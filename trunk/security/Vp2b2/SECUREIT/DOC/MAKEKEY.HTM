@@ -1,0 +1,842 @@
+<HTML>
+<HEAD>
+  <TITLE>SecureIt - The MakeKey programs</TITLE>
+</HEAD>
+<body background="backgrnd.gif" onLoad="parent.index.location.href='makekey.inx'; return true">
+<h1><a name="top">SecureIt - The MakeKey programs</h1>
+
+<p>
+  Once you have inserted the required calls to SecureIt in your code, you
+  can use one of the supplied MakeKey programs to generate Name/password
+  combinations that are valid for your program.
+
+<p>
+  MakeKey itself is protected using SecureIt, although it does not
+  require the SecureIt DLL in order to run.  The first time it is run,
+  you will be prompted for a name and password which will be stored in
+  an ini file (SecureIt.ini) for subsequent use.
+
+<p>
+  The reason why MakeKey does not use the SecureIt DLL, but rather links
+  the code statically, is that it needs to contain the code for
+  generating passwords as well as the code to decode them.  It is
+  obviously not desirable to have this code present in the DLL that you
+  give to your users, which means that MakeKey must use a slightly
+  different version of the SecureIt functions to work.
+
+<p>
+  MakeKey is included in 2 different flavours: Text mode and PM
+  (Presentation Manager).  The Text mode version, or MkTxt, can be used
+  to generate passwords based on the contents of a MakeKey configuration
+  file. The same SecureIt password works for both MkTxt and MkPM, in
+  spite of the fact that it uses both CodePatch and CallBack protection
+  fields; this is possible by using the new <a
+  href="api.htm#KeySetCallOffsets">KeySetCallOffsets</a> API.
+
+<p>
+  The PM version, MkPM, can generate password strings just as MkTxt, and
+  more. It contains a graphical dialog for editing the setup used, and
+  can load and save the settings from a MakeKey configuration file.  In
+  addition, it can generate <b>MakeKey PM Clients</b> - a convenient way
+  of supplying your distributors with a key generator for your program.
+  Please refer to the section on <a href="#MkClient">MakeKey Clients</a>
+  for more information.
+
+<p>
+
+<h2><A name="config">The MakeKey configuration files</h2>
+<p>
+  In order generate valid keys for your program, you need to configure
+  MakeKey.  This is done by creating a file with a .KEY extension and
+  enter the required keywords in the file.  The SAMPLE subdirectories
+  contains several examples of these; and below is a list of all keywords
+  accepted along with their meaning:
+<p>
+
+<h3><a name="debug">Debug [0 or 1]</h3>
+<p>
+    Use this keyword to get MakeKey to output little or much information
+    as it runs.  0, which means minimum information, is the default.
+    This setting only has an effect on the text mode version of MakeKey;
+    MkPM ignores this setting.
+<p>
+Default: <em>Debug 0</em>
+
+<h3><a name="screenoutput">ScreenOutput [0 or 1]</h3>
+<p>
+    If you specify ScreenOutput 0, MkTxt outputs only a single line on
+    the screen when run.  The default (ScreenOutput 1) causes all
+    messages to be displayed on screen.  MkPM ignores this setting.
+<p>
+Default: <em>ScreenOutput 1</em>
+
+<h3><a name="logfile">LogFile [Name of logfile]</h3>
+<p>
+    If you include this keyword and specify a valid file name as the
+    parameter, all messages are logged to this file.  This may happen in
+    addition to the messages being output to screen.  MkPM ignores this
+    setting.
+<p>
+Default: <em>No log file</em>
+
+<h3><a name="programname">ProgramName [String]</h3>
+<p>
+    This keyword can be used to define the name of the program for which
+    this .KEY file defines the setup.  This string will be embedded in
+    MakeKey Clients generated, and be displayed at the top of the
+    registration screen.  It is also included in Registration Log Files
+    you choose to generate.
+<p>
+Default: <em>ProgramName Default SecureIt Program</em>
+
+<h3><a name="author">Author [String]</h3>
+<p>
+    This keyword is used to specify a second line of text in a MakeKey
+    Client.  This could be author information, copyright information, or
+    any other plain text string.  This string is also included as the
+    second line of information the Registration Log Files.
+<p>
+Default: <em>Author For internal use only</em>
+
+<h3><a name="reglogfile">RegLogFile [Name of logfile]</h3>
+<p>
+    If this keyword is specified with a filename as the parameter, the
+    MakeKey programs will add one line of text to the specified file
+    every time a password is generated.  This text file is checksummed,
+    and MakeKey will refuse to generate a password if the file has been
+    modified in any way.  To generate a valid empty Registration Log
+    File, run MkTxt with a /C parameter, or specify the name of a
+    non-existing RegLogFile in MkPm and click the Apply button.  A
+    sample registration log file looks like this:
+    <pre>
+--- Cut ---
+    SecureIt Checked Log File
+
+    SecureIt for OS/2 v2.0  (This line contains the ProgramName)
+    Allan Mertner           (This line contains the Author)
+
+     Date and Time      Serial    Name of user  Password
+     Password
+      23-05-97 17:43:57  007F0001  Allan        dP0AU4nHUMSA-...
+
+    ---
+    Internal CheckSum on next line; do NOT modify this file
+    B84B70E6
+--- Cut ---
+    </pre>
+    The Registration Log File is a nice way of keeping an accurate log
+    of all registrations carried out, including date and time of
+    registration, serial number, user name and password.
+<p>
+    To validate a Checked Log File, you can either try to generate a
+    password using the log file, or you can run the supplied <a
+    href="overview.htm#validate">Validate</a> utility for the purpose.
+<p>
+Default: <em>No registration log file</em>
+
+<h3><a name="highasciicounts">HighAsciiCounts [0 or 1]</h3>
+<p>
+    This keyword is used to define whether or not to include high-ascii
+    characters in the user name in the user name checksum used to encode
+    the password string.  Please refer to the KeySetup API description
+    for more information about this.
+<p>
+Default: <em>HighAsciiCounts 0</em>
+
+<h3><A name="rsaencodepassword">RSAEncodePassword [0 or 1]</h3>
+<p>
+    This keyword defines whether or not to use RSA encryption on the
+    password string.  For maximum security, this parameter should be set
+    to 1; for compatibility with v1.0, it should be 0.  If RSA-encoded
+    passwords are enabled, the RSAKeyFile keyword must be specified as
+    well.
+<p>
+Default: <em>RSAEncodePassword 1</em>
+
+<h3><A name="rsakeyfile">RSAKeyFile [FileName.RSA]</h3>
+<p>
+    If RSA-encrypted passwords are enabled using the
+    <a href="#rsaencodepassword">RSAEncodePassword</a>
+    keyword, this keyword must specify the filename of the file
+    containing the RSA key to use for encryption.  This binary file is
+    generated by the GENDATA program, and by default has a .RSA
+    extension.
+<p>
+Default: <em>No default</em>
+
+<h3><A name="useserialnumber">UseSerialNumber [0 or 1]</h3>
+<p>
+    If you wish to assign a 32-bit serial number to each user, this
+    parameter should be 1.  For compatibility with v1.0, it should be 0.
+    If serial numbers are to be specified, the
+    <a href="#getserialnumberfrom">GetSerialNumberFrom</a>
+    keyword must be specified.
+<p>
+Default: <em>UseSerialNumber 1</em>
+
+<h3><A name="getserialnumberfrom">GetSerialNumberFrom [0 FileName or 1]</h3>
+<p>
+    This keyword specifies where to find the next serial number to use
+    when generating a password.  It can either be in an external text
+    file containing nothing but the next serialnumber to use, or it can
+    be embedded in the .KEY file using the NextSerialNumber keyword.
+    This is the default, and is specified by GetSerialNumber 1.  If you
+    wish to read the serial number from an external text file, you
+    should specify GetSerialNumberFrom 0 FileName.Txt.
+<p>
+Default: <em>GetSerialNumberFrom 1</em>
+
+
+<h3><a name="nextserialnumber">NextSerialNumber [8-digit Hex number]</h3>
+<p>
+    If <a href="#GetSerialNumberFrom">GetSerialNumberFrom</a> is 1,
+    this keyword is used to define which serial number to assign to the
+    next password generated.
+<p>
+Default: <em>No default</em>
+
+
+<h3><a name="incrementserialnumber">IncrementSerialNumber [0 or 1]</h3>
+<p>
+    Once a password has been generated, MakeKey can automatically
+    increment the serial number and will do so if this keyword is
+    specified with a 1 parameter.  This works both if the serial number
+    is embedded in an external text file, in the .KEY file, or in a
+    MakeKey Client executable.
+<p>
+Default: <em>IncrementSerialNumber 1</em>
+
+
+<h3><a name="version">Version [6-digit hex Number]</h3>
+<p>
+    The Version field is important: The 3-byte value is encoded and
+    stored in the password.  When the
+    <a href="api.htm#KeyCheck">KeyCheck</a> API is called, it is
+    checked that the Version stored in the password is correct one for
+z    the current version of the program.  You can specify the version of
+    your program (to match the one defined in the .KEY file) as one of
+    the parameters to the <a href="api.htm#KeySetup">KeySetup</a> API.
+<p>
+Default: <em>Version 010101</em>
+
+
+<h3><A Name="uservalue">UserValue [Hex Number]</h3>
+<p>
+    Use this keyword to store a 4-byte number in the password.  This
+    value can be used for your own purposes to store memory addresses,
+    jump tables, etc.  For more information, see the example programs.
+<p>
+Default: <em>No default</em>
+
+<h3><a name="callback">CallBack [Hex Address]</h3>
+<p>
+    Use this keyword to store the address of an entry point in your code
+    in the password.  If you call the KeyCheck function with a TRUE
+    parameter, SecureIt automatically makes a call to the routine at
+    this address when the key has been validated. For more information,
+    please refer to the example programs.
+<p>
+    Note, that the callback functions must not take any parameters. When
+    a callback function is called by SecureIt, no parameters are passed
+    on the stack.  This means that any function, irrespective of the
+    calling convention used, can be specified here.
+<p>
+    For information about finding which address to use, please refer to
+    the <a href="#address">addresses, addresses</a> section of this
+    document.
+<p>
+Default: <em>No default</em>
+
+<h3><a name="codepatch">CodePatch [Address Data]</h3>
+<p>
+    Use this keyword to store a memory address (of executable code) and
+    4 bytes of new code (Data) to hardcode on top of the code in your
+    executable file.  If you call the KeyCheck function with a TRUE
+    parameter, SecureIt automatically makes the patch when the key has
+    been validated. For more information, please refer to the example
+    programs.
+<p>
+    You can either include the code to patch as embedded assembler code
+    (if you know assembler, of course), or you can look at the generated
+    assembler output of your program and decide how you want to change
+    it.  If you do not know assembler, you should probably not attempt to
+    use the CodePatch functions of SecureIt.
+<p>
+    For information about finding which address to use, please refer to
+    the <a href="#address">addresses, addresses</a> section of this
+    document.
+<p>
+Default:<em>No default</em>
+
+<h2><a name="MkTxt">Running MakeKey - MkTxt</h2>
+<p>
+  Once you have saved your .KEY file, you can run MkTxt to generate
+  valid passwords containing the information defined in the .KEY file.
+<p>
+  To run, specify the name of the .KEY file as the first parameter and
+  the name for which a password should be generated thereafter.
+<p>
+  For example,
+<pre>
+    MKTXT MyProg Allan Mertner
+</pre>
+
+  will generate a valid password string for "Allan Mertner" using the
+  setup defined in the file MyProg.KEY; the output on screen will look
+  something like
+<pre>
+        SecureIt (OS/2) v2.0 Key Generator - text mode version
+
+      þ Using setup defined in MyProg.key
+      þ Generating password for Allan Mertner
+      þ Serial number is 0007F069
+      þ Password is RSA encrypted
+      þ Reading RSA key from MyProg.RSA
+      þ Password : US6bx3VlDX76UwBLAOKyVOv9NvK+pXMvrAfwactKH9WX+kVPo
+</pre>
+
+  All you then need to do is cut and paste the output and send it in a
+  mail to your customer.
+<p>
+  If your setup calls for a checked log file to be updated, you will get
+  an error message the first time you run MakeKey, because the file does
+  not exist.  To avoid this message and create a valid empty Checked Log
+  file, run MkTxt with a /C parameter, such as
+<pre>
+    MKTXT /C MyProg.Key
+</pre>
+
+<h2><a name="MkPM">Running Makekey - MkPM</h2>
+<p>
+  The PM version of MakeKey works just as the text mode version.  It
+  accepts the name of a .KEY file as the first parameter and considers
+  the rest of the command line to be a user name for which a password
+  should be generated.  The /C parameter is not supported; checked log
+  files are generated differently as described below.
+<p>
+  If you just want to generate a password using an existing setup, run
+  MkPM and specify the name of the setup file as the parameter.  Fill in
+  the User Name entry field and optionally the Serial Number field, and
+  hit the Password button.  The password for the selected user name is
+  generated and written to the Password memo box, from where it can
+  easily be cut and pasted into an e-mail message.
+
+<p>
+  The following image shows the MkPM main screen, just after a password
+  has been generated (for the Pascal version of the Prot5 example):
+<p>
+<img src="mkpm.gif" alt="MkPM main dialog">
+
+<h3><a name="settings">The MkPM Settings dialog</h3>
+<p>
+  MkPM has two distinct features that set it apart from the text mode
+  version (Aside from being Presentation Manager, that is :).  The first
+  feature is the ability to graphically edit most of the settings
+  defined in the .KEY file, thus making it easier for those of you not
+  comfortable with text-configuration files to work with SecureIt.  To
+  view the settings currently loaded, click the Settings button on the
+  main MkPM screen to display the Settings dialog.
+
+<p>
+  The following shows the settings dialog for the <a
+  href="example.htm#Prot5">Prot5 example</a>:
+<p>
+
+<img src="mkpmset.gif" alt="MkPM settings dialog">
+
+<p>
+  The settings dialog is not modal and is an easy way of experimenting
+  with various SecureIt password settings before deciding on a final set
+  of parameters.  If you edit some values in the dialog, the Apply
+  button becomes enabled.  By clicking this button, the new settings
+  take effect and will be used if you click the Password button on the
+  main page.
+<p>
+  In the Settings disalog, you can also load another set of settings by
+  clicking the Load... button on the bottom, or you can save the current
+  setup to the file name defined in the Setup File Name field by
+  clicking the Save... button.
+<p>
+  Note, that saving the setup file will not preserve any formatting you
+  have in a manually entered settings file, but will write all relevant
+  settings in a standard easy-to-read format.
+<p>
+  The second outstanding feature of MkPM is the ability to create MakeKey
+  clients that are able to generate valid passwords using one specific
+  setup only.  To generate a <a href="#MkClient">MakeKey Client</a>, or
+  MkClient, click the Client... button on the main page.
+
+<h3><a name="generate">Generating a MakeKey Client</h3>
+<p>
+  In general, a MakeKey client executable will use the currently defined
+  settings of MkPM, but two options to do with the Client itself need to
+  be defined.
+
+<p>
+  In the MakeKey Client Setup dialog, you can specify an expiration date
+  for the client (or you can specify that it does not expire), and you
+  can allow or disallow the user of the client to override the default
+  serial number.  By clicking the Client... button in the MkPM main
+  dialog, the Generate Client dialog is shown:
+<p>
+
+<img src="mkclient.gif" alt="The Generate Client dialog">
+
+<p>
+  The option to make the client expire can be useful if you wish to make
+  sure that your distributors always have the most up to date version of
+  the key generator; if you let it expire in 3 months, you have a
+  semblance of control over the password generation process, even if it
+  takes place at a distributor's place.  If your own SecureIt licence is
+  restricted and your password will expire however, you will not be able
+  to generate a client that does not expire, and the expiration date of
+  the Client generated cannot be set to after that where your SecureIt
+  licence expires.  If this is the case, the "Client Expires" checkbox
+  is both checked and greyed.
+
+<p>
+  If your SecureIt licence does not expire, or expires in a looong time,
+  the Client expiration dates can be set to any 1st of the month, 36
+  months into the future.  There does not seem to be much point in
+  generating a client that expires further into the future - if you wish
+  to make the client expire in 10 years, don't let it expire :-)
+
+<p>
+  If you allow the use to override the serial number, you effectively
+  lose control of serial numbers assigned to users, and this option
+  should normally be disabled when you generate MkClients for your
+  distributors.  By assigning different widely spaced serial numbers to
+  each distributor, you can be sure that the same serial number is not
+  assigned twice.
+
+<p>
+  However, the option to override the serial number cannot be disabled
+  if Automatic Increment of serial numbers is disabled, since the client
+  would then be able to generate passwords with a single serial number
+  only.  If your passwords do not include a serial number, the setting
+  of this is of course irrelevant.
+
+<p>
+  When you have defined the desired settings, click the Create button to
+  create the Client executable.  You will be presented with a File Save
+  dialog where you should specify the desired name of the executable.
+  MkPM will then copy the template MkClient MKCLIENT.EX_ from the
+  current directory (by default found in the UTIL directory of
+  SecureIt), copy it to the specified filename, and append an encrypted
+  version of the specified setup to the file.
+<p>
+
+<h2><a name="MkClient">Running Makekey - MkClient</h2>
+<p>
+  Once you have generated a MakeKey client, you can execute it.  Since
+  the client only works for one specific setup, any command line
+  parameters are used as the user name.
+<p>
+  None of the advanced Settings options are available in a MkClient; the
+  user can enter a user name and optionally a serial number (if this was
+  not disabled when the client was generated), and hit the Password
+  button.  This is illustrated in the MkClient screenshot below:
+<p>
+
+<img src="mkclrun.gif" alt="A screenshot of an MkClient in action">
+
+<p>
+  The MkClient is protected against tampering in several ways.  Firstly,
+  it contains an MkClient setup password generated specifically for your
+  setup, and does not contain your SecureIt password.  Secondly, it
+  contains the desired setup, also encrypted, and it performs a
+  self-check by checking that the file has not been modified before
+  executing.
+
+<p>
+  The one thing MkClient does compromise, if anything, is SecureIt's own
+  security.  MkPM can generate valid passwords for MkClient, which uses
+  the same protection as MkPM itself (callback fields etc).  However,
+  since different RSA keys are used in the two programs (MkClient uses
+  the one you specify since it needs to know about that one anyway),
+  this does not enable you to generate valid passwords for MkPM - I am
+  the only one with the correct secret RSA key.
+
+<p>
+  When an MkClient executable expires, a dialog is displayed notifying
+  the user about this and the program will not run again, ever.  Of
+  course, if your distributor winds back the clock, unpacks the original
+  MkClient file he got from you and then re-runs it, it will still work.
+  See the next section for more information about how this is achieved.
+
+<p>
+  You should set up the client to use a Checked Log file on the MkPM
+  settings page to get some control over its use.  For my shareware
+  programs, I typically generate MkClients that expire in 6 months, and
+  ask the distributor to send me the full checked log file every month.
+
+<p>
+  While this does not prevent misuse, it does mean that the distributor
+  must specifically take action in order to generate keys he does not
+  want to tell you about and is probably the best method available,
+  short of writing to hidden places in INI files etc, none of which is
+  particularly desirable and should certainly not be done by a generic
+  utility potentially used by many different authors.
+
+<p>
+  If an error is encountered during startup of an MkClient, it displays a
+  message and terminates.  Since the MkClient is automatically generated
+  by MkPM and cannot be configured in any way after its creation, an
+  error in reading the setup probably indicates tampering, or a bug in
+  SecureIt itself.
+
+<h3><a name="modify">How MkClient modifies itself</h3>
+
+<p>
+  MkClient uses an undocumented feature of OS/2 to allow MkClient to
+  modify itself in a way that it will not run: DosReplaceModule (Entry
+  point number 417 in DosCalls.Dll).  Using this OS/2 API, MkClient
+  tells OS/2 to load another copy of itself into memory, relinguishing
+  control of the original copy which can then be modified.
+
+<p>
+  The same methodology is used if MkClient includes the next serial
+  number embedded in itself, in order to update the "Next SerialNumber"
+  field.  This causes OS/2 to increase the swap file by about 50kB every
+  time MkClient is executed; in the worst case, a distributor running
+  MkClient 20 times every working day will have a swap file that grows
+  by 20MB per calendar month.  If he has a reasonably sized hard disk,
+  this will not be a problem since the data will never be swapped out
+  again; it will be deleted when OS/2 is next rebooted.
+
+
+<h2><A name="address">Addresses, Addresses</h2>
+<p>
+  A commonly asked question is: How do I find out which address to
+  specify for my CallBack and CodePatch fields?   The simple answer is
+  to look in the map file generated by the compiler, or load the program
+  into the debugger and have a look at the disassembly view.
+
+<p>
+  A more elaborate answer required a little background knowledge of the
+  internals of OS/2 and some examples.
+
+<p>
+  When OS/2 loads an executable program, it loads the file from disk,
+  copies it to memory and applies all relocations required.  The code is
+  loaded to the address starting from 10000 hex (it is said to be
+  <b>based</b> at this address); since every process has its own 2GB
+  virtual address space, this does not result in conflicts between
+  programs.
+
+<p>
+  All 32-bit programs use a flat memory model where the entire 2GB
+  address space is addressable by using a non-segmented 32-bit pointer
+  address, and you may find it odd to talk about segments (which may
+  remind you of the old days of 16:16 pointer), but is nevertheless
+  relevant even in 32-bit OS/2.
+
+<p>
+  In a 32-bit operating system, segments are used to distinguish
+  <b>types</b> of data; each segment has a set of attributes defined by
+  the linker.  These attributes determine whether the data of a
+  particular segment is code or data, readable or writeable, initialised
+  or non-initialised, etc.  As previously mentioned, the load process
+  causes the first code segment to be loaded at offset 10000 and
+  subsequent segments are loaded at higher addresses.
+
+<h3><a name="mapfile">The map file</h3>
+<p>
+  Looking at the <b>segment map</b> of the map file output by Virtual Pascal
+  for the Prot3 example, this may actually make sense:
+
+<pre>
+ Start         Length     Name                   Class
+  0001:00000000 000002CE4H CODE32                 CODE
+  0002:00000000 0000009A8H CONST32                CONST
+  0002:000009A8 000000528H DATA32                 DATA
+  0002:00000ED0 000000014H TLS                    TLS
+  0002:00000EE4 00000059CH BSS32                  BSS
+  0002:00001480 00000C350H STACK32                STACK
+  0003:00000000 000000010H CODE16                 CODE
+  0004:00000000 0000005C0H RESOURCE32             RESOURCE
+</pre>
+
+<ul>
+  <li>The first segment, named CODE32 and of class CODE (ie containing the
+  program itself) has the number 0001 and will be loaded to address
+  10000 when the program starts.
+  <li>
+  The next segment, CONST32, contains initialised, unmodifiable data for
+  the program and will be loaded at offset 20000.
+  <li>
+  The DATA32 segment contains initialised data that can be changed and will be loaded
+  right after the CONST32 segment, at address 209a8.
+  <li>
+  Following this, we see the TLS segment containing Thread Local Storage
+  data, the BSS32 segment containing uninitialised data and the STACK32
+  segment which will be used to contain the stack.
+  <li>
+  Last, there is a CODE16 segment containing 16-bit executable code,
+  to be loaded at address 30000, and a RESOURCE32 segment which will be
+  loaded at offset 40000.
+</ul>
+
+<p>
+  The reason why the CONST, DATA, TLS, BSS and STACK segments are all
+  loaded into the same range of 10000 bytes (from 20000 to 2ffff) is
+  that these segments are <b>grouped</b> by the linker, because they
+  have similar access protections.  If you didn't already know this,
+  just ignore it, it's not important.
+
+<p>
+  Having established where what code in the executable program is
+  loaded, the data further down in the map file becomes useful: The
+  Publics by Value section, a section of which is shown below.
+
+<pre>
+  Address         Publics by Value
+
+ 0001:00000000       Prot3@Code@
+ 0001:00000000       Prot3@RegisteredOnly
+ 0001:000000E0       Prot3@IsRegistered
+ 0001:000000E8       Prot3@$Init
+</pre>
+
+<p>
+  The real item of interest is the address of the function we want to
+  store the address of in the password: IsRegistered.  Armed with the
+  knowledge from above, it is easy to see that it will be loaded at
+  offset 100E0, and thus this is the address we should specify in the
+  .KEY file.
+
+<p>
+  The same information can be gained from other compiler's map files;
+  below is an extract from the Publics by Value section of the Prot3 Map
+  file generated by IBM's VAC compiler:
+
+<pre>
+ 0001:00000000       RegisteredOnly__Fv
+ 0001:00000050       IsRegistered__Fv
+ 0001:00000060       main
+</pre>
+
+<p>
+  In spite of the fact that names are mangled, it is easy to see that
+  the IsRegistered routine is loaded at address 10050 when the example
+  is compiled using this compiler.
+
+<p>
+  The GNU C compiler is slightly different than the other compilers when
+  it comes to map files.  The following is an extract from the map file
+  generated for the Prot3 example when compiled with the MKMAP command
+  file:
+
+<pre>
+  prot3.s:5      data:000001c0 _SIBlob
+  prot3.s:593    text:00000090 _RegisteredOnly
+  prot3.s:620    text:000000dc _IsRegistered
+  prot3.s:633    text:00000150 _main
+</pre>
+
+<p>
+  The segments are not numbered, but named, and the <b>text</b> segment
+  is where the code is stored; this segment is loaded at address 10000.
+  However, the linker puts a small stub in front of the code listed
+  above, presumable a loader and initialiser for the EMX library.  This
+  stub is 0x38 hex bytes long, and all offsets need to be added this
+  value to get the true address of the entrypoint when it is loaded into
+  memory.
+
+<p>
+  If you are aware of this, it should not present a problem; if you are
+  using a different version of GNU C, this stub code may be of a
+  different size, so beware.
+
+
+<h3><a name="debug">The debugger</h3>
+<p>
+  As mentioned in the beginning of this section, another method is to
+  use a debugger.  The exact keystrokes varies for different debuggers,
+  although the principle remains the same: Locate the symbol in which
+  you are interested, and get a disassembly view displayed.
+
+<p>
+  In Virtual Pascal's debugger, this is done by compiling the program,
+  loading it by pressing Ctrl-F2, going to the desired function in the
+  source code and pressing Ctrl-Shift-V.  The result looks something
+  like the following:
+
+  <img src="vpdebug.gif">
+
+<p>
+  Once again, we get the same result: the IsRegistered function is
+  indeed loaded to offset 100E0 (and consists of just two instructions:
+  A <b>mov</b> for setting the value of Registered, and a <b>ret</b> to
+  return to the calling function.
+
+<p>
+  Using IBM's IPMD to achieve the same result, we first compile the
+  source with the /Ti+ option and link with with the /DE switch to
+  include debugging information.  Selecting Mixed view (both source and
+  disassembly) then allows us to get the address from here as well:
+
+  <img src="ipmddbg.gif">
+
+<p>
+  As can be seen, the address of the IsRegistered function is 10050 (as
+  was to be expected after looking at the map file above) in the program
+  generated by IBM VAC; the address may even change between versions of
+  the compiler as different code is generated.  Compiler options,
+  particularly run-time checking and optimisation options, also affect
+  the code generated and thus the absolute addresses of the functions.
+
+<h3><a name="dlls">DLLs</h3>
+<p>
+  DLLs, or Dynamic Link Libraries, differ from executables in that they
+  are not normally loaded at a fixed base address.  If you want to make
+  a CallBack or even a CodePatch of code located in a DLL, you should
+  use the <a href="api.htm#KeySetCallOffsets">KeySetCallOffsets</a> API
+  and only store a relative offset in the password - not an absolute
+  one.
+
+<p>
+  The base address of a DLL is determined when it is first loaded; the
+  address used must be unused in all running processes, since OS/2 only
+  loads a single instance of every DLL, irrespective of the number of
+  programs using the DLL.  The base address of a DLL is the same for
+  every running program using it, although the address is likely to
+  change if the DLL is unloaded (by stopping the last program using it)
+  and re-launching the program.
+
+<p>
+  It <em>is</em> possible to base a DLL so it can only be loaded at a
+  fixed address.  This has got the advantage that it does not have to
+  store relocation addresses for all entry points, but has the
+  significant downside of reduced flexibility.  If another DLL is
+  already loaded at the preset base address, the DLL cannot be loaded,
+  and it is generally not recommended to base DLLs.
+
+<p>
+  Since only a single instance of a DLL is loaded even when multiple
+  programs use it, performing code patching on a DLL is a dangerous
+  business.  If one program patches a certain address, all other
+  programs using the DLL are affected by this change as well, and some
+  synchronisation between processes (using multiplex semaphores for
+  example) must be implemented.
+
+<p>
+  Determining the addresses to use when doing CallBacks into a DLL is a
+  straightforward process nevertheless.  As before, look at the map file
+  for the DLL, and simply store the difference between the two entry
+  points: One of them is the one you wish to call, and the other one is
+  a not-too-distant entrypoint, the address of which should be passed to
+  the <a href="api.htm#KeySetCallOffsets">KeySetCallOffsets</a> API.
+
+
+<h2><a name="passwords">The password strings</h2>
+<p>
+  The password strings generated by MakeKey are really encoded values
+  that are used by SecureIt routines.  Every time 4 bytes of data are
+  added to the list of data you want to store in the password, the
+  password becomes 6 characters longer because of the encoding routine
+  which allows only "sensible" characters to be used as password
+  characters.  Valid passwords consist only of the characters A to Z
+  (both upper and lower case), the numbers 0 to 9 and the plus/minus
+  characters (+,-).
+<p>
+  SecureIt uses 8 to 12 bytes of data in the password for security checks,
+  checksums and version information, leaving the minimum length of a
+  valid password at 12 characters - this is if you do not specify
+  data to be stored in the password.
+<p>
+  The maximum number of fields you can add is 4, mostly because
+  insensibly long password strings are annoying and do not serve any
+  purpose.  If you really must store more information than this, please
+  refer to example program CLOCK.PAS for an example of how this can be
+  done.
+<p>
+  If you use all four available fields, but do not use any CodePatch
+  fields, the password will be 36 characters long.  The maximum length
+  password will occur if you use 4 CodePatch fields, where SecureIt
+  will generate a 60 character password.
+<p>
+  If you RSA-encrypt the password strings, they become longer.  If you
+  use 128-bit RSA encryption, the password data will be a multiple of 16
+  bytes long, and the password string consequently a multiple of 24
+  characters long.  Using the maximum RSA key length of 768, the minimum
+  length password is about 150 characters...
+<p>
+  For more information about the password strings and how they are
+  used by SecureIt, please refer to the section on
+  <a href="internal.htm#encoding">encoding passwords</a> in the Internals
+  section.
+
+<h2><a name="example">An example of a MakeKey .KEY file</h2>
+<p>
+  Several .KEY files can be found with the examples, and a standard .KEY
+  file useable as a template can be found in the UTIL directory.
+<p>
+  The following is a working MakeKey configuration file:
+<pre>
+;===--------------------------------------------------------===;
+;===        Key definition file for SecureIt v2.0           ===;
+;===                                                        ===;
+;===        Sample SecureIt-protected Application           ===;
+;===              Written by a SecureIt User                ===;
+;===                                                        ===;
+;===      Generated by MKEY/PM on 26-05-97 16:06:54         ===;
+;===--------------------------------------------------------===;
+
+
+;===--------------------------------------------------------===;
+;===            General MakeKey Configuration               ===;
+;===--------------------------------------------------------===;
+
+ProgramName           Sample SecureIt-protected Application
+
+Author                Written by a SecureIt User
+
+LogFile               MyApp.log
+RegLogFile            MyApp.Reg
+
+
+;===--------------------------------------------------------===;
+;===              Password Protection Fields                ===;
+;===--------------------------------------------------------===;
+
+Version               00010202
+
+HighAsciiCounts       0
+
+RSAEncodePassword     1
+RSAKeyFile            MyApp.RSA
+
+CallBack              00010091
+
+UserValue             18F70A04
+
+CodePatch             000A0894 CA0BC833
+
+
+
+;===--------------------------------------------------------===;
+;===          Password Serial Number Definition             ===;
+;===--------------------------------------------------------===;
+
+UseSerialNumber       1
+
+GetSerialNumberFrom   1
+
+IncrementSerialNumber 1
+
+NextSerialNumber      0007F06B
+
+
+
+;===--------------------------------------------------------===;
+;===                  MkTxt setup fields                    ===;
+;===--------------------------------------------------------===;
+
+ScreenOutput          1
+
+Debug                 0
+</pre>
+
+</body>
+</html>

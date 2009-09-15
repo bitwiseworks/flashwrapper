@@ -1,0 +1,17 @@
+<HTML>
+
+<!-- Index for Compiler.htm --!>
+
+<body background="backgrnd.gif">
+Compilers Index
+<font size=-1>
+<p><a href="compiler.htm" target="text">Compiler considerations</a>
+<p><a href="compiler.htm#vp" target="text">Virtual Pascal</a>
+<p><a href="compiler.htm#bc" target="text">Borland C++</a>
+<p><a href="compiler.htm#vac" target="text">IBM Visual Age C++</a>
+<p><a href="compiler.htm#gcc" target="text">GNU C</a>
+<p><a href="compiler.htm#rexx" target="text">REXX</a>
+
+</font>
+</body>
+</html>

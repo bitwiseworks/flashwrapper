@@ -1,0 +1,50 @@
+LIBRARY NPFLOS2 INITINSTANCE TERMINSTANCE
+DESCRIPTION "Flash Plugin Wrapper"
+PROTMODE
+;CODE      MOVEABLE DISCARDABLE LOADONCALL
+;DATA      MULTIPLE NONSHARED READWRITE LOADONCALL
+
+;CODE  DISCARDABLE LOADONCALL
+DATA  SINGLE SHARED READWRITE LOADONCALL
+
+EXPORTS
+;    NSGetModule
+    ;
+    ; What netscape v4.x looks for.
+    ;
+    NP_GetEntryPoints   
+    NP_Initialize       
+    NP_Shutdown         
+
+IMPORTS
+    RegCloseKey     = REGISTRY.1
+;    RegCreateKey    = REGISTRY.3
+;    RegCreateKeyEx  = REGISTRY.4
+;    RegDeleteKey    = REGISTRY.7
+;    RegDeleteValue  = REGISTRY.9
+;    RegEnumKey      = REGISTRY.11
+;    RegEnumKeyEx    = REGISTRY.12
+;    RegEnumValue    = REGISTRY.15
+;    RegFlushKey     = REGISTRY.17
+    RegOpenKey      = REGISTRY.22
+    RegOpenKeyEx    = REGISTRY.23
+;    RegQueryInfoKey = REGISTRY.26
+;    RegQueryValue   = REGISTRY.30
+    RegQueryValueEx = REGISTRY.31
+;    RegSetValue     = REGISTRY.42
+;    RegSetValueEx   = REGISTRY.43
+;     odin_fflush     = ODINCRT.370
+;     odin_fwrite     = ODINCRT.430
+;     odin_fopen     = ODINCRT.293
+	; NSPR4.DLL
+    _PR_FindSymbol = NSPR4._PR_FindSymbol
+
+    ; XPCOM.DLL
+   __Z20NS_NewGenericModule2P12nsModuleInfoPP9nsIModule  = XPCOM.__Z20NS_NewGenericModule2P12nsModuleInfoPP9nsIModule
+;   __Znwm                                                = XPCOM.__Znwm
+;   __ZN13nsCOMPtr_baseD2Ev                               = XPCOM.__ZN13nsCOMPtr_baseD2Ev                  
+;   __ZN7nsDebug12PreConditionEPKcS1_S1_i                 = XPCOM.__ZN7nsDebug12PreConditionEPKcS1_S1_i
+;   __ZNK16nsQueryInterfaceclERK4nsIDPPv                  = XPCOM.__ZNK16nsQueryInterfaceclERK4nsIDPPv
+;   __ZN7nsDebug9AssertionEPKcS1_S1_i                     = XPCOM.__ZN7nsDebug9AssertionEPKcS1_S1_i
+;   __ZN13nsTraceRefcnt10LogReleaseEPvjPKc                = XPCOM.__ZN13nsTraceRefcnt10LogReleaseEPvjPKc
+;   __ZN13nsTraceRefcnt9LogAddRefEPvjPKcj                 = XPCOM.__ZN13nsTraceRefcnt9LogAddRefEPvjPKcj
