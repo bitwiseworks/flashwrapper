@@ -1,0 +1,3 @@
+set beginlibpath=D:\ecs\install\WARPIN
+D:\ecs\install\WARPIN\wic.exe -a flash10os2_debug.wpi 1 -c"E:\dev\oxp.svn\trunk\bin\Debug" *.dll -r 1 -c"." odin.ini 1 -c"E:\dev\oxp.svn\trunk\bin" wgss50.dll 1 -c"E:\dev\oxp.svn\trunk\bin" odincrt.dll 1 -c"." libc063.dll -r 2 -c"E:\dev\oxp\plugwrp\debug" npflos2.dll 2 -c"." flashos2.readme 3 -c"." NPSWF32.DLL -s flash10os2_release.wis
+D:\ecs\install\WARPIN\wic.exe -a flash10os2_release.wpi 1 -c"E:\dev\oxp.svn\trunk\bin\Release" *.dll -r 1 -c"." odin.ini 1 -c"E:\dev\oxp.svn\trunk\bin" wgss50.dll 1 -c"E:\dev\oxp.svn\trunk\bin" odincrt.dll 1 -c"." libc063.dll -r 2 -c"E:\dev\oxp\plugwrp\release" npflos2.dll 2 -c"." flashos2.readme 3 -c"." NPSWF32.DLL -s flash10os2_release.wis
