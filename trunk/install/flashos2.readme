@@ -53,3 +53,10 @@ Changelog
 
 16.06.2009:
  - Created WARPIN installer
+
+26.08.2009:
+ - Fixed crash when click RMB on an Flash animations
+
+26.09.2009:
+ - Fixed crash when click About dialog and clicks on flash animations, 
+   points on an new URLs
