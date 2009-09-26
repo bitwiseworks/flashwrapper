@@ -1118,6 +1118,7 @@ typedef struct _NPNetscapeFuncs {
     NPN_InvalidateRectUPP invalidaterect;
     NPN_InvalidateRegionUPP invalidateregion;
     NPN_ForceRedrawUPP forceredraw;
+    char padd[200];
 } NPNetscapeFuncs;
 
 #ifdef XP_MAC

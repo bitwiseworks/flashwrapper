@@ -237,6 +237,38 @@ struct _NP32NetscapeFuncs
     void        (* NPW32CALLBACK pfnInvalidateRectUPP)(NPP instance, NPRect *rect);
     void        (* NPW32CALLBACK pfnInvalidateRegionUPP)(NPP instance, NPRegion region);
     void        (* NPW32CALLBACK pfnForceRedrawUPP)(NPP instance);
+/*
+    NPN_GetStringIdentifierUPP getstringidentifier;
+    NPN_GetStringIdentifiersUPP getstringidentifiers;
+    NPN_GetIntIdentifierUPP getintidentifier;
+    NPN_IdentifierIsStringUPP identifierisstring;
+    NPN_UTF8FromIdentifierUPP utf8fromidentifier;
+    NPN_IntFromIdentifierUPP intfromidentifier;
+    NPN_CreateObjectUPP createobject;
+    NPN_RetainObjectUPP retainobject;
+    NPN_ReleaseObjectUPP releaseobject;
+    NPN_InvokeUPP invoke;
+    NPN_InvokeDefaultUPP invokeDefault;
+    NPN_EvaluateUPP evaluate;
+    NPN_GetPropertyUPP getproperty;
+    NPN_SetPropertyUPP setproperty;
+    NPN_RemovePropertyUPP removeproperty;
+    NPN_HasPropertyUPP hasproperty;
+    NPN_HasMethodUPP hasmethod;
+    NPN_ReleaseVariantValueUPP releasevariantvalue;
+    NPN_SetExceptionUPP setexception;
+    NPN_PushPopupsEnabledStateUPP pushpopupsenabledstate;
+    NPN_PopPopupsEnabledStateUPP poppopupsenabledstate;
+    */
+
+    /*
+     * we are not implementing whole functions,
+     * but have to reserve memory for them
+     * currently, there is 21 missed functions
+     */
+
+    char buf[21*4];
+
 };
 #pragma pack()
 
