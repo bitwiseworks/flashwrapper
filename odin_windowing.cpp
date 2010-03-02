@@ -843,7 +843,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
          *  CreateFakeWindowEx returns 0 it's because the window already is wrapped.
          */
         ahwndParents[cParents] = NULL;  /* initialize the +1 entry */
-        #ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL
         if (cParents > 0)
             WinSetOwner(ahwndParents[cParents - 1], ahwndParents[cParents - 1]);
 #endif
@@ -853,6 +853,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
             HWND hwndFake = odinCreateFakeWindowEx(ahwndParents[cParents], gWCLevelMinus);
             if (hwndFake)
             {
+                dprintf(("npWinCreateWindowWrapper: created fake window %X", hwndFake));
                 odinSetWindowLong(hwndFake, LMINUS1_GWL_OS2HWND, (LONG)ahwndParents[cParents]);
                 if (!WinQueryWindowULong(ahwndParents[cParents], QWL_USER))
                     WinSetWindowULong(ahwndParents[cParents], QWL_USER, (ULONG)hwndFake);
@@ -862,18 +863,11 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
         /*
          * Now we have established parents and so can create the child.
          */
-        HWND hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevel0/*gWCFlashFS*/);
-#if 0
-        hwndRc = hwndFake;
-#else
+        HWND hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevel0);
         if (hwndFake)
         {
             hwndRc = odinCreateWindowEx(0 /*??*/,
-#if 0
-                                        WC_NPWIN_FLASH_FS,
-#else
                                         WC_NPWIN_LEVEL1,
-#endif
                                         NULL, /* name */
                                         WS_VISIBLE | WS_CHILD | WS_TABSTOP,
                                         0,  0,
@@ -897,7 +891,6 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
         }
         else
             dprintf(("npWinCreateWindowWrapper: failed to create fake window. lasterr=@todo"));
-#endif
     }
 
     dprintf(("npWinCreateWindowWrapper: hwndRc=%x", hwndRc));
@@ -1155,27 +1148,6 @@ LRESULT npWinLevel1WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
     else
         dprintf(("npWinLevel1WndProc: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x WM_DESTROY !!",
                  hwnd, msg, mp1, mp2));
-#if 0
-    RealPlayerPNGUIWndProc PNGUIWndProc = (RealPlayerPNGUIWndProc)odinGetWindowLong(0x68000005,0xfffffffc); // get wndproc
-
-    dprintf(("PNGUIWndProc wndproc %08x ", PNGUIWndProc));
-
-    if (PNGUIWndProc)
-    {
-        odinSetWindowPos(0x68000005, NULL, 0, 0, 240, 240, SWP_NOZORDER);
-        PNGUIWndProc(0x68000005, msg, mp1, mp2);
-        PNGUIWndProc(0x68000005, WM_SIZE, SIZE_RESTORED, 0x00F000F0);
-        PNGUIWndProc(0x68000005, WM_MOVE, 0, 0x00000000);
-        PNGUIWndProc(0x68000005, WM_PAINT, 0, 0);
-        odinSetWindowPos(0x68000006, NULL, 0, 0, 240, 240, SWP_NOZORDER);
-        PNGUIWndProc(0x68000006, msg, mp1, mp2);
-        PNGUIWndProc(0x68000006, WM_SIZE, SIZE_RESTORED, 0x00F000F0);
-        PNGUIWndProc(0x68000006, WM_MOVE, 0, 0x00000000);
-        PNGUIWndProc(0x68000006, WM_PAINT, 0, 0);
-    }
-
-#endif
-//    odinSendMessageA(0x68000005, msg, mp1, mp2);
 
     return odinDefWindowProc(hwnd, msg, mp1, mp2);
 }

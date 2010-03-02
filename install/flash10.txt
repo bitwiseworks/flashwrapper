@@ -215,6 +215,11 @@ Changelog
  - Fixed umlaut in URL inputfield of the bowser
  - Fixed SMP issues
 
+27.02.2010:
+ - Reworked DART sound output
+ - Fixed Space character input
+ - Some more small fixes
+
 More information
 ================
 
