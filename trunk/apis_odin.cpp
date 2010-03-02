@@ -209,7 +209,7 @@ BOOL    npResolveOdinAPIs(void)
         ulSavedCodePage = WinQueryCp (HMQ_CURRENT);
         pszEnd = strrchr(szPath, '\\');
         if (!pszEnd) pszEnd = strrchr(szPath, '/');
-        //dprintf(("Codepage: %i", ulSavedCodePage));
+        dprintf(("Codepage: %i", ulSavedCodePage));
 
         if (pszEnd)
         {
@@ -217,7 +217,7 @@ BOOL    npResolveOdinAPIs(void)
             DosSetExtLIBPATH(&szPath[0], BEGIN_LIBPATH);
         }
         //dprintf(("Codepage after set LIBPATH: %i", WinQueryCp (HMQ_CURRENT)));
-        WinSetCp(HMQ_CURRENT, ulSavedCodePage);
+        //WinSetCp(HMQ_CURRENT, ulSavedCodePage);
         //dprintf(("Codepage after restoring: %i", WinQueryCp (HMQ_CURRENT)));
 
         /*

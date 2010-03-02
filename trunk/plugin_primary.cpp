@@ -310,8 +310,9 @@ BOOL    npInitTerm_Lazy(void)
         if (    DosGetInfoBlocks(&ptib, &ppib)
             ||  DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), &szFakeName[0]))
             strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe"); /* *must* include one or more '\\'!  */
-        odinSetFreeTypeIntegration(TRUE);
+        
         dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
+        //odinSetFreeTypeIntegration(TRUE);
         if (odinRegisterDummyExe(&szFakeName[0]))
         {
             /*
