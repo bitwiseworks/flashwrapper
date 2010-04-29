@@ -111,6 +111,37 @@ int Registered = TRUE;
 *******************************************************************************/
 ULONG WIN32API      npOdinInitTerm(ULONG hInstance, ULONG reason, LPVOID reserved);
 
+typedef APIRET (* APIENTRY PROC_DosSetThreadAffinity)(PMPAFFINITY pAffinity);
+
+BOOL SetThreadAffinity()
+{
+    static PROC_DosSetThreadAffinity pfnDosSetThreadAffinity = NULL;
+    MPAFFINITY  mask;
+    APIRET      rc;
+
+    ULONG nrCPUs;
+
+    rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &nrCPUs, sizeof(nrCPUs));
+    if (rc != 0 || nrCPUs == 1)
+    {//not supported
+        return TRUE;
+    }
+
+    HMODULE hDoscalls;
+    if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
+        DosQueryProcAddr(hDoscalls, 564, NULL, (PFN *)&pfnDosSetThreadAffinity);
+    }
+    if(pfnDosSetThreadAffinity == NULL) {
+        return TRUE;
+    }
+    /* always run on 1st CPU */
+    mask.mask[0] = 0x00000001;
+    mask.mask[1] = 0; //TODO: this might not be a good idea, but then again, not many people have > 32 cpus
+
+    rc = pfnDosSetThreadAffinity(&mask);
+
+    return (rc == NO_ERROR);
+}
 
 
 /**
@@ -145,8 +176,10 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 
             ctordtorInit();
 
+            SetThreadAffinity();
+
             //dprintf(("Flash plugin init term"));
-#if 1
+#if 0
             /* checking for ECS 1.2 key via SecureIt API */
 #if defined(DEBUG)
             KeyAllowDebugger();
@@ -310,7 +343,7 @@ BOOL    npInitTerm_Lazy(void)
         if (    DosGetInfoBlocks(&ptib, &ppib)
             ||  DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), &szFakeName[0]))
             strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe"); /* *must* include one or more '\\'!  */
-        
+
         dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
         //odinSetFreeTypeIntegration(TRUE);
         if (odinRegisterDummyExe(&szFakeName[0]))
