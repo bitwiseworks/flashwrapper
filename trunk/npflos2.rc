@@ -5,16 +5,16 @@
 /*
  * Pluging info
  */
-RCDATA NP_INFO_ProductVersion { 12,0,0,1, }
+RCDATA NP_INFO_ProductVersion { 10,0,45,2, }
 
 RCDATA NP_INFO_MIMEType          { "application/x-shockwave-flash\0" }
 RCDATA NP_INFO_FileExtents       { "swf\0" }
 RCDATA NP_INFO_FileOpenName      { "Adobe Flash movie\0" }
-RCDATA NP_INFO_FileVersion       { 12,0,0,1, }
+RCDATA NP_INFO_FileVersion       { 10,0,45,2, }
 RCDATA NP_INFO_CompanyName       { "Vladest\0" }
-RCDATA NP_INFO_FileDescription   { "Shockwave Flash 12.11 r199\0" }
+RCDATA NP_INFO_FileDescription   { "Shockwave Flash 10.0 r45\0" }
 RCDATA NP_INFO_InternalName      { "NPFLOS2.DLL\0" }
-RCDATA NP_INFO_LegalCopyright    { "Copyright (C) 2000-2009\0" }
+RCDATA NP_INFO_LegalCopyright    { "Copyright (C) 2000-2010\0" }
 RCDATA NP_INFO_OriginalFilename  { "NPFLOS2.DLL\0" }
 RCDATA NP_INFO_ProductName       { "Shockwave Flash\0" }
 

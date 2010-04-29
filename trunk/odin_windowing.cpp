@@ -171,7 +171,6 @@ BOOL npWinInit()
     VERIFY_EXCEPTION_CHAIN();
     if (!gfInited)
     {
-#if 1
         WNDCLASSA WndClass;
         memset(&WndClass, 0, sizeof(WndClass));
         WndClass.lpfnWndProc   = npWinLevel0WndProc;
@@ -208,22 +207,8 @@ BOOL npWinInit()
         else
             dprintf(("npWinInit: failed to register %s.", WC_NPWIN_LEVEL0));
     }
-#else
-    /* try to find ShockwaveFlashFullScreen class */
-
-    gWCFlashFS = odinFindAtom(WC_NPWIN_FLASH_FS);
-    if (!gWCFlashFS)
-    {
-        dprintf(("npWinInit: failed to register %s.", WC_NPWIN_FLASH_FS));
-    } else
-    {
-        dprintf(("npWinInit: Atom [%s] found %x.", WC_NPWIN_FLASH_FS, gWCFlashFS));
-        gfInited = TRUE;
-    }
-}
-#endif
-VERIFY_EXCEPTION_CHAIN();
-return gfInited;
+    VERIFY_EXCEPTION_CHAIN();
+    return gfInited;
 }
 
 
@@ -866,6 +851,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
         HWND hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevel0);
         if (hwndFake)
         {
+            dprintf(("npWinCreateWindowWrapper: fake window level 0 created: %08x", hwndFake));
             hwndRc = odinCreateWindowEx(0 /*??*/,
                                         WC_NPWIN_LEVEL1,
                                         NULL, /* name */
@@ -878,6 +864,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
                                         (LPVOID)hwndOS2);
             if (hwndRc)
             {
+                dprintf(("npWinCreateWindowWrapper: window level 1 created: %08x", hwndRc));
                 odinSetWindowLong(hwndFake, L0_GWL_OS2PLUGINWINDOW, (LONG)hwndOS2);
                 odinSetWindowLong(hwndFake, L0_GWL_LEVEL1_ODINHWND, (LONG)hwndRc);
                 odinSetWindowLong(hwndRc,   L1_GWL_OS2PLUGINWINDOW, (LONG)hwndOS2);
@@ -885,7 +872,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
             }
             else
             {
-                dprintf(("npWinCreateWindowWrapper: failed to create fake window. Returning fake window since that's better than nothing."));
+                dprintf(("npWinCreateWindowWrapper: failed to create window. Returning fake window since that's better than nothing."));
                 hwndRc = hwndFake;
             }
         }
@@ -971,7 +958,6 @@ void                npWinFakeWindowPosSize(HWND hwndOdin, HWND hwndOS2, int x, i
             dprintf(("%s: Successfully changed the pos/size of the L1 wrapper window.", szFunction));
         else
             dprintf(("%s: odinSetWindowPos failed on L1 !!!", szFunction));
-
     }
     else
         dprintf(("%s: hoom! didn't find hwndOdinL0/hwndOS2L0!!!!", szFunction));
@@ -1132,7 +1118,8 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
             break;
         }
     }
-//    odinSendMessageA(0x68000006, msg, mp1, mp2);
+    //    odinSendMessageA(0x68000006, msg, mp1, mp2);
+
     return odinDefWindowProc(hwnd, msg, mp1, mp2);
 }
 
