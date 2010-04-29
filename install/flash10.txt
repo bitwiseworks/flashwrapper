@@ -220,6 +220,10 @@ Changelog
  - Fixed Space character input
  - Some more small fixes
 
+10.04.2010:
+ - Some crashes fixed
+ - Added initial security interface
+
 More information
 ================
 
