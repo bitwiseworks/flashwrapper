@@ -1,6 +1,5 @@
-/* $Id: nparos2.cpp,v 1.8 2004/02/13 16:38:28 bird Exp $
- *
- * nparos2.cpp - initterm helpers for main wrapper dll.
+/*
+ * npflos2.cpp - initterm helpers for main wrapper dll.
  *      We implement the custombuild specifics for find the dll and initiating
  *      the plugin wrapper here. initterm calls us.
  *
@@ -23,35 +22,18 @@
 #include <string.h>
 #include <stdio.h>
 #include <win32type.h>
-//#include <custombuild.h>
-//#include <aros2build.h>
 
 #define NPODIN_NS4X
 #include "plugin_primary.h"
 #include "common.h"
 
-
 /*******************************************************************************
 *   External Functions                                                         *
 *******************************************************************************/
-extern "C" {
-extern unsigned _System RegOpenKey(HANDLE hKey, const char *pszSubKey, PHANDLE phKey);
-extern unsigned _System RegCloseKey(HANDLE hKey);
-extern unsigned _System RegQueryValueEx (HANDLE hKey, const char *pszValueName, unsigned uReserved,
-                                        unsigned *pfType, void *pvValue, unsigned *pcbValue);
-}
-#define HKEY_LOCAL_MACHINE      ((HANDLE)0xFFFFFFEFL)
-#define KEY_READ                0x00020019
 
 #define MAKE_BUILDNR(major, minor)      ((major << 16) | minor)
 #define MAJOR_BUILDNR(buildnr)          (buildnr >> 16)
 #define MINOR_BUILDNR(buildnr)          (buildnr & 0xffff)
-
-#define INNOWIN_REGISTRY_BASE      "Software\\"
-#define INNOWIN_REG_CURRENTUSER    "REGROOT_HKEY_CurrentUser"
-#define INNOWIN_REG_LOCAL_MACHINE  "REGROOT_HKEY_LocalMachine"
-#define INNOWIN_REG_USERS          "REGROOT_HKEY_Users"
-
 
 /**
  * Get the full path to the ODIN dlls to use for the plugins.
@@ -110,10 +92,8 @@ extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName
     /*
      * Get the full path name of the Win32 plugin dll.
      */
-    HANDLE  hKey = NULLHANDLE;
     int     rc;
 
-#if 1
     rc = PrfQueryProfileData(HINI_USERPROFILE, "Flash10_Plugin", "AdobePluginPath", pszPluginDllName, (PULONG)&cchPluginDllName);
     if (rc)
     {
@@ -121,24 +101,6 @@ extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName
         strcpy(pszPluginName, "npswf32.dll");
         return TRUE;
     }
-#else
-    rc = RegOpenKey(HKEY_LOCAL_MACHINE,
-                    "Software\\Macromedia\\FlashPlayerPlugin",
-                    &hKey);
-    if (!rc)
-    {
-        unsigned fType = 0;
-        unsigned cb = cchPluginDllName;
-        rc = RegQueryValueEx(hKey, "Path", 0, &fType, pszPluginDllName, &cb);
-        RegCloseKey(hKey);
-    }
-    if (!rc)
-    {
-        strcat(pszPluginDllName, "\\npswf32.dll");
-        strcpy(pszPluginName, "npswf32.dll");
-        return TRUE;
-    }
-#endif
     return FALSE;
 
 }
@@ -176,3 +138,4 @@ fail:
                            MB_YESNO | MB_MOVEABLE | MB_WARNING | MB_APPLMODAL);
     return (rc == MBID_YES);
 }
+

@@ -18,15 +18,11 @@
 #define INCL_PM
 #include <os2.h>
 
-/* the mozilla headers */
 #ifdef __IBMCPP__
 # include "moz_VACDefines.h"
 #else
 # include "moz_GCCDefines.h"
 #endif
-#include "moz\sdk\xpcom\include\nscore.h"
-#include "moz\include\plugin\nsplugindefs.h"
-#include "moz\include\plugin\npapi.h"
 
 #include "common.h"
 #include <string.h>
