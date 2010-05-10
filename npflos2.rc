@@ -26,13 +26,3 @@ RCDATA NP_INFO_ProductName       { "Shockwave Flash\0" }
  */
 ICON    1 "npfl.ico"
 
-
-/*
- * Strings
- */
-/*
-STRINGTABLE DISCARDABLE
-BEGIN
-
-END
-*/

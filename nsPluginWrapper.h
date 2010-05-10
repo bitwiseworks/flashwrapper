@@ -45,12 +45,6 @@ extern "C" {
 #endif
 int     npdprintf(const char *pszFormat, ...);
 void _Optlink   ReleaseInt3(unsigned uEAX, unsigned uEDX, unsigned uECX);
-#ifndef INCL_DEBUGONLY
-void    npXPCOMInitSems();
-nsresult npXPCOMGenericGetFactory(nsIServiceManagerObsolete *aServMgr, REFNSIID aClass, const char *aClassName,
-                                  const char *aContractID, PRLibrary * aLibrary, nsIPlugin **aResult);
-nsresult npXPCOMGenericMaybeWrap(REFNSIID aIID, nsISupports *aIn, nsISupports **aOut);
-#endif
 
 #ifdef __cplusplus
 }

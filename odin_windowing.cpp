@@ -45,15 +45,7 @@
 #else
 # include "moz_GCCDefines.h"
 #endif
-#include "moz\sdk\xpcom\include\nscore.h"
 #define __OS2_H__
-#define HRGN unsigned long
-#define HWND unsigned long
-#include "moz\include\plugin\nsplugindefs.h"
-#undef HRGN
-#undef HWND
-#include "moz\include\plugin\npapi.h"
-
 
 #include "windows.h"
 typedef HANDLE HPS;
@@ -71,6 +63,8 @@ typedef struct _MATRIXLF
     LONG    lM33;
 } MATRIXLF;
 typedef MATRIXLF *PMATRIXLF;
+
+#define INCL_NS4X
 #include "common.h"
 
 /*******************************************************************************
@@ -110,7 +104,6 @@ static ATOM         gWCFlashFS;
 #ifdef EXPERIMENTAL
 static MRESULT _System   npWinPluginSubClassWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 #endif
-typedef LRESULT (__stdcall *RealPlayerPNGUIWndProc)(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2);
 static LRESULT __stdcall npWinLevelMinusWndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2);
 static LRESULT __stdcall npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2);
 static LRESULT __stdcall npWinLevel1WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2);
@@ -232,7 +225,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
     static const char szFunction[] = "npWinSetWindowBegin";
     VERIFY_EXCEPTION_CHAIN();
 
-#define GETMEMB_WND(ptr, memb, type) (fNS4x ? (type)(((NPWindow*)(ptr))->memb) : (type)(((nsPluginWindow*)(ptr))->memb))
+#define GETMEMB_WND(ptr, memb, type) (fNS4x ? (type)(((NPWindow*)(ptr))->memb) : (type)(((NPWindow*)(ptr))->memb))
 
     /*
      * Create wrapper if needed.
@@ -247,7 +240,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         unsigned    cx   = GETMEMB_WND(pvWindow, width, unsigned);
         unsigned    cy   = GETMEMB_WND(pvWindow, height, unsigned);
         unsigned    type = GETMEMB_WND(pvWindow, type, unsigned);
-        unsigned    cb   = fNS4x ? sizeof(NPWindow) : sizeof(nsPluginWindow);
+        unsigned    cb   = fNS4x ? sizeof(NPWindow) : sizeof(NPWindow);
 
         dprintf(("%s: hwnd=%x  x,y=(%d,%d) cx,cy=(%d,%d)  type=%d  fNS4x=%d", szFunction, hwnd, x, y, cx, cy, type, fNS4x));
 
@@ -258,7 +251,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         PNPWINDATA      pWndData = NULL;
         if (ppWndData)
             pWndData = *ppWndData;
-        if (!pWndData && type == nsPluginWindowType_Window)
+        if (!pWndData && type == NPWindowTypeWindow)
             pWndData = (PNPWINDATA)WinQueryWindowULong(hwnd, QWL_USER);
 
         /*
@@ -266,8 +259,8 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
          */
         switch (type)
         {
-            case nsPluginWindowType_Window:
-                dprintf(("%s: nsPluginWindowType_Window: hwnd=%#x", szFunction, hwnd));
+            case NPWindowTypeWindow:
+                dprintf(("%s: NPWindowTypeWindow: hwnd=%#x", szFunction, hwnd));
                 if (!pWndData)
                 {
                     /*
@@ -287,10 +280,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                             if (pWndData->hwndOdin)
                             {
                                 memcpy(pvOdinWnd, aWindow, cb);
-                                if (fNS4x)
-                                    ((NPWindow*)pvOdinWnd)->window = (void*)pWndData->hwndOdin;
-                                else
-                                    ((nsPluginWindow*)pvOdinWnd)->window = (nsPluginPort*)pWndData->hwndOdin;
+                                ((NPWindow*)pvOdinWnd)->window = (void*)pWndData->hwndOdin;
 
                                 if (WinSetWindowULong(hwnd, QWL_USER, (ULONG)pWndData))
                                 {
@@ -362,10 +352,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                      * Update the structure.
                      */
                     memcpy(pvOdinWnd, pvWindow, cb);
-                    if (fNS4x)
-                        ((NPWindow *)pvOdinWnd)->window = (void*)pWndData->hwndOdin;
-                    else
-                        ((nsPluginWindow *)pvOdinWnd)->window = (nsPluginPort *)pWndData->hwndOdin;
+                    ((NPWindow *)pvOdinWnd)->window = (void*)pWndData->hwndOdin;
                     npWinFlipY(pvOdinWnd, hwnd, y, cy, fNS4x);
 
                     /*
@@ -376,8 +363,8 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                 break;
 
 
-            case nsPluginWindowType_Drawable:
-                dprintf(("%s: nsPluginWindowType_Drawable: hps=%#x hwndOS2=%#x hwndOdin=%#x", szFunction, hwnd, hwndDocOS2, hwndDocOdin));
+            case NPWindowTypeDrawable:
+                dprintf(("%s: NPWindowTypeDrawable: hps=%#x hwndOS2=%#x hwndOdin=%#x", szFunction, hwnd, hwndDocOS2, hwndDocOdin));
                 if (!pWndData)
                 {
                     /*
@@ -448,10 +435,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                      * Update the structure.
                      */
                     memcpy(pvOdinWnd, pvWindow, cb);
-                    if (fNS4x)
-                        ((NPWindow *)pvOdinWnd)->window = (void*)pWndData->hdcOdin;
-                    else
-                        ((nsPluginWindow *)pvOdinWnd)->window = (nsPluginPort *)pWndData->hdcOdin;
+                    ((NPWindow *)pvOdinWnd)->window = (void*)pWndData->hdcOdin;
 
                     /* flip y ??? */
                     #if 0
@@ -461,7 +445,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                     if (fNS4x)
                         ((NPWindow*)pvOdinWnd)->y       = yOdin;
                     else
-                        ((nsPluginWindow*)pvOdinWnd)->y = yOdin;
+                        ((NPWindow*)pvOdinWnd)->y = yOdin;
                     #endif
                 }
                 break;
@@ -512,8 +496,8 @@ void npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAV
 
         switch (type)
         {
-            case nsPluginWindowType_Drawable:
-                dprintf(("%s: nsPluginWindowType_Drawable: hps=%#x", szFunction, hps));
+            case NPWindowTypeDrawable:
+                dprintf(("%s: NPWindowTypeDrawable: hps=%#x", szFunction, hps));
                 if (ppWndData && VALID_PTR(*ppWndData) && !pSavedPS)
                 {
                     /*
@@ -538,7 +522,7 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
     VERIFY_EXCEPTION_CHAIN();
     dprintf(("%s: enter", szFunction));
 
-    struct nsPluginPrint *pPrint = (struct nsPluginPrint *)aPlatformPrint;
+    NPPrint *pPrint = (NPPrint *)aPlatformPrint;
 
 #ifdef DEBUG
     /*
@@ -547,13 +531,13 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
      *     2. The mode must be known.
      *     3. Netscape and mozilla must use the same structures. - WRONG!!! FIXME!!!!
      */
-    if (    pPrint->mode == nsPluginMode_Embedded
+    if (    pPrint->mode == NP_EMBED
         &&  pPrint->print.embedPrint.window.window)
     {
         dprintf(("%s: window handle ASSUMPTION failed\n"));
         DebugInt3();
     }
-    if (pPrint->mode != nsPluginMode_Embedded && pPrint->mode != nsPluginMode_Full)
+    if (pPrint->mode != NP_EMBED && pPrint->mode != NP_FULL)
     {
         dprintf(("%s: mode ASSUMPTION failed\n"));
         DebugInt3();
@@ -608,7 +592,7 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
         DebugInt3();
         return NULL;
     }
-    pPrtData->pvOdinPrt = calloc(sizeof(nsPluginPrintW32), 1);
+    pPrtData->pvOdinPrt = calloc(sizeof(NPPrintW32), 1);
     if (!pPrtData->pvOdinPrt)
     {
         dprintf(("%s: Out of memory !!!\n"));
@@ -616,7 +600,7 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
         free(pPrtData);
         return NULL;
     }
-    HPS hps = pPrint->mode == nsPluginMode_Full
+    HPS hps = pPrint->mode == NP_FULL
         ? (HPS)pPrint->print.fullPrint.platformPrint
         : (HPS)pPrint->print.embedPrint.platformPrint;
     pPrtData->hpsOS2    = hps;
@@ -635,11 +619,11 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
     /*
      * Create the plugin print structure the structure.
      */
-    nsPluginPrintW32 *pOdinPrint = (nsPluginPrintW32 *)pPrtData->pvOdinPrt; /* struct can't have nsPluginPrint */
-    memcpy(pOdinPrint, aPlatformPrint, sizeof(nsPluginPrintW32)); /* assumes target is smaller. */
+    NPPrintW32 *pOdinPrint = (NPPrintW32 *)pPrtData->pvOdinPrt; /* struct can't have NPPrint */
+    memcpy(pOdinPrint, aPlatformPrint, sizeof(NPPrintW32)); /* assumes target is smaller. */
     switch (pPrint->mode)
     {
-        case nsPluginMode_Full:
+        case NP_FULL:
             pOdinPrint->print.fullPrint.platformPrint   = (void*)pPrtData->hdcOdin;
             pOdinPrint->print.fullPrint.pluginPrinted   = pPrint->print.fullPrint.pluginPrinted;
             pOdinPrint->print.fullPrint.printOne        = pPrint->print.fullPrint.printOne;
@@ -650,7 +634,7 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
                      pOdinPrint->print.fullPrint.printOne));
             break;
 
-        case nsPluginMode_Embedded:
+        case NP_EMBED:
             pOdinPrint->print.embedPrint.platformPrint = (void*)pPrtData->hdcOdin;
             pOdinPrint->print.embedPrint.window.window      = pPrint->print.embedPrint.window.window;
             pOdinPrint->print.embedPrint.window.x           = pPrint->print.embedPrint.window.x;
@@ -895,7 +879,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
  * @param   cy          The OS/2 height.
  * @param   fNS4x       Flags which structure pvOdinWnd is actually pointing to.
  *                      TRUE:   NPWindow
- *                      FALSE:  nsPluginWindow
+ *                      FALSE:  NPWindow
  */
 void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
 {
@@ -913,7 +897,7 @@ void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
             if (fNS4x)
                 ((NPWindow*)pvOdinWnd)->y       = yOdin;
             else
-                ((nsPluginWindow*)pvOdinWnd)->y = yOdin;
+                ((NPWindow*)pvOdinWnd)->y = yOdin;
         }
         else
         {
@@ -958,6 +942,7 @@ void                npWinFakeWindowPosSize(HWND hwndOdin, HWND hwndOS2, int x, i
             dprintf(("%s: Successfully changed the pos/size of the L1 wrapper window.", szFunction));
         else
             dprintf(("%s: odinSetWindowPos failed on L1 !!!", szFunction));
+
     }
     else
         dprintf(("%s: hoom! didn't find hwndOdinL0/hwndOS2L0!!!!", szFunction));
@@ -1035,29 +1020,10 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
 {
     static const char szFunction[] = "npWinLevel0WndProc";
     VERIFY_EXCEPTION_CHAIN();
-#if 0
-    RealPlayerPNGUIWndProc PNGUIWndProc = (RealPlayerPNGUIWndProc)odinGetWindowLong(0x68000005,0xfffffffc); // get wndproc
-
-    dprintf(("PNGUIWndProc wndproc %08x ", PNGUIWndProc));
-
-    if (PNGUIWndProc)
-    {
-        odinSetWindowPos(0x68000005, NULL, 0, 0, 240, 240, SWP_NOZORDER);
-        PNGUIWndProc(0x68000005, msg, mp1, mp2);
-        PNGUIWndProc(0x68000005, WM_SIZE, SIZE_RESTORED, 0x00F000F0);
-        PNGUIWndProc(0x68000005, WM_MOVE, 0, 0x00000000);
-        PNGUIWndProc(0x68000005, WM_PAINT, 0, 0);
-        odinSetWindowPos(0x68000006, NULL, 0, 0, 240, 240, SWP_NOZORDER);
-        PNGUIWndProc(0x68000006, msg, mp1, mp2);
-        PNGUIWndProc(0x68000006, WM_SIZE, SIZE_RESTORED, 0x00F000F0);
-        PNGUIWndProc(0x68000006, WM_MOVE, 0, 0x00000000);
-        PNGUIWndProc(0x68000006, WM_PAINT, 0, 0);
-    }
-#endif
     dprintf(("%s: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!", szFunction,
              hwnd, msg, mp1, mp2));
 
-//    odinSendMessageA(0x68000005, msg, mp1, mp2);
+    //    odinSendMessageA(0x68000005, msg, mp1, mp2);
 
     switch (msg)
     {
@@ -1096,7 +1062,7 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
                         &&  pWndData->uMagic == NPWNDDATA_MAGIC
                         )
                     {
-                        #ifdef DO_DELETE
+                        //#ifdef DO_DELETE
                         if (pWndData->pvOdinWnd)
                         {
                             /** @todo This free of this member should be delayed perhaps.. we'll see. */
@@ -1104,7 +1070,7 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
                         }
                         memset(pWndData, 0, sizeof(*pWndData));
                         delete pWndData;
-                        #endif
+                        //#endif
                     }
                     else
                     {
@@ -1118,8 +1084,7 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
             break;
         }
     }
-    //    odinSendMessageA(0x68000006, msg, mp1, mp2);
-
+//    odinSendMessageA(0x68000006, msg, mp1, mp2);
     return odinDefWindowProc(hwnd, msg, mp1, mp2);
 }
 

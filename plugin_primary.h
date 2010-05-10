@@ -19,7 +19,6 @@
 extern "C" {
 #endif
 
-
 /**
  * This function returns all the win32 dll names.
  *
@@ -44,21 +43,9 @@ extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName
  */
 extern BOOL npprimaryCheckBuildNumber(HMODULE hmodOdin);
 
-
-
 /*
  * Drag in the right parts.
  */
-
-#ifdef NPODIN_XPCOM
-extern int giXPCOM;
-static int *gOdinXPCOM = &giXPCOM;
-#endif
-
-#ifdef NPODIN_JNI
-extern int giJNI;
-static int *gOdinJNI = &giJNI;
-#endif
 
 #ifdef NPODIN_NS4X
 extern int giNS4x;
@@ -69,4 +56,4 @@ static int *gOdinNS4x = &giNS4x;
 }
 #endif
 
-#endif /* !__plugin_2nd_h__ */
+#endif /* !__plugin_primary_h__ */
