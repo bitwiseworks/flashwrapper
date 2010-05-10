@@ -2,6 +2,8 @@
 #include <os2.h>
 #include <plugin_RCDefines.h>
 
+RCINCLUDE "npflos2-bld.rc"
+
 /*
  * Pluging info
  */
