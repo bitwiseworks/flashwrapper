@@ -1,0 +1,31 @@
+<HTML>
+
+<!-- Index for Gendata.htm --!>
+
+<body background="backgrnd.gif">
+GenData Index
+<font size=-1>
+<p><a href="gendata.htm" target="text">GenData</a>
+
+<p><a href="gendata.htm#config" target="text">GenData keywords</a>
+<ul>
+  <li><a href="gendata.htm#format" target="text">Format</a>
+  <li><a href="gendata.htm#bytesperline" target="text">BytesPerLine</a>
+  <li><a href="gendata.htm#outputto" target="text">OutputTo</a>
+  <li><a href="gendata.htm#getrandom" target="text">GetRandom</a>
+  <li><a href="gendata.htm#keylength" target="text">KeyLength</a>
+  <li><a href="gendata.htm#saversakeyto" target="text">SaveRSAKeyTo</a>
+  <li><a href="gendata.htm#readrsakeyfrom" target="text">ReadRSAKeyFrom</a>
+  <li><a href="gendata.htm#userstring" target="text">UserString</a>
+  <li><a href="gendata.htm#userstringq" target="text">UserStringQ</a>
+  <li><a href="gendata.htm#userstringb" target="text">UserStringB</a>
+  <li><a href="gendata.htm#snlockout" target="text">SNLockOut</a>
+  <li><a href="gendata.htm#sndatelock" target="text">SNDateLock</a>
+</ul>
+
+<p><a href="gendata.htm#example" target="text">An example of a GenData
+configuration file</a>
+
+</font>
+</body>
+</html>
