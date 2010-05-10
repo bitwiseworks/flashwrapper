@@ -1,0 +1,11 @@
+#
+# Flash10 configuration variables
+#
+# Copy this file to Makefile.inc and change your paths.
+# Edit Makefile.inc to change version numbering
+# in bldlevel informations
+#
+VERSION	  = 0.2.0
+BUILD     = tp2
+ODIN_INST = F:\rd\Odin\svn\trunk
+TOOLKIT   = F:\dev\toolkit452
