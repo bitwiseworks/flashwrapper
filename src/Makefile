@@ -1,13 +1,21 @@
 #
+# (c) 2010 Mensys BV
+# npflos2 - Flash plugin wrapper
+#
 # Setup config.
 #
-ODIN_INST       = F:\rd\Odin\svn\trunk
-TOOLKIT         = F:\dev\toolkit452
+# Create Makefile.inc using Makefile.in_ as template.
+#
+!include Makefile.inc
 
 !if "$(BUILD_MODE)" == ""
-#BUILD_MODE = DEBUG
-BUILD_MODE = RELEASE
+BUILD_MODE = release
+!else
+BUILD_MODE = debug
 !endif
+
+OBJDIR = ..\obj\$(BUILD_MODE)
+BINDIR = ..\bin\$(BUILD_MODE)
 
 # Odin tradition, no exceptions.				
 CXX_NO_XCPT     = 1
@@ -21,77 +29,98 @@ ALL_NO_DBGMEM   = 1
 #
 # Includes
 #
-INCL            = -I.\include\vacpp \
-                  -I.\moz\include\plugin \
-                  -I.\moz\sdk\nspr\include \
+INCL            = -I..\include\incl_vac \
+                  -I..\include\include\plugin \
+                  -I..\include\sdk\nspr\include \
                   -I$(ODIN_INST)\include \
                   -I$(ODIN_INST)\include\win
 
 #
 # Flags
 #
-!if "$(BUILD_MODE)" == "RELEASE"
+!if "$(BUILD_MODE)" == "release"
 CFLAGS          = -Ge- -Gm+ -Su4 -O+
 CXXFLAGS        = -Ge- -Gm+ -Su4 -O+
 ALL_DEFINES     = -DNPODIN -D__WIN32OS2__ -D__i386__ -DORIGINAL_VAC_FUNCTIONS
 #-DEXPERIMENTAL
-LDFLAGS         = /DLL /NOE /MAP:FULL /EXEPACK:2
+LDFLAGS         = /DLL /NOE /MAP:$(BINDIR)\$(TARGET_NAME).map /EXEPACK:2
 !else
 CFLAGS          = -Ge- -Gm+ -Su4 -O- -Ti+
 CXXFLAGS        = -Ge- -Gm+ -Su4 -O- -Ti+
 ALL_DEFINES     = -DNPODIN -D__WIN32OS2__ -D__i386__ -DORIGINAL_VAC_FUNCTIONS -DDEBUG
 #-DEXPERIMENTAL
-LDFLAGS         = /DLL /NOE /MAP:FULL /EXEPACK:2 /DEBUG 
-TARGET_OBJS     = $(TARGET_OBJS) dbg_RegChecker.$(EXT_OBJ) dbg_VerifyExcptChain.$(EXT_OBJ)
+LDFLAGS         = /DLL /NOE /MAP:$(BINDIR)\$(TARGET_NAME).map /EXEPACK:2 /DEBUG 
 !endif
 		
 #
 # Target config.
 #
-TARGET_NAME     = NPFLOS2
-TARGET_MODE     = DLL
-EXT_OBJ         = OBJ
+TARGET_NAME     = npflos2
+TARGET_MODE     = dll
+EXT_OBJ         = obj
 
 TARGET_OBJS     = \
-    apis_mozilla.$(EXT_OBJ) \
-    apis_odin.$(EXT_OBJ) \
-    npflos2.$(EXT_OBJ) \
-    odin_windowing.$(EXT_OBJ) \
-    odin_windowing_os2.$(EXT_OBJ) \
-    plugin_Generic.$(EXT_OBJ) \
-    plugin_GenericWeaks.$(EXT_OBJ) \
-    plugin_primary.$(EXT_OBJ) \
-    util_asm.$(EXT_OBJ) \
-    util_debug.$(EXT_OBJ) \
-    vac_malloc.$(EXT_OBJ) \
-    vac_odincrt.$(EXT_OBJ) \
-    wrap_ns4x.$(EXT_OBJ) 
+    $(OBJDIR)\apis_mozilla.$(EXT_OBJ) \
+    $(OBJDIR)\apis_odin.$(EXT_OBJ) \
+    $(OBJDIR)\npflos2.$(EXT_OBJ) \
+    $(OBJDIR)\odin_windowing.$(EXT_OBJ) \
+    $(OBJDIR)\odin_windowing_os2.$(EXT_OBJ) \
+    $(OBJDIR)\plugin_Generic.$(EXT_OBJ) \
+    $(OBJDIR)\plugin_GenericWeaks.$(EXT_OBJ) \
+    $(OBJDIR)\plugin_primary.$(EXT_OBJ) \
+    $(OBJDIR)\util_asm.$(EXT_OBJ) \
+    $(OBJDIR)\util_debug.$(EXT_OBJ) \
+    $(OBJDIR)\vac_malloc.$(EXT_OBJ) \
+    $(OBJDIR)\vac_odincrt.$(EXT_OBJ) \
+    $(OBJDIR)\wrap_ns4x.$(EXT_OBJ) 
 
-.c.obj:
-	icc /Q $(INCL) $(CFLAGS) $(ALL_DEFINES) -o $@ -c $<
+!if "$(BUILD_MODE)" == "debug"
+TARGET_OBJS     = $(TARGET_OBJS) \
+    $(OBJDIR)\dbg_RegChecker.$(EXT_OBJ) \
+    $(OBJDIR)\dbg_VerifyExcptChain.$(EXT_OBJ)
+!endif
 
-.cpp.obj:
-	icc /Q $(INCL) $(CXXFLAGS) $(ALL_DEFINES) -o $@ -c $<
+.c{$(OBJDIR)}.obj:
+	icc /Q $(INCL) $(CFLAGS) $(ALL_DEFINES) -Fo$* -c $<
 
-.asm.obj:
-	alp -Mb -Fdi:$(TOOLKIT)\INC $<
+.cpp{$(OBJDIR)}.obj:
+	icc /Q $(INCL) $(CXXFLAGS) $(ALL_DEFINES) -Fo$* -c $<
 
-.rc.res:
-    rc -n -r -I . $*.rc
+.asm{$(OBJDIR)}.obj:
+	alp -Mb -Fdi:$(TOOLKIT)\INC -Fdo:$(OBJDIR) $<
+
+.rc{$(OBJDIR)}.res:
+    rc -n -r -I . $< $@
 
 all: \
-    $(BUILD_MODE)\$(TARGET_NAME).dll \
-    $(TARGET_NAME).res
+    outtree \
+    $(BINDIR)\$(TARGET_NAME).dll \
+    $(OBJDIR)\$(TARGET_NAME).res
 
-$(BUILD_MODE)\$(TARGET_NAME).dll: \
+outtree:
+    @if not exist ..\bin mkdir ..\bin
+    @if not exist $(BINDIR) mkdir $(BINDIR)
+    @if not exist ..\obj mkdir ..\obj
+    @if not exist $(OBJDIR) mkdir $(OBJDIR)
+
+# update bldlevel info
+$(OBJDIR)\$(TARGET_NAME).res: Makefile.inc npflos2.rc
+	@echo Writing build level informations
+	@copy npflos2.rc $(OBJDIR)\npflos2-bld.rc
+	@BldLevelInf0.cmd $(VERSION) $(BUILD) $(OBJDIR)\npflos2-bld.rc
+        rc -n -r -I . -I $(OBJDIR) npflos2.rc $@
+
+$(BINDIR)\$(TARGET_NAME).dll: \
     $(TARGET_OBJS) \
     $(TARGET_NAME).def \
-    $(TARGET_NAME).res
+    $(OBJDIR)\$(TARGET_NAME).res
     ilink $(LDFLAGS) $(TARGET_OBJS) $(LIBS) security\securit2.lib $(TARGET_NAME).def -out:$@
-    rc -n -p -x2 $(TARGET_NAME).res $@
+    rc -n -p -x2 $(OBJDIR)\$(TARGET_NAME).res $@
 
 clean:
-    rm -f $(BUILD_MODE)\$(TARGET_NAME).dll 
-    rm -f $(TARGET_NAME).res
-    rm -f $(TARGET_NAME).map
-    rm -f *.obj
+    -rm -f $(BINDIR)\*
+    -rmdir $(BINDIR)
+    -rmdir ..\bin
+    -rm -f $(OBJDIR)\*
+    -rmdir $(OBJDIR)
+    -rmdir ..\obj
