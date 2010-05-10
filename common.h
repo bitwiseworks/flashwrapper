@@ -54,12 +54,6 @@
  * fType param of NPJNICreateWrapper().
  * @{
  */
-/** JNIEnv wrapper. */
-#define NPJS_TYPE_JNIENV            0x00000010
-
-/** JavaVM wrapper. */
-#define NPJS_TYPE_JAVAVM            0x00000020
-
 /** JRIEnv down wrapper. */
 #define NPJS_TYPE_JRIENV_DOWN       0x00000040
 
@@ -88,7 +82,6 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <win32type.h>
-//#include <odinlx.h>
 #include <odin.h>
 
 /* taken from odinlx.h */
@@ -104,7 +97,7 @@ typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR l
 #endif
 
 #ifdef INCL_MOZAPIS
-#include "moz\sdk\nspr\include\prthread.h"
+#include "prthread.h"
 #endif
 
 
@@ -153,38 +146,6 @@ typedef struct npwinSavedPS
 } NPSAVEDPS, *PNPSAVEDPS;
 
 
-#ifdef nsplugindefs_h___
-#   pragma pack(1)
-    struct nsPluginWindowW32
-    {
-        nsPluginPort *window;
-        PRInt32       x;
-        PRInt32       y;
-        PRUint32      width;
-        PRUint32      height;
-        nsPluginRect  clipRect;
-        PRInt32       type;    //nsPluginWindowType type;    /* da culprit? yes. */
-    };
-    struct nsPluginEmbedPrintW32
-    {
-        nsPluginWindowW32 window;
-        void             *platformPrint;
-    };
-    struct nsPluginPrintW32
-    {
-        PRUint16                  mode;
-        PRUint16                  dummy_padding;
-        union
-        {
-            nsPluginFullPrint     fullPrint;
-            nsPluginEmbedPrintW32 embedPrint;
-        } print;
-    };
-#   pragma pack()
-#endif
-
-
-
 /**
  * Data associated with a print event.
  */
@@ -227,12 +188,12 @@ typedef struct npwinPluginWindowData
     /** Saved Odin PS state. */
     NPSAVEDPS   SavedOdinPS;
 
-    /** Pointer to the nsPluginWindow we present to the Win32 layer.
+    /** Pointer to the NPWindow we present to the Win32 layer.
      * @todo This should be freed in some WM_(NC)DESTROY case.
      */
     void *      pvOdinWnd;
 
-    /** Pointer to the nsPluginWindow we originally received.
+    /** Pointer to the NPWindow we originally received.
      * Not sure if it's trusty or not, think it'll stay around it the window
      * is destroyed.
      */
@@ -248,16 +209,25 @@ typedef struct npwinPluginWindowData
 } NPWINDATA, *PNPWINDATA;
 
 
-/* win32 versions */
-#ifdef INCL_MOZXPCOM
-typedef struct DownThis *           PDOWNTHIS;
-typedef nsresult (*NPW32CALL    PFNW32_NSGetFactory)(/*nsISupports* */ PDOWNTHIS aServMgr, const nsCID &aClass,
-                                                     const char *aClassName, const char *aContractID, nsIFactory **aFactory);
-typedef PRBool   (*NPW32CALL    PFNW32_NSCanUnload)(/*nsISupports* */ PDOWNTHIS aServMgr);
-typedef nsresult (*NPW32CALL    PFNW32_NSRegisterSelf)(/*nsISupports* */ PDOWNTHIS aServMgr, const char *fullpath);
-typedef nsresult (*NPW32CALL    PFNW32_NSUnregisterSelf)(/*nsISupports* */ PDOWNTHIS aServMgr, const char *fullpath);
-#endif
+typedef struct NPOdinPluginWrapper *PNPODINWRAPPER;
+
+/*******************************************************************************
+*   typedefs & structs that depend on the moz plugin headers                   *
+*******************************************************************************/
 #ifdef INCL_NS4X
+
+extern "SYSTEM" {
+#include "npfunctions.h"
+}
+
+/* callback versions */
+typedef NPError     (* _Optlink PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
+typedef NPError     (* _Optlink PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
+typedef NPError     (* _Optlink PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
+typedef NPError     (* _Optlink PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
+typedef char *      (* _Optlink PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
+
+/* win32 versions */
 typedef struct _NP32PluginFuncs    *PNP32PluginFuncs;
 typedef struct _NP32NetscapeFuncs  *PNP32NetscapeFuncs;
 typedef NPError (*NP4W32CALL    PFNW32_NP_GetEntryPoints)(PNP32PluginFuncs pCallbacks);
@@ -265,28 +235,7 @@ typedef NPError (*NP4W32CALL    PFNW32_NP_Initialize)(PNP32NetscapeFuncs pFuncs)
 typedef NPError (*NP4W32CALL    PFNW32_NP_Shutdown)(void);
 typedef NPError (*NP4W32CALL    PFNW32_NP_GetValue)(NPP future, NPPVariable variable, void *value);
 typedef char * (*NP4W32CALL     PFNW32_NP_GetMIMEDescription)(void);
-#endif
 
-/* callback versions */
-typedef struct NPOdinPluginWrapper *PNPODINWRAPPER;
-#ifdef INCL_MOZXPCOM
-typedef nsresult             (* PFN_NSGetFactory)(nsISupports* aServMgr, const nsCID &aClass,
-                                                  const char *aClassName, const char *aContractID,
-                                                  nsIFactory **aFactory, PNPODINWRAPPER pPlugin);
-typedef PRBool               (* PFN_NSCanUnload)(nsISupports* aServMgr, PNPODINWRAPPER pPlugin);
-typedef nsresult             (* PFN_NSRegisterSelf)(nsISupports* aServMgr, const char *fullpath, PNPODINWRAPPER pPlugin);
-typedef nsresult             (* PFN_NSUnregisterSelf)(nsISupports* aServMgr, const char *fullpath, PNPODINWRAPPER pPlugin);
-#endif
-#ifdef INCL_NS4X
-typedef NPError     (* _Optlink PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
-typedef char *      (* _Optlink PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
-#endif
-
-
-#if defined(INCL_MOZXPCOM) && defined(INCL_NS4X)
 /**
  * Per Plugin Structure.
  *
@@ -323,10 +272,6 @@ typedef struct NPOdinPluginWrapper
      * npGenericInit() will initialize these. Noone will ever be NULL.
      * @{
      */
-    PFN_NSGetFactory                pfnNSGetFactory;
-    PFN_NSCanUnload                 pfnNSCanUnload;
-    PFN_NSRegisterSelf              pfnNSRegisterSelf;
-    PFN_NSUnregisterSelf            pfnNSUnregisterSelf;
     PFN_NP_GetEntryPoints           pfnNP_GetEntryPoints;
     PFN_NP_Initialize               pfnNP_Initialize;
     PFN_NP_Shutdown                 pfnNP_Shutdown;
@@ -338,10 +283,6 @@ typedef struct NPOdinPluginWrapper
      * npGenericInit() will resolve these.
      * @{
      */
-    PFNW32_NSGetFactory             pfnW32NSGetFactory;
-    PFNW32_NSCanUnload              pfnW32NSCanUnload;
-    PFNW32_NSRegisterSelf           pfnW32NSRegisterSelf;
-    PFNW32_NSUnregisterSelf         pfnW32NSUnregisterSelf;
     PFNW32_NP_GetEntryPoints        pfnW32NP_GetEntryPoints;
     PFNW32_NP_Initialize            pfnW32NP_Initialize;
     PFNW32_NP_Shutdown              pfnW32NP_Shutdown;
@@ -349,21 +290,42 @@ typedef struct NPOdinPluginWrapper
     PFNW32_NP_GetMIMEDescription    pfnW32NP_GetMIMEDescription;
     //@}
 
-
 } NPODINWRAPPER;
 
-/** Function pointer to npGenericInit().
- * Provided just to ease the resolving and calling of npGenericInit().
- */
-typedef int               (*    PFNNPGENERICINIT)(PNPODINWRAPPER pNPOdinWrapper);
-#endif /* INCL_MOZXPCOM and INCL_NS4X */
+#pragma pack(1)
+struct NPWindowW32
+{
+    void *        window;
+    int32_t       x;
+    int32_t       y;
+    uint32_t      width;
+    uint32_t      height;
+    NPRect        clipRect;
+    NPWindowType  type;
+};
 
+struct NPEmbedPrintW32
+{
+    NPWindowW32 window;
+    void *      platformPrint;
+};
 
+struct NPPrintW32
+{
+    uint16_t            mode;
+    uint16_t            dummy_padding;
+    union
+    {
+        NPFullPrint     fullPrint;
+        NPEmbedPrintW32 embedPrint;
+    } print;
+};
+#pragma pack()
+
+#endif /* INCL_NS4X */
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-/** Handle of the Custombbuild Odin Dll. */
-//extern HMODULE                  ghmodOdinDll;
 
 /** ODIN_ThreadEnterOdinContext - global */
 extern USHORT (*WIN32API        pfnODIN_ThreadEnterOdinContext)(void *pExceptionRegRec, BOOL fForceFSSwitch);
@@ -388,7 +350,6 @@ extern void (*PRICALL           pfn_PRI_DetachThread)(void);
 extern BOOL                     gfInitSuccessful;
 
 extern HMODULE                  ghmodOurSelf;
-
 
 /*******************************************************************************
 *   Functions                                                                  *
@@ -420,6 +381,7 @@ HDC  WIN32API       odinHPSToHDC(HWND hwnd, HPS hps, LPCSTR pszDevice, LPRECT pR
 BOOL WIN32API       odinJ2PluginHacks(int iHack, BOOL fEnable);
 void WIN32API       odinSetFreeTypeIntegration(BOOL fEnabled);
 ATOM WIN32API       odinFindAtom(LPCSTR atomStr);
+
 /* window and ps/dc hacking. */
 void *              npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSetWindow, HWND hwndOS2, HWND hwndOdin);
 void                npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSetWindow);
@@ -440,16 +402,6 @@ void                moz_PRI_DetachThread(void);
 #endif
 
 /* Misc Internal */
-#if defined(INCL_MOZXPCOM) && defined(__cplusplus)
-const char *        getIIDCIDName(REFNSIID aIID);
-const nsID *        getIIDCIDFromName(const char *pszStrID);
-}
-nsresult            downCreateWrapper(void **ppvResult, const void *pvVFT, nsresult rc);
-nsresult            downCreateWrapper(void **ppvResult, REFNSIID aIID, nsresult rc);
-extern "C" {
-nsresult            upCreateWrapper(void **ppvResult, REFNSIID aIID, nsresult rc);
-#endif
-void                npXPCOMInitSems(void);
 BOOL                npInitTerm_Lazy(void);
 BOOL                npResolveOdinAPIs(void);
 BOOL                npResolveMozAPIs(void);
@@ -475,13 +427,6 @@ BOOL                npGenericInit(PNPODINWRAPPER pPlugin);
 BOOL                npGenericLazyInit(PNPODINWRAPPER pPlugin);
 int                 npGenericErrorBox(const char *pszMessage, BOOL fYesNo);
 
-#ifdef INCL_MOZXPCOM
-nsresult            npGenericNSGetFactory(nsISupports* aServMgr, const nsCID &aClass,  const char *aClassName,
-                                          const char *aContractID, nsIFactory **aFactory, PNPODINWRAPPER pPlugin);
-nsresult            npGenericNSRegisterSelf(nsISupports* aServMgr, const char *fullpath, PNPODINWRAPPER pPlugin);
-PRBool              npGenericNSCanUnload(nsISupports* aServMgr, PNPODINWRAPPER pPlugin);
-nsresult            npGenericNSUnregisterSelf(nsISupports* aServMgr, const char *fullpath, PNPODINWRAPPER pPlugin);
-#endif
 #ifdef INCL_NS4X
 NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
 NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
@@ -489,7 +434,6 @@ NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin);
 NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
 char *              npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin);
 #endif
-
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,6 @@
  *
  */
 
-
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
@@ -27,14 +26,7 @@
 
 #include <string.h>
 
-/* the mozilla headers */
-#include "moz\sdk\xpcom\include\nsIServiceManager.h"
-#include "moz\sdk\xpcom\include\nsIFactory.h"
-#include "moz\include\plugin\npapi.h"
-#include "moz\include\plugin\npupp.h"
-
 #define INCL_NS4X
-#define INCL_MOZXPCOM
 #include "common.h"
 
 #ifdef __IBMCPP__
@@ -42,18 +34,12 @@
  * This weak resolving ASSUMES that the caller cleans the stack!
  * (i.e. anything but __stdcall calling convention will work very nicely.)
  */
-extern "C" unsigned npGenericNSWeakStub(void);
 extern "C" unsigned npGenericNPWeakStub(void);
-#pragma weak(npGenericNSGetFactory,             npGenericNSWeakStub)
-#pragma weak(npGenericNSCanUnload,              npGenericNSWeakStub)
-#pragma weak(npGenericNSRegisterSelf,           npGenericNSWeakStub)
-#pragma weak(npGenericNSUnregisterSelf,         npGenericNSWeakStub)
 #pragma weak(npGenericNP_GetEntryPoints,        npGenericNPWeakStub)
 #pragma weak(npGenericNP_Initialize,            npGenericNPWeakStub)
 #pragma weak(npGenericNP_Shutdown,              npGenericNPWeakStub)
 #pragma weak(npGenericNP_GetValue,              npGenericNPWeakStub)
 #pragma weak(npGenericNP_GetMIMEDescription,    npGenericNPWeakStub)
-#pragma weak(npXPCOMInitSems,                   npGenericNSWeakStub)
 #endif
 
 extern int Registered;
@@ -64,72 +50,47 @@ extern int Registered;
  * @param   pPlugin     Pointer to plugin wrapper instance structure.
  * @remark  dprintf() doesn't work at this time as it uses the odin log facility.
  */
-BOOL                npGenericInit(PNPODINWRAPPER pPlugin)
+BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericInit";
 
-    if (!Registered)
-    {
-        npGenericErrorBox("It is not allowed to use Flash plugin wrapper on unregistered copy of eComStation", FALSE);
+    if (!Registered) {
+        npGenericErrorBox("You may not use the Flash plugin with an unregistered copy of eComStation", FALSE);
         return FALSE;
     }
 
-    /*
-     * Validate input.
-     */
-    if (    !VALID_PTR(pPlugin)
-        ||  pPlugin->cb != sizeof(*pPlugin)
-        ||  !pPlugin->szPluginDllName[0]
-        ||  !pPlugin->szPluginName[0]
-        )
-    {
+    // Validate input.
+    if (!VALID_PTR(pPlugin) || pPlugin->cb != sizeof(*pPlugin) ||
+        !pPlugin->szPluginDllName[0] || !pPlugin->szPluginName[0]) {
         dprintf(("%s: pPlugin is invalid !!!", szFunction));
         //DebugInt3();
         return FALSE;
     }
 
-
-    /*
-     * Verify the existance of the Plugin DLL.
-     */
+    // Verify the existence of the Plugin DLL.
     FILESTATUS3     fst3;
-    if (    DosQueryPathInfo(pPlugin->szPluginDllName, FIL_STANDARD, &fst3, sizeof(fst3))
-        &&  !(fst3.attrFile & FILE_DIRECTORY)
-        &&  fst3.cbFile > 1024          /* sanity check on min filesize */
-        )
-    {
+    if (DosQueryPathInfo(pPlugin->szPluginDllName, FIL_STANDARD,
+                         &fst3, sizeof(fst3)) ||
+        (fst3.attrFile & FILE_DIRECTORY) || fst3.cbFile < 1024) {
         dprintf(("%s: Bad plugin file [%s]", szFunction, pPlugin->szPluginDllName));
         //DebugInt3();
         return FALSE;
     }
 
-
-    /*
-     * Initiate the native entry points.
-     */
-    pPlugin->pfnNSGetFactory          = npGenericNSGetFactory;
-    pPlugin->pfnNSCanUnload           = npGenericNSCanUnload;
-    pPlugin->pfnNSRegisterSelf        = npGenericNSRegisterSelf;
-    pPlugin->pfnNSUnregisterSelf      = npGenericNSUnregisterSelf;
+    // Initialize the native entry points.
     pPlugin->pfnNP_GetEntryPoints     = npGenericNP_GetEntryPoints;
     pPlugin->pfnNP_Initialize         = npGenericNP_Initialize;
     pPlugin->pfnNP_Shutdown           = npGenericNP_Shutdown;
     pPlugin->pfnNP_GetValue           = npGenericNP_GetValue;
     pPlugin->pfnNP_GetMIMEDescription = npGenericNP_GetMIMEDescription;
 
-
-    /*
-     * Make sure that the NPXPCOM list semaphores are initiated at a safe time.
-     */
-    npXPCOMInitSems();
-
-    dprintf(("%s: Successfully initiated %s", szFunction, pPlugin->szPluginName));
+    dprintf(("%s: Successfully initialized %s", szFunction, pPlugin->szPluginName));
     return TRUE;
 }
 
 
 /**
- * Lazy init which the workers will call the first time an plugin is accessed.
+ * Lazy init which the workers will call the first time a plugin is accessed.
  *
  * This lazy init of the plugin wrapper was done to speed up brower startup.
  * However this only works with old Netscape styled plugins.
@@ -137,65 +98,45 @@ BOOL                npGenericInit(PNPODINWRAPPER pPlugin)
  * @returns Success indicator.
  * @param   pPlugin     Pointer to plugin wrapper instance structure.
  */
-BOOL        npGenericLazyInit(PNPODINWRAPPER pPlugin)
+BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericLazyInit";
 
-    /*
-     * No use it pretend plugins load when we didn't init correctly ourselves.
-     */
-
-    if (!gfInitSuccessful)
-    {
+    // No use to pretend plugins load when we didn't init correctly ourselves.
+    if (!gfInitSuccessful) {
         //DebugInt3();
         return FALSE;
     }
 
-    /*
-     * Check that the plugin isn't already initiated.
-     */
+    // Check that the plugin isn't already initialized.
     if (pPlugin->hmodPlugin)
         return TRUE;
 
-
-    /*
-     * Init the odin++ stuff first.
-     */
-    if (!npInitTerm_Lazy())
-    {
+    // Init the odin++ stuff first.
+    if (!npInitTerm_Lazy()) {
         //DebugInt3();
         //@todo proper complaint.
         npGenericErrorBox("Failed to load Flash Win32 plugin.", FALSE);
         return FALSE;
     }
 
-    /*
-     * Load the Wrapped Plugin DLL.
-     */
+    // Load the Wrapped Plugin DLL.
     pPlugin->hmodPlugin = odinLoadLibrary(pPlugin->szPluginDllName);
-    if (!pPlugin->hmodPlugin)
-    {
+    if (!pPlugin->hmodPlugin) {
         dprintf(("%s: odinLoadLibrary(%s) failed !!!", szFunction, pPlugin->szPluginDllName));
         //DebugInt3();
         npGenericErrorBox("Failed to load Flash Win32 plugin.", FALSE);
         return FALSE;
     }
 
-
-    /*
-     * Resolve entry points.
-     * @todo perhaps change this to use offsets into pPlugin and hence being static...
-     */
+    // Resolve entry points.
+    // @todo perhaps change this to use offsets into pPlugin and hence being static...
     struct EntryPoints
     {
         FARPROC *   ppfn;
         const char *psz;
     }   aExports[] =
     {
-        { (FARPROC*)&pPlugin->pfnW32NSGetFactory,           "NSGetFactory" },
-        { (FARPROC*)&pPlugin->pfnW32NSRegisterSelf,         "NSRegisterSelf" },
-        { (FARPROC*)&pPlugin->pfnW32NSUnregisterSelf,       "NSUnregisterSelf" },
-        { (FARPROC*)&pPlugin->pfnW32NSCanUnload,            "NSCanUnload" },
         { (FARPROC*)&pPlugin->pfnW32NP_GetEntryPoints,      "NP_GetEntryPoints" },
         { (FARPROC*)&pPlugin->pfnW32NP_Initialize,          "NP_Initialize" },
         { (FARPROC*)&pPlugin->pfnW32NP_Shutdown,            "NP_Shutdown" },
@@ -203,25 +144,21 @@ BOOL        npGenericLazyInit(PNPODINWRAPPER pPlugin)
         { (FARPROC*)&pPlugin->pfnW32NP_GetMIMEDescription,  "NP_GetMIMEDescription" },
     };
 
-    for (int i = 0; i < sizeof(aExports) / sizeof(aExports[0]); i++)
-    {
+    for (int i = 0; i < sizeof(aExports) / sizeof(aExports[0]); i++) {
         *aExports[i].ppfn = odinGetProcAddress(pPlugin->hmodPlugin, aExports[i].psz);
         dprintf(("%s: %s -> 0x%08x", __FUNCTION__, aExports[i].psz, *aExports[i].ppfn));
     }
 
-    /*
-     * Minimum requirement is an NSGetFactory or NP_GetEntryPoints support (for now at least).
-     */
-    if (!pPlugin->pfnW32NSGetFactory && !pPlugin->pfnW32NP_GetEntryPoints)
-    {
-        dprintf(("%s: no NSGetFactory/NP_GetEntryPoints export!", szFunction));
+    // Minimum requirement is NP_GetEntryPoints support
+    if (!pPlugin->pfnW32NP_GetEntryPoints) {
+        dprintf(("%s: no NP_GetEntryPoints export!", szFunction));
         odinFreeLibrary(pPlugin->hmodPlugin);
         //DebugInt3();
         npGenericErrorBox("Invalid Flash Win32 plugin.", FALSE);
         return FALSE;
     }
 
-    dprintf(("%s: Successfully initate %s", szFunction, pPlugin->szPluginName));
+    dprintf(("%s: Successfully initialized %s", szFunction, pPlugin->szPluginName));
     return TRUE;
 }
 

@@ -17,7 +17,10 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+
+#ifndef ORIGINAL_VAC_FUNCTIONS
 #define ORIGINAL_VAC_FUNCTIONS
+#endif
 
 #include <stdarg.h>
 #include <string.h>

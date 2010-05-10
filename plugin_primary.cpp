@@ -20,29 +20,18 @@
 #else
 # include "moz_GCCDefines.h"
 #endif
+
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
 #define  INCL_DOSERRORS
-#define  INCL_DOSSEMAPHORES
-
-#define INCL_BASE
-#define INCL_PM
 #include <os2.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <initdll.h>                    /* odin stuff. */
 #include "plugin_primary.h"
-//#include <custombuild.h>
-//#include <customloader.h>
 
-#include "moz\sdk\xpcom\include\nsIServiceManager.h"
-#include "moz\sdk\xpcom\include\nsIFactory.h"
-#include "moz\include\plugin\npapi.h"
-#include "moz\include\plugin\npupp.h"
-
-#define INCL_MOZXPCOM
 #define INCL_NS4X
 #define INCL_MOZAPIS
 #include "common.h"
@@ -64,51 +53,53 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-/** Handle of the Custombbuild Odin Dll. */
-//HMODULE                 ghmodOdinDll = NULLHANDLE;
 
-/** OS/2 Handle of this DLL. */
-HMODULE                 ghmodOurSelf = NULLHANDLE;
+// OS/2 Handle of this DLL
+HMODULE         ghmodOurSelf = NULLHANDLE;
 
-/** Odin32 Handle of this DLL. */
-HINSTANCE               ghInstanceOurSelf = NULLHANDLE;
+// Odin32 Handle of this DLL
+HINSTANCE       ghInstanceOurSelf = NULLHANDLE;
 
-/** Flags wether or not to handle DLL_THREAD* events.
- * We need this for register/unregister process.
- */
-BOOL                    gfHandleDllEvents = FALSE;
+// Flags whether or not to handle DLL_THREAD* events.
+// We need this for register/unregister process.
+BOOL            gfHandleDllEvents = FALSE;
 
-/** Global flag which tells if we init was successful or not.
- * If not successfull we have to stay in memory because Odin does so.
- */
-BOOL                    gfInitSuccessful = FALSE;
+// Global flag which tells if we init was successful or not.
+// If not successfull we have to stay in memory because Odin does so.
+BOOL            gfInitSuccessful = FALSE;
 
-BOOL                    gfLazyInitSuccessful = FALSE;
+BOOL            gfLazyInitSuccessful = FALSE;
+
+// Is eCS registered?
+int             Registered = TRUE;
 
 /** The plugin instance data. */
-NPODINWRAPPER           gPlugin =
+NPODINWRAPPER   gPlugin =
 {
-    sizeof(NPODINWRAPPER),
-    "",
-    "",
-    NULLHANDLE,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    sizeof(NPODINWRAPPER),  // cb
+    "",                     // szPluginDllName
+    "",                     // szPluginName
+    NULLHANDLE,             // hmodPlugin
+    NULL,                   // pfnNP_GetEntryPoints
+    NULL,                   // pfnNP_Initialize
+    NULL,                   // pfnNP_Shutdown
+    NULL,                   // pfnNP_GetValue
+    NULL,                   // pfnNP_GetMIMEDescription
+    NULL,                   // pfnW32NP_GetEntryPoints
+    NULL,                   // pfnW32NP_Initialize
+    NULL,                   // pfnW32NP_Shutdown
+    NULL,                   // pfnW32NP_GetValue
+    NULL                    // pfnW32NP_GetMIMEDescription
 };
 
+// used to unload the Odin dlls at termination
 extern struct OdinEntryPoint aAPIs[];
-extern int registered_apis;
-int Registered = TRUE;
+extern int                   registered_apis;
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
+
 ULONG WIN32API      npOdinInitTerm(ULONG hInstance, ULONG reason, LPVOID reserved);
 
 typedef APIRET (* APIENTRY PROC_DosSetThreadAffinity)(PMPAFFINITY pAffinity);
@@ -143,7 +134,6 @@ BOOL SetThreadAffinity()
     return (rc == NO_ERROR);
 }
 
-
 /**
  * DLL Initialization and Termination entry point.
  * @returns 1 on success.
@@ -156,103 +146,92 @@ BOOL SetThreadAffinity()
 unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
                                     ulFlag)
 {
-    switch (ulFlag)
-    {
-    case 0:
-        {
-            ULONG  ulBootDrv;
-            CHAR pszRegName[] = "D:\\OS2\\ECSREG11.INI";
+    switch (ulFlag) {
 
-            /*
-             * Init CRT and do C++ static initializations.
-             */
+        case 0: {
+            gfInitSuccessful = FALSE;
+
+            // Init CRT and do C++ static initializations.
             int rc = _CRT_init();
-            if (rc)
-            {
+            if (rc) {
                 //dprintf(("CRT_init rc: %d", rc));
-                break;
+                return 0;
             }
-            ghmodOurSelf = hmod;
 
             ctordtorInit();
 
             SetThreadAffinity();
 
             //dprintf(("Flash plugin init term"));
-#if 0
-            /* checking for ECS 1.2 key via SecureIt API */
+
+            // check for ECS 1.2 key via SecureIt API
 #if defined(DEBUG)
             KeyAllowDebugger();
 #endif
             KeySetup(TRUE, FALSE, TRUE, 0x010101, &SIBlob, SIBlobLen);
 
-            DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE, &ulBootDrv, sizeof(ulBootDrv));
+            ULONG  ulBootDrv;
+            CHAR pszRegName[] = "D:\\OS2\\ECSREG11.INI";
 
+            DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE, &ulBootDrv, sizeof(ulBootDrv));
             pszRegName[0] = (char)(ulBootDrv + 'A' - 1);
 
-            if (!KeySetNamePswIni(pszRegName, "eComStationRegistration"))
-            {
+            if (!KeySetNamePswIni(pszRegName, "eComStationRegistration")) {
                 dprintf(("ECSREG11.INI not found\n"));
                 Registered = FALSE;
             }
 
-            if (!KeyCheck(TRUE))
-            {
+            if (!KeyCheck(TRUE)) {
+
                 // Check why KeyCheck failed
-                switch (KeyGetSerialNumberStatus())
-                {
-                case snExpired:
-                    dprintf(("Serial number expired")); break;
-
-                case snLocked:
-                    dprintf(("Key is locked")); break;
-
-                default :
-                    dprintf(("Unregistered")); break;
+                switch (KeyGetSerialNumberStatus()) {
+                    case snExpired:
+                        dprintf(("Serial number expired"));
+                        break;
+                    case snLocked:
+                        dprintf(("Key is locked"));
+                        break;
+                    default:
+                        dprintf(("Unregistered"));
+                        break;
                 }
                 Registered = FALSE;
             }
-#endif
-            /*
-             * Save the module handle as we will need it further down in the lazy init.
-             */
-            /*
-             * Get the plugin names.
-             */
-            if (npprimaryGetPluginNames(gPlugin.szPluginDllName, sizeof(gPlugin.szPluginDllName),
-                                        gPlugin.szPluginName, sizeof(gPlugin.szPluginName)))
-            {
-                if (npGenericInit(&gPlugin))
-                {
-                    gfInitSuccessful = TRUE;
-                    dprintf(("Flash plugin inited successfully"));
-                    return 1;
-                }
-                else
-                {
-                    dprintf(("Flash plugin init failed in npGenericInit"));
-                    //@todo complain in any way?
-                }
+
+            // Save the module handle as we will need it further down in the lazy init.
+            ghmodOurSelf = hmod;
+
+            // Get the plugin names.
+            if (!npprimaryGetPluginNames(gPlugin.szPluginDllName,
+                                        sizeof(gPlugin.szPluginDllName),
+                                        gPlugin.szPluginName,
+                                        sizeof(gPlugin.szPluginName))) {
+                dprintf(("Flash plugin init failed in npprimaryGetPluginNames [%s]",
+                         gPlugin.szPluginDllName));
+                return 0;
             }
-            else
-            {
-                dprintf(("Flash plugin init failed in npprimaryGetPluginNames [%s]", gPlugin.szPluginDllName));
-                //@todo complain in any way?
+
+            if (!npGenericInit(&gPlugin)) {
+                dprintf(("Flash plugin init failed in npGenericInit"));
+                return 0;
             }
-            break;
+
+            gfInitSuccessful = TRUE;
+            dprintf(("Flash plugin inited successfully"));
+            return 1;
         }
 
-    case 1:
-        {
-            /*
-             * Get memory stats if debug build.
-             * This is too late for dprintf unfortunately :/
-             */
+        case 1: {
+            // Get memory stats if debug build.
+            // This is too late for dprintf unfortunately
             if (!gfInitSuccessful)
                 return 1;
+
+            // already detached
             //if (!gfHandleDllEvents)
-            //    return 1; /* already detached */
-            //#ifdef DEBUG
+            //    return 1; 
+
+//#ifdef DEBUG
 #if 0
             extern void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc, unsigned long *pnrcalls_free, unsigned long *ptotalmemalloc);
             unsigned long cAllocs;
@@ -268,25 +247,19 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 
             unsigned long oldmod = 0;
 
-            /*
-             * Deregister ourselfs.
-             */
+            // Deregister ourselfs.
             dprintf(("starting unload procedure"));
             gfHandleDllEvents = FALSE;
-            if (ghInstanceOurSelf)
-            {
+
+            if (ghInstanceOurSelf) {
                 odinUnregisterLxDll(ghInstanceOurSelf);
                 ghInstanceOurSelf = NULLHANDLE;
             }
             dprintf(("DLL unregistered"));
-#if 1
-            /*
-             * Unload the ODIN dlls.
-             */
-            for (int i = registered_apis-1; i >= 0; i--)
-            {
-                if (aAPIs[i].modInst && oldmod != aAPIs[i].modInst)
-                {
+
+            // Unload the ODIN dlls.
+            for (int i = registered_apis-1; i >= 0; i--) {
+                if (aAPIs[i].modInst && oldmod != aAPIs[i].modInst) {
                     DosFreeModule(aAPIs[i].modInst);
                     oldmod = aAPIs[i].modInst;
                     aAPIs[i].modInst = NULLHANDLE;
@@ -294,92 +267,74 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
             }
             registered_apis = 0;
             dprintf(("DLLs unloaded"));
-#endif
-            /*
-             * Do C++ static terminatinos and terminate the CRT.
-             */
+
+            // Do C++ static terminations and terminate the CRT.
             ctordtorTerm();
             _CRT_term();
 
-            /*
-             * Done.
-             */
+            // Done.
             gfInitSuccessful = FALSE;
             return 1;
         }
     }
 
-    /*
-     * Failure.
-     */
-    gfInitSuccessful = FALSE;
+    // We should never reach here.
     return 0;
 }
 
 /**
  * Lazy inititiation of Odin and more.
- *
  * @returns Success indicator.
  */
 BOOL    npInitTerm_Lazy(void)
 {
-    /*
-     * Check if we're allready initiated.
-     */
+    // Check if we're allready initialized
     if (gfLazyInitSuccessful)
         return TRUE;
 
-    /*
-     * Resolv the OdinAPIs we will use.
-     */
-    if (npResolveOdinAPIs())
-    {
-        /*
-         * Register fake exe.
-         */
-        char    szFakeName[CCHMAXPATH];
-        PPIB    ppib;
-        PTIB    ptib;
-        if (    DosGetInfoBlocks(&ptib, &ppib)
-            ||  DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), &szFakeName[0]))
-            strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe"); /* *must* include one or more '\\'!  */
-
-        dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
-        //odinSetFreeTypeIntegration(TRUE);
-        if (odinRegisterDummyExe(&szFakeName[0]))
-        {
-            /*
-             * Resolve mozilla APIs
-             */
-            if (npResolveMozAPIs())
-            {
-                /*
-                 * Register our selfs a LxDll so we can catch CreateThread() events.
-                 */
-                gfHandleDllEvents = FALSE;
-                ghInstanceOurSelf = odinRegisterLxDll(ghmodOurSelf, npOdinInitTerm, NULL, 0, 0, 0);
-                if (ghInstanceOurSelf)
-                {
-                    gfHandleDllEvents = TRUE;
-                    gfLazyInitSuccessful = TRUE;
-                    dprintf(("npInitTerm_Lazy: ghInstanceOurSelf=%x", ghInstanceOurSelf));
-                    return TRUE;
-                }
-                else
-                    dprintf(("npInitTerm_Lazy: odinRegisterLxDll failed!"));
-            }
-            else
-                dprintf(("npInitTerm_Lazy: ResolveMozAPIs failed!"));
-        }
-        else
-            dprintf(("npInitTerm_Lazy: odinRegisterDummyExe failed!"));
-    }
-    else
-    {
-        //@todo complain
-    }
     gfInitSuccessful = FALSE;
-    return FALSE;
+
+    // Resolv the OdinAPIs we will use.
+    if (!npResolveOdinAPIs()) {
+        //@todo complain
+        return FALSE;
+    }
+
+    // Register fake exe.
+    char    szFakeName[CCHMAXPATH];
+    PPIB    ppib;
+    PTIB    ptib;
+
+    // this *must* include one or more '\\' !
+    if (DosGetInfoBlocks(&ptib, &ppib) ||
+        DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), szFakeName))
+        strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe"); 
+
+    dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
+    //odinSetFreeTypeIntegration(TRUE);
+    if (!odinRegisterDummyExe(szFakeName)) {
+        dprintf(("npInitTerm_Lazy: odinRegisterDummyExe failed!"));
+        return FALSE;
+    }
+
+    // Resolve mozilla APIs
+    if (!npResolveMozAPIs()) {
+        dprintf(("npInitTerm_Lazy: ResolveMozAPIs failed!"));
+        return FALSE;
+    }
+
+    // Register ourself as an LxDll so we can catch CreateThread() events
+    gfHandleDllEvents = FALSE;
+    ghInstanceOurSelf = odinRegisterLxDll(ghmodOurSelf, npOdinInitTerm, NULL, 0, 0, 0);
+    if (!ghInstanceOurSelf) {
+        dprintf(("npInitTerm_Lazy: odinRegisterLxDll failed!"));
+        return FALSE;
+    }
+
+    gfHandleDllEvents = TRUE;
+    gfLazyInitSuccessful = TRUE;
+    dprintf(("npInitTerm_Lazy: ghInstanceOurSelf=%x", ghInstanceOurSelf));
+    return TRUE;
 }
 
 
@@ -393,71 +348,62 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
 {
     static const char szFunction[] = "npOdinInitTerm";
 
-    switch (fReason)
-    {
-        case DLL_THREAD_ATTACH:
-        {
+    switch (fReason) {
+
+        case DLL_THREAD_ATTACH: {
+
             dprintf(("%s: DLL_THREAD_ATTACH. Instance: 0x%X", szFunction, hInstance));
-            if (gfHandleDllEvents)
-            {
+            if (gfHandleDllEvents) {
+
                 USHORT selFSOld = pfnODIN_ThreadLeaveOdinContextNested(NULL, FALSE);
-                /*
-                 * On Win32 PR_GetCurrentThread actually calls _PRI_AttachThread()
-                 * we here work around that OS/2 bug. If this is fixed in the
-                 * OS/2 Mozilla this code will still work as PR_GetCurrentThread
-                 * will succeed.
-                 */
+
+                // On Win32 PR_GetCurrentThread actually calls _PRI_AttachThread()
+                // we here work around that OS/2 bug. If this is fixed in the
+                // OS/2 Mozilla this code will still work as PR_GetCurrentThread
+                // will succeed.
+
                 PRThread * pThread = mozPR_GetCurrentThread();
-                if (!pThread)
-                {
-                    if (pfn_PRI_AttachThread)
-                    {
+                if (!pThread) {
+                    if (pfn_PRI_AttachThread) {
                         dprintf(("%s: calling moz_PRI_AttachThread", szFunction));
                         pThread = moz_PRI_AttachThread(PR_USER_THREAD, PR_PRIORITY_NORMAL, NULL, 0);
                     }
                     else
-                    {
                         dprintf(("%s: DLL_THREAD_ATTACH we're f**ked mozilla 1.3b or final !!!!", szFunction));
-                    }
                 }
                 pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld);
             }
+
             dprintf(("%s: DLL_THREAD_ATTACHED", szFunction));
             return TRUE;
         }
 
-        case DLL_THREAD_DETACH:
-        {
+        case DLL_THREAD_DETACH: {
+
             dprintf(("%s: DLL_THREAD_DETACH. Instance: 0x%X", szFunction, hInstance));
-            if (gfHandleDllEvents)
-            {
-                #if 1
+            if (gfHandleDllEvents) {
+
                 USHORT selFSOld = pfnODIN_ThreadLeaveOdinContextNested(NULL, FALSE);
-                /*
-                 * On Win32 NSPR4 will also receive this event and do what we now
-                 * are doing here.
-                 */
+
+                // On Win32 NSPR4 will also receive this event and do what we now
+                // are doing here.
+
                 PRThread * pThread = mozPR_GetCurrentThread();
-                if (pThread/* && pThread->flags & _PR_ATTACHED */) //@todo should test on these flags!
-                {
-                    if (pfn_PRI_DetachThread)
-                    {
+                //@todo should test on these flags!
+                if (pThread/* && pThread->flags & _PR_ATTACHED */) {
+                    if (pfn_PRI_DetachThread) {
                         dprintf(("%s: calling moz_PRI_DetachThread", szFunction));
                         moz_PRI_DetachThread();
                     }
-                    else
-                    {
+                    else {
                         dprintf(("%s: calling mozPR_DetachThread", szFunction));
                         mozPR_DetachThread();
                     }
                 }
                 pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld);
-                #endif
             }
 
-            /*
-             * Get memory stats if debug build.
-             */
+            // Get memory stats if debug build.
             #ifdef DEBUG
             extern void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc, unsigned long *pnrcalls_free, unsigned long *ptotalmemalloc);
             unsigned long cAllocs;
@@ -473,43 +419,16 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             return TRUE;
         }
 
-        /* Ignore these */
+        // Ignore these
         case DLL_PROCESS_DETACH:
         case DLL_PROCESS_ATTACH:
-            dprintf(("%s: DLL_THREAD_ATTACH/DETACH", szFunction));
+            dprintf(("%s: DLL_PROCESS_ATTACH/DETACH", szFunction));
             return TRUE;
     }
 
-    /* Failure if we ever get here (default) */
+    // Failure if we ever get here (default)
     return FALSE;
 }
-
-
-
-/*
- * XPCOM interfaces
- */
-extern "C" PR_IMPLEMENT(nsresult) NSGetFactory(nsISupports* aServMgr, const nsCID &aClass, const char *aClassName,
-                                               const char *aContractID, nsIFactory **aFactory)
-{
-    return gPlugin.pfnNSGetFactory(aServMgr, aClass, aClassName, aContractID, aFactory, &gPlugin);
-}
-
-extern "C" PR_IMPLEMENT(PRBool)   NSCanUnload(nsISupports* aServMgr)
-{
-    return gPlugin.pfnNSCanUnload(aServMgr, &gPlugin);
-}
-
-extern "C" PR_IMPLEMENT(nsresult) NSRegisterSelf(nsISupports* aServMgr, const char *fullpath)
-{
-    return gPlugin.pfnNSRegisterSelf(aServMgr, fullpath, &gPlugin);
-}
-
-extern "C" PR_IMPLEMENT(nsresult) NSUnregisterSelf(nsISupports* aServMgr, const char *fullpath)
-{
-    return gPlugin.pfnNSUnregisterSelf(aServMgr, fullpath, &gPlugin);
-}
-
 
 /*
  * Netscape v4.x interfaces
@@ -534,7 +453,7 @@ char * NP_GetMIMEDescription()
     return gPlugin.pfnNP_GetMIMEDescription(&gPlugin);
 }
 
-/* unix only?!? */
+// unix only?!?
 NPError OSCALL NP_GetValue(NPP future, NPPVariable aVariable, void *aValue)
 {
     return gPlugin.pfnNP_GetValue(future, aVariable, aValue, &gPlugin);

@@ -7,11 +7,14 @@
  *
  */
 
-      #ifndef CRTWRAP
-      #define CRTWRAP(a)   odin_##a
-      #endif
+#ifndef CRTWRAP
+#define CRTWRAP(a)   odin_##a
+#endif
 
+#ifndef ORIGINAL_VAC_FUNCTIONS
 #define ORIGINAL_VAC_FUNCTIONS
+#endif
+
 #include <malloc.h>
 #include <umalloc.h>
 #include <os2sel.h>
