@@ -1,0 +1,32 @@
+<HTML>
+
+<!-- Index for Examples.htm --!>
+
+<body background="backgrnd.gif">
+Examples Index
+<font size=-1>
+<p><a href="examples.htm#top" target="text">About Examples</a>
+<p><a href="examples.htm#prot1" target="text">Prot1 - the first try</a>
+<p><a href="examples.htm#prot2" target="text">Prot2 - using a CallBack
+field in the password</a>
+<p><a href="examples.htm#prot3" target="text">Prot3 - using a Patch and a
+Callback field with both S/Ns and RSA encryption</a>
+<p><a href="examples.htm#prot4" target="text">Prot4 - encrypted strings
+and a demonstration licence</a>
+<p><a href="examples.htm#prot5" target="text">Prot5 - A sensible
+example, using relative addresses for patches and callbacks, and
+verifies the integrity of the SecureIt DLL</a>
+<p><a href="examples.htm#clock" target="text">Clock - a real program</a>
+
+<ul>
+  <li><a href="examples.htm#conditionals" target="text">Conditional defines</a>
+  <li><a href="examples.htm#constants" target="text">Constant definitions</a>
+  <li><a href="examples.htm#code" target="text">The Code</a>
+  <li><a href="examples.htm#clockcheckedlog" target="text">The checked
+  log file</a>
+  <li><a href="examples.htm#clockgd" target="text">GenData setup</a>
+  <li><a href="examples.htm#clockmk" target="text">MakeKey setup</a>
+</ul>
+</font>
+</body>
+</html>

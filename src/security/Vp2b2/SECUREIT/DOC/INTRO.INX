@@ -1,0 +1,15 @@
+<HTML>
+
+<!-- Index for Intro.htm --!>
+
+<body background="backgrnd.gif">
+Introduction Index
+<font size=-1>
+<p><a href="intro.htm#top" target="text">About SecureIt</a>
+<p><a href="intro.htm#installing" target="text">Installing SecureIt</a>
+<p><a href="intro.htm#help" target="text">About this help system</a>
+<p><a href="intro.htm#author" target="text">The author's background</a>
+<p><a href="intro.htm#history" target="text">History of SecureIt</a>
+</font>
+</body>
+</html>
