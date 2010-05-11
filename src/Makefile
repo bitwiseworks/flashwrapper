@@ -103,6 +103,18 @@ outtree:
     @if not exist ..\obj mkdir ..\obj
     @if not exist $(OBJDIR) mkdir $(OBJDIR)
 
+install:
+	@echo Building installation package
+	-@rm $(BINDIR)\flash10os2_$(BUILD_MODE).wpi
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c"$(ODIN_INST)\bin\$(BUILD_MODE)" -r *.dll
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c..\install odin.ini 
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c"$(ODIN_INST)\bin" wgss50.dll odincrt.dll
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 2 -c"$(BINDIR)" npflos2.dll
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 2 -c..\install flash10.txt flash10.lic
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 3 -c..\install npswf32.dll
+	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -s ..\install\flash10os2_release.wis
+
+
 # update bldlevel info
 $(OBJDIR)\$(TARGET_NAME).res: Makefile.inc npflos2.rc
 	@echo Writing build level informations
@@ -118,9 +130,5 @@ $(BINDIR)\$(TARGET_NAME).dll: \
     rc -n -p -x2 $(OBJDIR)\$(TARGET_NAME).res $@
 
 clean:
-    -rm -f $(BINDIR)\*
-    -rmdir $(BINDIR)
-    -rmdir ..\bin
-    -rm -f $(OBJDIR)\*
-    -rmdir $(OBJDIR)
-    -rmdir ..\obj
+    rm -fr $(BINDIR)
+    rm -fr $(OBJDIR)
