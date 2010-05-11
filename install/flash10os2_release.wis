@@ -102,6 +102,36 @@
 	
 	</REXX>
 
+	<REXX NAME="RequiresLibc">
+	  call rxFuncAdd 'SysLoadFuncs','REXXUTIL','SysLoadFuncs'
+	  call SysLoadFuncs
+	
+	  dname = 'libc063.dll'
+	  requires = 'REQUIRES="netlabs.org\kLIBC\LIBC 0.6 Runtime\0\6\3"'
+	
+	  cf = SysBootDrive() || '\config.sys'
+	  lp = 'LIBPATH='
+	  call SysFileSearch lp, cf, 'lp.'
+	
+	  lpath = ''
+	  do i=1 to lp.0
+		if pos(lp, lp.i) = 1 then do
+		  lpath = substr(lp.i, 9)
+		end
+	  end
+	
+	  cr = d2c(10)
+	  do while lpath \= ''
+		parse var lpath ldir ';' lpath
+		tfile = ldir || '\' || dname
+		if stream(tfile, 'c', 'query exists') \= '' then do
+		  return ''
+		end
+	  end
+	  /* file not found, return REQUIRES clause */
+	  return requires
+	</REXX>
+
 	<VARPROMPT NAME=MOZILLA_HOME TYPE=PATH>
 	The MOZILLA_HOME environment variable was not set up, please enter the path to your webbrowser homedirectory:
 	</VARPROMPT>
@@ -112,6 +142,7 @@
 			PACKAGEID="Mensys BV\Flash 10\Odin DLLs\0\1\0"
 			TITLE="Odin DLLs for Flash 10 plugin"
 			TARGET="=("GetProgramPath")"
+			=("RequiresLibc")
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\OdinPath"
 			WRITEPROFILE="USER\Flash10_Plugin\OdinPath|$(1)"
