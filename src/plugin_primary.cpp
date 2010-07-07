@@ -37,7 +37,8 @@
 #include "common.h"
 
 #include "security\Securit2.h"
-#include "security\ecomstation.inc"
+#include "security\ecomstation12.inc"
+#include "security\ecomstation20.inc"
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -71,7 +72,7 @@ BOOL            gfInitSuccessful = FALSE;
 BOOL            gfLazyInitSuccessful = FALSE;
 
 // Is eCS registered?
-int             Registered = TRUE;
+int             Registered = FALSE;
 
 /** The plugin instance data. */
 NPODINWRAPPER   gPlugin =
@@ -168,7 +169,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 #if defined(DEBUG)
             KeyAllowDebugger();
 #endif
-            KeySetup(TRUE, FALSE, TRUE, 0x010101, &SIBlob, SIBlobLen);
 
             ULONG  ulBootDrv;
             CHAR pszRegName[] = "D:\\OS2\\ECSREG11.INI";
@@ -176,12 +176,14 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
             DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE, &ulBootDrv, sizeof(ulBootDrv));
             pszRegName[0] = (char)(ulBootDrv + 'A' - 1);
 
+            // test 1.2 key
+            KeySetup(TRUE, FALSE, TRUE, 0x010101, &SIBlob, SIBlobLen);
+
+            // must be always set after KeySetup
             if (!KeySetNamePswIni(pszRegName, "eComStationRegistration")) {
                 dprintf(("ECSREG11.INI not found\n"));
                 Registered = FALSE;
-            }
-
-            if (!KeyCheck(TRUE)) {
+            } else if (!KeyCheck(TRUE)) {
 
                 // Check why KeyCheck failed
                 switch (KeyGetSerialNumberStatus()) {
@@ -196,7 +198,41 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
                         break;
                 }
                 Registered = FALSE;
-            }
+            } else {
+		dprintf(("Test 1.2: registered"));
+                Registered = TRUE;
+	    }
+
+	    if (Registered == FALSE) {
+		// test 2.0 key
+		dprintf(("Testing 2.0 key\n"));
+		KeySetup(TRUE, FALSE, TRUE, 0x010121, &SIBlob20, SIBlobLen20);
+
+		// must be always set after KeySetup
+		if (!KeySetNamePswIni(pszRegName, "eComStationRegistration")) {
+		    dprintf(("ECSREG11.INI not found\n"));
+		    Registered = FALSE;
+		} else if (!KeyCheck(TRUE)) {
+    
+		    // Check why KeyCheck failed
+		    switch (KeyGetSerialNumberStatus()) {
+			case snExpired:
+			    dprintf(("Serial number expired"));
+			    break;
+			case snLocked:
+			    dprintf(("Key is locked"));
+			    break;
+			default:
+			    dprintf(("Unregistered"));
+			    break;
+		    }
+		    Registered = FALSE;
+		} else {
+		    dprintf(("Test 2.0: registered"));
+		    Registered = TRUE;
+		}
+
+	    }
 
             // Save the module handle as we will need it further down in the lazy init.
             ghmodOurSelf = hmod;
