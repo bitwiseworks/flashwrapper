@@ -16,6 +16,7 @@ BUILD_MODE = debug
 
 OBJDIR = ..\obj\$(BUILD_MODE)
 BINDIR = ..\bin\$(BUILD_MODE)
+DISTDIR = ..\bin
 
 # Odin tradition, no exceptions.				
 CXX_NO_XCPT     = 1
@@ -58,6 +59,7 @@ LDFLAGS         = /DLL /NOE /MAP:$(BINDIR)\$(TARGET_NAME).map /EXEPACK:2 /DEBUG
 TARGET_NAME     = npflos2
 TARGET_MODE     = dll
 EXT_OBJ         = obj
+TARGET_DIST     = $(DISTDIR)\flash10os2-$(BUILD_MODE)-$(BUILD).wpi
 
 TARGET_OBJS     = \
     $(OBJDIR)\apis_mozilla.$(EXT_OBJ) \
@@ -105,14 +107,11 @@ outtree:
 
 install:
 	@echo Building installation package
-	-@rm $(BINDIR)\flash10os2_$(BUILD_MODE).wpi
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c"$(ODIN_INST)\bin\$(BUILD_MODE)" -r *.dll
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c..\install odin.ini 
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 1 -c"$(ODIN_INST)\bin" wgss50.dll odincrt.dll
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 2 -c"$(BINDIR)" npflos2.dll
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 2 -c..\install flash10.txt flash10.lic
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -a 3 -c..\install npswf32.dll
-	$(WARPIN)\wic.exe $(BINDIR)\flash10os2_$(BUILD_MODE).wpi -s ..\install\flash10os2_release.wis
+	-@rm $(TARGET_DIST)
+	$(WARPIN)\wic.exe $(TARGET_DIST) -a 2 -c"$(BINDIR)" npflos2.dll
+	$(WARPIN)\wic.exe $(TARGET_DIST) -a 2 -c..\install flash10.txt flash10.lic
+	$(WARPIN)\wic.exe $(TARGET_DIST) -a 3 -c..\install npswf32.dll
+	$(WARPIN)\wic.exe $(TARGET_DIST) -s ..\install\flash10os2_release.wis
 
 
 # update bldlevel info
@@ -122,12 +121,16 @@ $(OBJDIR)\$(TARGET_NAME).res: Makefile.inc npflos2.rc
 	@BldLevelInf0.cmd $(VERSION) $(BUILD) $(OBJDIR)\npflos2-bld.rc
         rc -n -r -I . -I $(OBJDIR) npflos2.rc $@
 
+#    ilink $(LDFLAGS) $(TARGET_OBJS) $(LIBS) security\securit2.lib $(TARGET_NAME).def -out:$@
 $(BINDIR)\$(TARGET_NAME).dll: \
     $(TARGET_OBJS) \
     $(TARGET_NAME).def \
     $(OBJDIR)\$(TARGET_NAME).res
     ilink $(LDFLAGS) $(TARGET_OBJS) $(LIBS) security\securit2.lib $(TARGET_NAME).def -out:$@
     rc -n -p -x2 $(OBJDIR)\$(TARGET_NAME).res $@
+    mapsym $(BINDIR)\$(TARGET_NAME).map
+    copy  $(TARGET_NAME).sym $(BINDIR)\$(TARGET_NAME).sym
+    del  $(TARGET_NAME).sym
 
 clean:
     rm -fr $(BINDIR)
