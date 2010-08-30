@@ -167,6 +167,10 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 
             //dprintf(("Flash plugin init term"));
 
+#if defined(DEBUG)
+	    Registered = TRUE;
+#else
+
             // check for ECS 1.2 key via SecureIt API
 #if defined(DEBUG)
             KeyAllowDebugger();
@@ -235,6 +239,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 		}
 
 	    }
+#endif // DEBUG
 
             // Save the module handle as we will need it further down in the lazy init.
             ghmodOurSelf = hmod;
