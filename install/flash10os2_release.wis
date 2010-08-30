@@ -143,6 +143,7 @@
 			TITLE="Odin DLLs for Flash 10 plugin"
 			TARGET="=("GetProgramPath")"
 			=("RequiresLibc")
+			EXTERNAL="Odin-flash10.wpi"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\OdinPath"
 			WRITEPROFILE="USER\Flash10_Plugin\OdinPath|$(1)"
@@ -153,7 +154,7 @@
 		</PCK>
 
 		<PCK INDEX=2
-			PACKAGEID="Mensys BV\Flash 10\Plugin Wrapper\0\1\0"
+			PACKAGEID="Mensys BV\Flash 10\Plugin Wrapper\0\1\1"
 			TITLE="Flash 10 plugin wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
@@ -163,7 +164,7 @@
 		</PCK>
 
 		<PCK INDEX=3
-			PACKAGEID="Mensys BV\Flash 10\Win32 plugin\0\1\0"
+			PACKAGEID="Mensys BV\Flash 10\Win32 plugin\0\1\1"
 			TITLE="Adobe Flash 10 Win32 plugin"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
