@@ -161,7 +161,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 
             ctordtorInit();
 
+#if 0
             SetThreadAffinity();
+#endif
 
             //dprintf(("Flash plugin init term"));
 
