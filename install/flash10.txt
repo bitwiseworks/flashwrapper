@@ -1,10 +1,9 @@
 [ Flash 10 Plugin wrapper for eComStation Technology Preview ]
 
 This is a Technology Preview of the Flash 10 Plugin wrapper for
-eComStation. There is no support and no need for feedback. It is
-intended to show the progress of this product and to give you an 
-early experience of being able to use websites implementing the 
-latest Flash content.
+eComStation. It is intended to show the progress of this product
+and to give you an early experience of being able to use websites 
+implementing the latest Flash content.
 
 It is available to anyone with an active Software Subscription 
 Services for eComStation, via their download-area at the Mensys 
@@ -74,7 +73,7 @@ Requirements
 
 * Supported audio drivers:
 
-- UNIAUD audio driver
+- UNIAUD audio driver (please use latest UNIAUD from http://svn.netlabs.org/uniaud)
 - The SB Live driver from Sander van Leeuwen
 - The Analog Devices AC 97 driver
 - The Cmedia 8738 driver by Rudiger Ihle
@@ -132,10 +131,10 @@ rendering problems with the Panorama video driver, like:
 These SMP issues are known and being worked on. This seems to be a defect 
 in the currently used customized ODIN code.
 
-* Disable LIBPATHSTRICT: 
+* LIBPATHSTRICT: 
 
-The ODIN environment cannot handle the LIBPATHSTRICT option. Do not use 
-LIBPATHSTRICT to invoke your browser, or Flash 10 will not work properly.
+The ODIN environment may handle the LIBPATHSTRICT option now. If not please
+disable it.
 LIBPATHSTRICT is for example used by Rich Walsh' utility RUN! and referring
 to your browser with a L in the filename (for example: firefox!L.exe)
 This restriction will be lifted in a future release.
@@ -151,6 +150,13 @@ This restriction will be lifted in a future release.
 
 * Certain Flash content is not displayed, for example movies from CBS 
   http://www.cbs.com/primetime/ncis/video/
+
+
+Reporting Bugs
+==============
+
+To report bugs please visit http://svn.ecomstation.nl/flash10
+It's explained there what steps are needed and how to properly report a bug.
 
 
 How to uninstall Flash 10
@@ -224,6 +230,12 @@ Changelog
  - Some crashes fixed
  - Added initial security interface
 
+21.09.2010
+ - eComstation 2.0 support added
+ - Enabled SMP again
+ - build against latest ODIN
+
+
 More information
 ================
 
@@ -231,7 +243,7 @@ Information on Software Subscription Services for eComStation can be found
 at: http://www.ecomstation.com/subscription/
 
 
-** (c) 2009 Mensys BV **
+** (c) 2009-2010 Mensys BV **
 
 [eof]
 
