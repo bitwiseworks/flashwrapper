@@ -56,7 +56,7 @@ extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName)
     if (rc != NO_ERROR || szODINPath[0] == '\0')
     {
         ULONG cbs = cchCustomDllName;
-        rc = PrfQueryProfileData(HINI_USERPROFILE, "Flash10_Plugin", "OdinPath", pszCustomDllName, &cbs);
+        rc = PrfQueryProfileData(HINI_USERPROFILE, "KLIBC", "OdinPath", pszCustomDllName, &cbs);
         if (!rc || pszCustomDllName[0] == '\0')
         {
             return FALSE;
