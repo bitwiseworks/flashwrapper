@@ -381,6 +381,8 @@ HDC  WIN32API       odinHPSToHDC(HWND hwnd, HPS hps, LPCSTR pszDevice, LPRECT pR
 BOOL WIN32API       odinJ2PluginHacks(int iHack, BOOL fEnable);
 void WIN32API       odinSetFreeTypeIntegration(BOOL fEnabled);
 ATOM WIN32API       odinFindAtom(LPCSTR atomStr);
+void WIN32API       odinSetWindowAppearance(int fLooks);
+BOOL WIN32API       odinEnableFlashAudio(BOOL fEnable);
 
 /* window and ps/dc hacking. */
 void *              npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSetWindow, HWND hwndOS2, HWND hwndOdin);
