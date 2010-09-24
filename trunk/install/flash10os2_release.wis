@@ -102,6 +102,13 @@
 	
 	</REXX>
 
+	<REXX NAME="GetOdinPath">
+	  rc=rxFuncAdd('SysLoadFuncs','REXXUTIL','SysLoadFuncs')
+	  rc=SysLoadFuncs()
+	  ProgramPath = SysIni('USER', 'KLIBC', 'OdinPath')
+	  return ProgramPath
+	</REXX>
+
 	<REXX NAME="RequiresLibc">
 	  call rxFuncAdd 'SysLoadFuncs','REXXUTIL','SysLoadFuncs'
 	  call SysLoadFuncs
@@ -143,6 +150,7 @@
 			TITLE="Flash 10 plugin wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
+                        REQUIRES="Odin\Odin\Odin Core Files\0\6\21457"
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
 			WRITEPROFILE="USER\Flash10_Plugin\PluginWrapperPath|$(12)"
 		>Flash 10 Plugin Wrapper
@@ -161,7 +169,7 @@
 		<PCK INDEX=14
 			PACKAGEID="Mensys BV\Flash 10\Odin customization\0\1\1"
 			TITLE="Odin initialization data"
-			TARGET="$(2)"
+			TARGET="=("GetOdinPath")"
 			NODESELECT FIXED
 		>Odin initialization data
 		</PCK>
