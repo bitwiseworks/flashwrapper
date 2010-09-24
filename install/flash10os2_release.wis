@@ -137,40 +137,33 @@
 	</VARPROMPT>
 
 	<TITLE>Flash 10 Plugin wrapper for eComStation Technology Preview Install</TITLE>
-	
-		<PCK INDEX=1
-			PACKAGEID="Mensys BV\Flash 10\Odin DLLs\0\1\0"
-			TITLE="Odin DLLs for Flash 10 plugin"
-			TARGET="=("GetProgramPath")"
-			=("RequiresLibc")
-			EXTERNAL="Odin-flash10.wpi"
-			NODESELECT
-			CLEARPROFILE="USER\Flash10_Plugin\OdinPath"
-			WRITEPROFILE="USER\Flash10_Plugin\OdinPath|$(1)"
-		>The plugin is wrapper for Adobe Flash 9/10 Win32 plugin to Mozilla/FireFox/etc built for OS/2.
-		It contains ODIN DLLs, adopted for the Flash plugin wrapper. There is no guarantee that this ODIN DLLs will be useful for our other WIN32 applications
-		This ODIN dll's will be installed in separatedirectory and shouldn't be in stated in LIBPATH
-		Plugin wrapper will search the dll's by FLASH10_ODIN environment variable or by keyword in Registry which will be added by this WPI package
-		</PCK>
 
-		<PCK INDEX=2
+		<PCK INDEX=12
 			PACKAGEID="Mensys BV\Flash 10\Plugin Wrapper\0\1\1"
 			TITLE="Flash 10 plugin wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
-			WRITEPROFILE="USER\Flash10_Plugin\PluginWrapperPath|$(2)"
+			WRITEPROFILE="USER\Flash10_Plugin\PluginWrapperPath|$(12)"
 		>Flash 10 Plugin Wrapper
 		</PCK>
 
-		<PCK INDEX=3
+		<PCK INDEX=13
 			PACKAGEID="Mensys BV\Flash 10\Win32 plugin\0\1\1"
 			TITLE="Adobe Flash 10 Win32 plugin"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\AdobePluginPath"
-			WRITEPROFILE="USER\Flash10_Plugin\AdobePluginPath|$(3)"
+			WRITEPROFILE="USER\Flash10_Plugin\AdobePluginPath|$(13)"
 		>Flash 10 Plugin Wrapper
+		</PCK>
+
+		<PCK INDEX=14
+			PACKAGEID="Mensys BV\Flash 10\Odin customization\0\1\1"
+			TITLE="Odin initialization data"
+			TARGET="$(2)"
+			NODESELECT FIXED
+		>Odin initialization data
 		</PCK>
 
 	</HEAD>
@@ -178,13 +171,13 @@
 		<PAGE INDEX=1 TYPE=README>
 		<NEXTBUTTON TARGET=2>~Next</NEXTBUTTON>
 		<TEXT>Flash 10 Plugin wrapper for eComStation readme</TEXT>
-		<README EXTRACTFROMPCK="2" format=PLAIN>flash10.txt</README>
+		<README EXTRACTFROMPCK="12" format=PLAIN>flash10.txt</README>
 		</PAGE>
 
 		<PAGE INDEX=2 TYPE=README>
 		<NEXTBUTTON TARGET=3>~I Agree</NEXTBUTTON>
 		<TEXT>ADOBE SYSTEMS INCORPORATED Warranty Disclaimer and Software License Agreement.</TEXT>
-		<README EXTRACTFROMPCK="2" format=FLOW>flash10.lic</README>
+		<README EXTRACTFROMPCK="12" format=FLOW>flash10.lic</README>
 		</PAGE>
 
 		<PAGE INDEX=3 TYPE=TEXT>
