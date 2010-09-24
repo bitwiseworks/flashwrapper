@@ -166,14 +166,6 @@
 		>Flash 10 Plugin Wrapper
 		</PCK>
 
-		<PCK INDEX=14
-			PACKAGEID="Mensys BV\Flash 10\Odin customization\0\1\1"
-			TITLE="Odin initialization data"
-			TARGET="=("GetOdinPath")"
-			NODESELECT FIXED
-		>Odin initialization data
-		</PCK>
-
 	</HEAD>
 	<BODY>
 		<PAGE INDEX=1 TYPE=README>

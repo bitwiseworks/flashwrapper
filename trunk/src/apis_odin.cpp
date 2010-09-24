@@ -147,6 +147,13 @@ static HDC (*WIN32API           pfnHPSToHDC)(HWND hwnd, HPS hps, LPCSTR pszDevic
 /** J2PluginHacks */
 static BOOL (*WIN32API          pfnJ2PluginHacks)(int iHack, BOOL fEnable);
 
+/** Change window look&feel */
+static void (*WIN32API          pfnSetWindowAppearance)(int fLooks);
+
+/** Enable Flash Audio */
+static BOOL (*WIN32API          pfnEnableFlashAudio)(BOOL fEnable);
+
+
 #undef static //debugging
 
 int registered_apis = 0;
@@ -176,6 +183,8 @@ struct OdinEntryPoint aAPIs[] =
     {1, (void**)&pfnSetWindowPos,                      "SetWindowPos", "USER32.DLL", NULLHANDLE},
     {0, (void**)&pfnGetDC,                             "GetDC", "USER32.DLL", NULLHANDLE},
     {0, (void**)&pfnHPSToHDC,                          "_HPSToHDC", "USER32.DLL", NULLHANDLE},
+    {1, (void**)&pfnSetWindowAppearance,               "_SetWindowAppearance@4", "USER32.DLL", NULLHANDLE},
+    {1, (void**)&pfnEnableFlashAudio,                  "ODIN_EnableFlashAudio", "WINMM.DLL", NULLHANDLE},
     //vladest        {0, (void**)&pfnJ2PluginHacks,                     "_J2PluginHacks@8"},
 };
 
@@ -547,6 +556,31 @@ BOOL WIN32API   odinJ2PluginHacks(int iHack, BOOL fEnable)
     BOOL fRc;
     ENTER_ODIN32_CONTEXT_IF_REQUIRED();
     fRc = pfnJ2PluginHacks(iHack, fEnable);
+    LEAVE_ODIN32_CONTEXT();
+    return fRc;
+}
+
+
+/** SetWindowAppearance */
+void WIN32API   odinSetWindowAppearance(int fLooks)
+{
+    if (!pfnSetWindowAppearance)
+        return;
+    BOOL fRc;
+    ENTER_ODIN32_CONTEXT_IF_REQUIRED();
+    pfnSetWindowAppearance(fLooks);
+    LEAVE_ODIN32_CONTEXT();
+}
+
+
+/** ODIN_EnableFlashAudio */
+BOOL WIN32API   odinEnableFlashAudio(BOOL fEnable)
+{
+    if (!pfnEnableFlashAudio)
+        return FALSE;
+    BOOL fRc;
+    ENTER_ODIN32_CONTEXT_IF_REQUIRED();
+    fRc = pfnEnableFlashAudio(fEnable);
     LEAVE_ODIN32_CONTEXT();
     return fRc;
 }

@@ -50,6 +50,8 @@
     #define DLL_THREAD_DETACH   3       /* detach thread */
 #endif
 
+/* from winuser32.h */
+#define OS2_APPEARANCE_SYSMENU  2
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -343,6 +345,11 @@ BOOL    npInitTerm_Lazy(void)
         return FALSE;
     }
 
+    // set OS/2 look&feel
+    odinSetWindowAppearance( OS2_APPEARANCE_SYSMENU);
+    // enable flash audio code
+    odinEnableFlashAudio( TRUE);
+    
     // Register fake exe.
     char    szFakeName[CCHMAXPATH];
     PPIB    ppib;

@@ -109,11 +109,9 @@ outtree:
 install:
 	@echo Building installation package
 	-@rm $(TARGET_DIST)
-	$(WARPIN)\wic.exe $(TARGET_DIST) -a 1 -c..\install win.ini system.ini
 	$(WARPIN)\wic.exe $(TARGET_DIST) -a 12 -c"$(BINDIR)" npflos2.dll
 	$(WARPIN)\wic.exe $(TARGET_DIST) -a 12 -c..\install flash10.txt flash10.lic
 	$(WARPIN)\wic.exe $(TARGET_DIST) -a 13 -c..\install npswf32.dll
-	$(WARPIN)\wic.exe $(TARGET_DIST) -a 14 -c..\install odin.ini
 	$(WARPIN)\wic.exe $(TARGET_DIST) -s ..\install\flash10os2_release.wis
 
 
