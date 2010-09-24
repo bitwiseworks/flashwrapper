@@ -1,3 +1,5 @@
+REM *** VAC++ 3.6 build ***
+
 nmake BUILD_MODE=debug clean
 nmake BUILD_MODE=debug
 nmake BUILD_MODE=debug install 
