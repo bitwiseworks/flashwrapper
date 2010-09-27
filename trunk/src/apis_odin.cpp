@@ -237,9 +237,11 @@ BOOL    npResolveOdinAPIs(void)
          */
         for (i = 0; i < sizeof(aAPIs) / sizeof(aAPIs[0]); i++)
         {
+            dprintf(("Loading: %d", i));
             memset(szPath, 0, sizeof(szPath));
             npprimaryGetOdinPath(szPath, sizeof(szPath));
             strcat(szPath, aAPIs[i].pszModName);
+            dprintf(("Try Loading: %s", szPath));
             rc = DosLoadModule(NULL, 0, &szPath[0], &aAPIs[i].modInst);
             dprintf(("DosLoadModule('%s') rc: %d. HMOD: %x", szPath, rc, aAPIs[i].modInst));
 #if 0
