@@ -256,6 +256,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
                 return 0;
             }
 
+            if (!npInitTerm_Lazy()) {
+                dprintf(("Flash plugin init failed in npInitTerm_Lazy"));
+                return 0;
+            }
+
             if (!npGenericInit(&gPlugin)) {
                 dprintf(("Flash plugin init failed in npGenericInit"));
                 return 0;
