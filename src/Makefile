@@ -60,7 +60,7 @@ LDFLAGS         = /DLL /NOE /MAP:$(BINDIR)\$(TARGET_NAME).map /EXEPACK:2 /DEBUG
 TARGET_NAME     = npflos2
 TARGET_MODE     = dll
 EXT_OBJ         = obj
-TARGET_DIST     = $(DISTDIR)\flash10os2-$(BUILD_MODE)-$(BUILD).wpi
+TARGET_DIST     = $(DISTDIR)\flash10os2-$(BUILD)-$(BUILD_MODE).wpi
 
 TARGET_OBJS     = \
     $(OBJDIR)\apis_mozilla.$(EXT_OBJ) \
