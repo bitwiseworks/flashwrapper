@@ -1,0 +1,58 @@
+First warn the user that his web browser must be shutdown. We can check
+this via rexx. But not realy needed.
+Warpin supports file unlock so if rename files or copy in place the new
+Flash it can popup a message the file needs to unlocked. 
+
+We must do our best there are no old Flash builds around:
+
+In the config.sys we set:
+SET MOZ_PLUGIN_PATH=C:\PROGRAMS\MOZ_PLUG
+
+We need to keep an eye on Flash 5. The DLL is npswf2.dll.
+I suggested when found to rename the file by giving it the name with
+the entension npswf2.dll.flash5
+
+Flash 7 are the files:
+npswf2.dll
+NPSWF32.dll
+flashwin.dll
+
+Give it the extension .dll.flash7
+
+Another thing is that some users dump files in the plugin directory of
+the browser!
+For example: \firefox\plugins
+Since eCS 1.2 we set the current browser directory in the os2.ini
+that can be queried with REXX:
+
+[HINI_USER_PROFILE\WPURLDEFAULTSETTINGS]
+DefaultBrowserExe="C:\PROGRAMS\Firefox\firefox!.exe"
+
+There we also need to check if Flash 5 or Flash 7 are around and if
+needed rename. 
+
+But in all cases the Flash 10 plugin most goto SET MOZ_PLUGIN_PATH=
+specified in the config.sys.
+
+Next we also need to include the proper ODIN build for the user.  He
+just needs to have a click and
+run package. There are multiple sources for this ODIN. By having the
+proper
+ODIN build in system we prevent crap with people having different
+versions.
+
+What the Innotek guys do is slick and we should do the same. Vladest is
+possible to keep the ODIN runtime we need out of the libpath ?
+Somehow the Java142 code finds the INNOWIN runtime DLL. This is done by
+one or more settings in the OPEN32 registry.
+
+I suggested we put the ODIN32 DLL needed in \PROGRAMS\FLASH10.
+Put the ODIN.INI in there with the needed modifcication for direct
+audio.
+
+Since this is still a beta. Would it not be a good a idea to include an
+option to install a debug build and a runtime build.
+As a Warpin package. That we we can prevent a lot of problems also. 
+
+We need to automate as much as possible for the end user. 
+

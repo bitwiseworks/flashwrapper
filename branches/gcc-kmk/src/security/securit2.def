@@ -1,0 +1,30 @@
+LIBRARY SECURIT2
+
+EXPORTS
+  KeySetNamePswP            = KeySetNamePswP           @1
+  KeySetNamePsw             = KeySetNamePsw            @2
+  KeySetVersion             = KeySetVersion            @3
+  KeyScrambleStr            = KeyScrambleStr           @4
+  KeyCheck                  = KeyCheck                 @5
+  KeyDispatch               = KeyDispatch              @6
+  KeyCodePatch              = KeyCodePatch             @7
+  KeyQueryUserValue         = KeyQueryUserValue        @8
+  KeyManualPatch            = KeyManualPatch           @9
+  KeyManualDispatch         = KeyManualDispatch        @10
+  KeyManualJump             = KeyManualJump            @11
+  KeyOverwriteCode          = KeyOverwriteCode         @12
+  KeySetNamePswIni          = KeySetNamePswIni         @13
+  KeyWriteNamePswToIni      = KeyWriteNamePswToIni     @14
+  KeyGetRegisteredName      = KeyGetRegisteredName     @15
+  KeySetup                  = KeySetup                 @20
+  KeyGetSerialNumber        = KeyGetSerialNumber       @21
+  KeyGetUserString          = KeyGetUserString         @22
+  KeyGetUserStringP         = KeyGetUserStringP        @23
+  KeyGetSerialNumberStatus  = KeyGetSerialNumberStatus @24
+  KeyGetSerialNumberExpiry  = KeyGetSerialNumberExpiry @25
+  KeySetCallOffsets         = KeySetCallOffsets        @26
+  KeySetPatchOffsets        = KeySetPatchOffsets       @27
+  KeyGetFileChecksum        = KeyGetFileChecksum       @28
+  KeyGetCRC32               = KeyGetCRC32              @29
+  KeyAllowDebugger          = KeyAllowDebugger         @251
+
