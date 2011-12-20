@@ -216,7 +216,7 @@ typedef struct NPOdinPluginWrapper *PNPODINWRAPPER;
 *******************************************************************************/
 #ifdef INCL_NS4X
 
-extern "SYSTEM" {
+extern "C" {
 #include "npfunctions.h"
 }
 

@@ -18,6 +18,8 @@
  * This weak resolving ASSUMES that the caller cleans the stack!
  * (i.e. anything but __stdcall calling convention will work very nicely.)
  */
+#endif
+
 extern "C" unsigned npGenericNPWeakStub(void);
 extern "C" void * NPJNICreateDownWrapperWeakStub(void);
 extern "C" unsigned upCreateWrapperWeakStub(void **pv1, void *pv2, int rc);
@@ -45,5 +47,5 @@ const char * getIIDCIDNameWeakStub(void *pv1)
     return "<unknown/weak>";
 }
 
-#endif
+
 

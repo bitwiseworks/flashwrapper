@@ -371,17 +371,27 @@ typedef struct _PluginInstance
 /** This variable is used to drag in XPCOM in the linking of a primary wrapper. */
 int             giNS4x;
 
-#ifdef __IBMCPP__
+extern "C" void *   NPJNICreateDownWrapperWeakStub(void);
+extern "C" unsigned upCreateWrapperWeakStub(void **pv1, void *pv2, int rc);
+extern "C" const char * getIIDCIDNameWeakStub(void *pv1);
+
+#if defined(__IBMCPP__)
 /*
  * This weak resolving ASSUMES that the caller cleans the stack!
  * (i.e. anything but __stdcall calling convention will work very nicely.)
  */
-extern "C" void *   NPJNICreateDownWrapperWeakStub(void);
-extern "C" unsigned upCreateWrapperWeakStub(void **pv1, void *pv2, int rc);
-extern "C" const char * getIIDCIDNameWeakStub(void *pv1);
 #pragma weak(NPJNICreateDownWrapper, NPJNICreateDownWrapperWeakStub)
 #pragma weak(upCreateWrapper, upCreateWrapperWeakStub)
 #pragma weak(getIIDCIDName, getIIDCIDNameWeakStub)
+
+#elif defined(__GNUC__)
+
+#include "plugin_GenericWeaks.cpp"
+
+extern "C" void *   NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, void *pv) __attribute__ ((weak, alias ("NPJNICreateDownWrapperWeakStub")));
+extern "C" unsigned upCreateWrapperWeak(void **pv1, void *pv2, int rc) __attribute__  ((weak, alias ("upCreateWrapperWeakStub")));
+extern "C" const char * getIIDCIDNameWeak(void *pv1) __attribute__  ((weak, alias ("getIIDCIDNameWeakStub")));
+
 #endif
 
 /*
@@ -1595,7 +1605,8 @@ NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODI
             {(void*)np4xUp_GetValue,        (void**)&pWrapper->w32.pfnGetValue,      (void**)&pCallbacks->getvalue },
             {(void*)np4xUp_SetValue,        (void**)&pWrapper->w32.pfnSetValue,      (void**)&pCallbacks->setvalue },
         };
-        for (int i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
+        int i;
+        for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
         {
             memset(pWrapper->aStubs[i].achMagic, 0xcc, sizeof(pWrapper->aStubs[i].achMagic));
             pWrapper->aStubs[i].chPush      = 0x68;
@@ -1716,7 +1727,8 @@ NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAP
         {(void*)np4xDown_InvalidateRegion,  (void**)&pFuncs->invalidateregion,  (void**)&pWrapper->w32.pfnInvalidateRegion },
         {(void*)np4xDown_ForceRedraw,       (void**)&pFuncs->forceredraw,       (void**)&pWrapper->w32.pfnForceRedraw },
     };
-    for (int i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
+    int i;
+    for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
     {
         pWrapper->aStubs[i].chPush      = 0x68;
         pWrapper->aStubs[i].pvImm32bit  = pWrapper;

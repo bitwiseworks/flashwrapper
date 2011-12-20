@@ -17,6 +17,7 @@
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 #ifdef DEBUG
+#if defined(__IBMC__)
 #define ENTER_ODIN32_CONTEXT() \
     VERIFY_EXCEPTION_CHAIN();                                                   \
     ULONG   ExceptionRegRec[2] = {0,0};                                         \
@@ -28,6 +29,19 @@
         dprintf(("%s: usFSOld != DOS32TIB !!!", __FUNCTION__));                 \
         DebugInt3();                                                            \
     }//
+#elif defined(__EMX__)
+#define ENTER_ODIN32_CONTEXT() \
+    VERIFY_EXCEPTION_CHAIN();                                                   \
+    ULONG   ExceptionRegRec[2] = {0,0};                                         \
+    void *  pExceptionRegRec = &ExceptionRegRec[0];                             \
+    USHORT usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);    \
+    extern _System void * Dos32TIB(); /* absolute symbol */                     \
+    if (usFSOld != (USHORT)(unsigned)&Dos32TIB)                                 \
+    {                                                                           \
+        dprintf(("%s: usFSOld != DOS32TIB !!!", __FUNCTION__));                 \
+        DebugInt3();                                                            \
+    }//
+#endif
 #else
 #define ENTER_ODIN32_CONTEXT() \
     VERIFY_EXCEPTION_CHAIN();                                                   \
@@ -51,6 +65,7 @@
     LEAVE_EXCPT();                                                              \
     VERIFY_EXCEPTION_CHAIN()
 
+#if defined(__IBMC__)
 #define ENTER_ODIN32_CONTEXT_IF_REQUIRED() \
     VERIFY_EXCEPTION_CHAIN();                                                   \
     ULONG   ExceptionRegRec[2] = {0,0};                                         \
@@ -63,7 +78,20 @@
         pExceptionRegRec = &ExceptionRegRec[0];                                 \
         usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);       \
     }//
-
+#elif defined(__EMX__)
+#define ENTER_ODIN32_CONTEXT_IF_REQUIRED() \
+    VERIFY_EXCEPTION_CHAIN();                                                   \
+    ULONG   ExceptionRegRec[2] = {0,0};                                         \
+    void *  pExceptionRegRec = NULL;                                            \
+    extern USHORT _System GetFS(void);                                          \
+    extern _System void * Dos32TIB(); /* absolute symbol */                     \
+    USHORT  usFSOld = GetFS();                                                  \
+    if (usFSOld == (USHORT)(unsigned)&Dos32TIB)                                 \
+    {                                                                           \
+        pExceptionRegRec = &ExceptionRegRec[0];                                 \
+        usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);       \
+    }//
+#endif
 
 /*******************************************************************************
 *   Header Files                                                               *

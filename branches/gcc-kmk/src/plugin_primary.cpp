@@ -161,7 +161,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
                 return 0;
             }
 
+#ifdef __EMX__
+            __ctordtorInit();
+#else
             ctordtorInit();
+#endif
 
 #if 0
             SetThreadAffinity();
@@ -188,7 +192,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
             KeySetup(TRUE, FALSE, TRUE, 0x010101, &SIBlob, SIBlobLen);
 
             // must be always set after KeySetup
-            if (!KeySetNamePswIni(pszRegName, "eComStationRegistration")) {
+            if (!KeySetNamePswIni(pszRegName, (PCHAR)"eComStationRegistration")) {
                 dprintf(("ECSREG11.INI not found\n"));
                 Registered = FALSE;
             } else if (!KeyCheck(TRUE)) {
@@ -217,7 +221,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 		KeySetup(TRUE, FALSE, TRUE, 0x010121, &SIBlob20, SIBlobLen20);
 
 		// must be always set after KeySetup
-		if (!KeySetNamePswIni(pszRegName, "eComStationRegistration")) {
+		if (!KeySetNamePswIni(pszRegName, (PCHAR)"eComStationRegistration")) {
 		    dprintf(("ECSREG11.INI not found\n"));
 		    Registered = FALSE;
 		} else if (!KeyCheck(TRUE)) {
@@ -319,7 +323,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
             dprintf(("DLLs unloaded"));
 
             // Do C++ static terminations and terminate the CRT.
+#ifdef __EMX__
+            __ctordtorTerm();
+#else
             ctordtorTerm();
+#endif
             _CRT_term();
 
             // Done.

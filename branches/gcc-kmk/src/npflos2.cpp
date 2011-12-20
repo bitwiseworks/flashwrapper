@@ -47,12 +47,12 @@ extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName)
 {
     APIRET rc  = 1;
     ULONG  ulBootDrv;
-    PSZ szODINPath = "";
+    PCSZ szODINPath = "";
 
     if (!pszCustomDllName)
         return FALSE;
 
-    rc=DosScanEnv("FLASH10_ODIN",(PCSZ*)&szODINPath);
+    rc=DosScanEnv("FLASH10_ODIN",(PSZ*)&szODINPath);
     if (rc != NO_ERROR || szODINPath[0] == '\0')
     {
         ULONG cbs = cchCustomDllName;
