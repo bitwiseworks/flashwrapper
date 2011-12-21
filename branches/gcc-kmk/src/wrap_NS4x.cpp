@@ -55,7 +55,6 @@
 /** Debug DOS32TIB assertion. */
 #ifdef DEBUG
 #define NPXP_ASSERT_OS2FS()     \
-        extern void * DOS32TIB;                                                     \
         if (npGetFS() != (USHORT)(unsigned)&DOS32TIB)                               \
         {                                                                           \
             dprintf(("%s: fs is wrong (%x) !!!", szFunction, npGetFS()));           \

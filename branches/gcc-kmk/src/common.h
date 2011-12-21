@@ -77,6 +77,13 @@
 /** The ordinal number of the npGenericInit() export. */
 #define NP_ORD_NPGENERICINIT        100
 
+#if defined(__EMX__)
+extern _System void * Dos32TIB(); /* absolute symbol */
+#define DOS32TIB Dos32TIB
+#else
+extern void * DOS32TIB;
+#endif
+
 
 /*******************************************************************************
 *   Header Files                                                               *
