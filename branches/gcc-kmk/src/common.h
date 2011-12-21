@@ -228,11 +228,11 @@ extern "C" {
 }
 
 /* callback versions */
-typedef NPError     (* _Optlink PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
-typedef char *      (* _Optlink PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
+typedef char *      (* OSCALL PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
 
 /* win32 versions */
 typedef struct _NP32PluginFuncs    *PNP32PluginFuncs;
