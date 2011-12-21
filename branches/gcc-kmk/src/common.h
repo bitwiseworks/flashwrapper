@@ -64,9 +64,9 @@
 
 
 /** PRI calling convention */
-#define PRICALL     _Optlink
+#define PRICALL
 /** PR calling convention */
-#define PRCALL      _Optlink
+#define PRCALL
 
 /** Plugin Export Calling Convention for Win32. */
 #define NPW32CALL   __cdecl
