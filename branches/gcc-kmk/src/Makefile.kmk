@@ -21,7 +21,6 @@ npflos2_SOURCES     = \
     npflos2.def
 
 npflos2_SOURCES.debug   = \
-    dbg_RegChecker.asm \
     dbg_VerifyExcptChain.asm
 
 npflos2_LIBS        = \

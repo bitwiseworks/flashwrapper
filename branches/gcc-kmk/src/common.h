@@ -417,13 +417,12 @@ BOOL                npResolveMozAPIs(void);
 void *              NPJNICreateUpWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 void *              NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 BOOL _Optlink       NPJNIEqual(unsigned *pu, unsigned uSet, unsigned uCurrent);
-unsigned            npGetFS(void);
-unsigned _System    npSetFS(unsigned selNewFS);
-unsigned            npRestoreOS2FS(void);
+unsigned _System    npGetFS(void);
+unsigned _System    npRestoreOS2FS(void);
 
 /* internal debug stuff */
 int                 npdprintf(const char *pszFormat, ...);
-void                npVerifyExcptChain(void);
+void _Optlink       npVerifyExcptChain(void);
 void _Optlink       ReleaseInt3(unsigned uEAX, unsigned uEDX, unsigned uECX);
 #ifdef DEBUG
 void                CleanStack(void);

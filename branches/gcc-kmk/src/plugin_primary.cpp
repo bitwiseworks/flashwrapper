@@ -467,7 +467,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             }
 
             // Get memory stats if debug build.
-            #ifdef DEBUG
+#if defined(DEBUG) && 0
             extern void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc, unsigned long *pnrcalls_free, unsigned long *ptotalmemalloc);
             unsigned long cAllocs;
             unsigned long cFrees;
@@ -478,7 +478,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             dprintf((" cFrees         = %d (%#x)", cFrees,  cFrees));
             dprintf((" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated));
             dprintf(("####InitTerm###### npj2 Heap statistics ####InitTerm#####"));
-            #endif
+#endif
             return TRUE;
         }
 
