@@ -6,6 +6,9 @@
 # Global definitions
 #------------------------------------------------------------------------------
 
+PLUGIN_VERSION  = 0.2.999
+PLUGIN_BUILD    = test
+
 #
 # Override handler for .asm files to compile them with the MASM-compilant tool
 #
