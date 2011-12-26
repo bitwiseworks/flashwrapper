@@ -436,11 +436,11 @@ BOOL                npGenericLazyInit(PNPODINWRAPPER pPlugin);
 int                 npGenericErrorBox(const char *pszMessage, BOOL fYesNo);
 
 #ifdef INCL_NS4X
-NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
-char *              npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_Shutdown(PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
+char * OSCALL npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin);
 #endif
 
 #ifdef __cplusplus

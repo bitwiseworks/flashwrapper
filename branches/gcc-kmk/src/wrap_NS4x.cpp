@@ -1516,7 +1516,7 @@ void    NPW32CALLBACK np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 
-NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetEntryPoints";
     dprintf(("%s: enter - pCallbacks=%p pPlugin=%p", szFunction, pCallbacks, pPlugin));
@@ -1641,7 +1641,7 @@ NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODI
 
 
 
-NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_Initialize";
     dprintf(("%s: enter - pFuncs=%p pPlugin=%p", szFunction, pFuncs, pPlugin));
@@ -1771,7 +1771,7 @@ NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAP
 }
 
 
-NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_Shutdown";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
@@ -1816,7 +1816,7 @@ NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
 
 
 /* Unix only? */
-NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - future=%p variable=%d value=%p pPlugin=%p", szFunction, future, variable, value, pPlugin));
@@ -1859,7 +1859,7 @@ NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void 
 }
 
 
-char *              npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin)
+char * OSCALL npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
