@@ -36,46 +36,6 @@
 #define MINOR_BUILDNR(buildnr)          (buildnr & 0xffff)
 
 /**
- * Get the full path to the ODIN dlls to use for the plugins.
- *
- * @returns Success indicator.
- * @param   pszCustomDllName    Buffer to store the custom dll name in.
- * @param   cchCustomDllName    Size of the buffer.
- */
-
-extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName)
-{
-    APIRET rc  = 1;
-    ULONG  ulBootDrv;
-    PCSZ szODINPath = "";
-
-    if (!pszCustomDllName)
-        return FALSE;
-
-    rc=DosScanEnv("FLASH10_ODIN",(PSZ*)&szODINPath);
-    if (rc != NO_ERROR || szODINPath[0] == '\0')
-    {
-        ULONG cbs = cchCustomDllName;
-        rc = PrfQueryProfileData(HINI_USERPROFILE, "KLIBC", "OdinPath", pszCustomDllName, &cbs);
-        if (!rc || pszCustomDllName[0] == '\0')
-        {
-            return FALSE;
-        }
-        else
-        {
-            strcat(pszCustomDllName, "\\");
-            return TRUE;
-        }
-    } else
-    {
-        dprintf(("Environment variable ODIN: [%s]", szODINPath));
-        //strcat(pszCustomDllName, "\\SYSTEM32\\");
-    }
-    strcpy(pszCustomDllName, szODINPath);
-    return TRUE;
-}
-
-/**
  * This function returns all the win32 dll names.
  *
  * Any version checking and such should be done when this function is called.
