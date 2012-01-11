@@ -87,7 +87,6 @@ extern ULONG EXPENTRY _DLL_InitTerm(HMODULE hmod, ULONG flFlags)
              * Get the (DLL) names.
              */
             if (np2ndaryGetPluginNames(gPlugin.szPluginDllName, sizeof(gPlugin.szPluginDllName),
-                                       gPlugin.szPluginName, sizeof(gPlugin.szPluginName),
                                        szPrimaryDLL, sizeof(szPrimaryDLL)))
             {
                 /*

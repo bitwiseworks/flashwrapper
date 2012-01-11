@@ -64,9 +64,9 @@
 
 
 /** PRI calling convention */
-#define PRICALL     _Optlink
+#define PRICALL
 /** PR calling convention */
-#define PRCALL      _Optlink
+#define PRCALL
 
 /** Plugin Export Calling Convention for Win32. */
 #define NPW32CALL   __cdecl
@@ -76,6 +76,13 @@
 
 /** The ordinal number of the npGenericInit() export. */
 #define NP_ORD_NPGENERICINIT        100
+
+#if defined(__EMX__)
+extern _System void * Dos32TIB(); /* absolute symbol */
+#define DOS32TIB Dos32TIB
+#else
+extern void * DOS32TIB;
+#endif
 
 
 /*******************************************************************************
@@ -216,16 +223,16 @@ typedef struct NPOdinPluginWrapper *PNPODINWRAPPER;
 *******************************************************************************/
 #ifdef INCL_NS4X
 
-extern "SYSTEM" {
+extern "C" {
 #include "npfunctions.h"
 }
 
 /* callback versions */
-typedef NPError     (* _Optlink PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
-typedef NPError     (* _Optlink PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
-typedef char *      (* _Optlink PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_Initialize)(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_Shutdown)(PNPODINWRAPPER pPlugin);
+typedef NPError     (* OSCALL PFN_NP_GetValue)(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
+typedef char *      (* OSCALL PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
 
 /* win32 versions */
 typedef struct _NP32PluginFuncs    *PNP32PluginFuncs;
@@ -255,12 +262,6 @@ typedef struct NPOdinPluginWrapper
      * This is input to the npGenericInit().
      */
     char            szPluginDllName[260];
-
-    /** The short name of the plugin.
-     * Chiefly for logging purposes.
-     * This is input to the npGenericInit().
-     */
-    char            szPluginName[64];
 
     /** The Odin module handle of the wrapped plugin Dll.
      * npGenericLazyInit() will initialize this.
@@ -410,13 +411,12 @@ BOOL                npResolveMozAPIs(void);
 void *              NPJNICreateUpWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 void *              NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 BOOL _Optlink       NPJNIEqual(unsigned *pu, unsigned uSet, unsigned uCurrent);
-unsigned            npGetFS(void);
-unsigned _System    npSetFS(unsigned selNewFS);
-unsigned            npRestoreOS2FS(void);
+unsigned _System    npGetFS(void);
+unsigned _System    npRestoreOS2FS(void);
 
 /* internal debug stuff */
 int                 npdprintf(const char *pszFormat, ...);
-void                npVerifyExcptChain(void);
+void _Optlink       npVerifyExcptChain(void);
 void _Optlink       ReleaseInt3(unsigned uEAX, unsigned uEDX, unsigned uECX);
 #ifdef DEBUG
 void                CleanStack(void);
@@ -430,11 +430,11 @@ BOOL                npGenericLazyInit(PNPODINWRAPPER pPlugin);
 int                 npGenericErrorBox(const char *pszMessage, BOOL fYesNo);
 
 #ifdef INCL_NS4X
-NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin);
-NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
-char *              npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_Shutdown(PNPODINWRAPPER pPlugin);
+NPError OSCALL npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin);
+char * OSCALL npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin);
 #endif
 
 #ifdef __cplusplus

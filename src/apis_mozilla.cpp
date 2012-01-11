@@ -117,8 +117,13 @@ BOOL isDllInThisProcess(const char *pszDll)
                    + pLrec->ctImpMod * sizeof(short)            /* size of the array of imported modules */
                    + strlen((char*)(void*)pLrec->pName) + 1     /* size of the filename */
                    + 3) & ~3));                                 /* the size is align on 4 bytes boundrary */
+#if defined (__EMX__) && !defined (USE_OS2_TOOLKIT_HEADERS)
+            pLrec->pNextRec = (PVOID*)(void*)((char*)(void*)pLrec->pObjInfo
+                                                 + sizeof(QSLOBJREC) * pLrec->ctObj);
+#else
             pLrec->pNextRec = (QSLREC*)(void*)((char*)(void*)pLrec->pObjInfo
                                                  + sizeof(QSLOBJREC) * pLrec->ctObj);
+#endif
             }
         if (pLrec->pName && !strnicmp((char*)pLrec->pName, pszDll, CCHMAXPATH)) /* paranoia */
             break;

@@ -1066,7 +1066,7 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
                         if (pWndData->pvOdinWnd)
                         {
                             /** @todo This free of this member should be delayed perhaps.. we'll see. */
-                            delete pWndData->pvOdinWnd;
+                            delete ((NPWindow*)pWndData->pvOdinWnd);
                         }
                         memset(pWndData, 0, sizeof(*pWndData));
                         delete pWndData;

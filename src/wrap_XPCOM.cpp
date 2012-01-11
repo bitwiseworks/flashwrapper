@@ -11583,7 +11583,7 @@ nsresult npGenericNSGetFactory(nsISupports* aServMgr, const nsCID &aClass,  cons
     dprintf(("%s: enter - aServMgr=%p, &aClass=%p, aClassName=%s aContractID=%s aFactory=%p pPlugin=%p",
              XPFUNCTION, aServMgr, &aClass, aClassName, aContractID, aFactory, pPlugin));
     DPRINTF_NSID(aClass);
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
 
     /*
      * Lazy Init.
@@ -11723,7 +11723,7 @@ PRBool   npGenericNSCanUnload(nsISupports* aServMgr, PNPODINWRAPPER pPlugin)
 {
     DEBUG_FUNCTIONNAME();
     dprintf(("%s: enter - aServMgr=%p pPlugin=%p", XPFUNCTION, aServMgr, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     PRBool  fRc = FALSE;
 
 // curious as ever - when is this entry point actually called??
@@ -11780,7 +11780,7 @@ nsresult npGenericNSRegisterSelf(nsISupports* aServMgr, const char *fullpath, PN
     DEBUG_FUNCTIONNAME();
     dprintf(("%s: enter - aServMgr=%p fullpath=%p pPlugin=%p", XPFUNCTION, aServMgr, fullpath, pPlugin));
     DPRINTF_STR(fullpath);
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
 
 // curious as ever - when is this entry point actually called??
 DebugInt3();
@@ -11836,7 +11836,7 @@ nsresult npGenericNSUnregisterSelf(nsISupports* aServMgr, const char *fullpath, 
     DEBUG_FUNCTIONNAME();
     dprintf(("%s: enter - aServMgr=%p fullpath=%p pPlugin=%p", XPFUNCTION, aServMgr, fullpath, pPlugin));
     DPRINTF_STR(fullpath);
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
 
 // curious as ever - when is this entry point actually called??
 DebugInt3();
