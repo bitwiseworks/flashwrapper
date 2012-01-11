@@ -65,7 +65,7 @@ static const char szPrefix[] = "";
  */
 int     npdprintf(const char *pszFormat, ...)
 {
-#ifdef NPODIN
+#if defined(NPODIN) && 0
     unsigned    selOldFS = npRestoreOS2FS();
 #else
     static int      fInited = 0;
@@ -92,7 +92,7 @@ int     npdprintf(const char *pszFormat, ...)
 #endif
     }
 
-#ifdef NPODIN
+#if defined(NPODIN) && 0
     npSetFS(selOldFS);
     if (pfnWriteLog)
         pfnWriteLog("%s", &szMsg[0]);

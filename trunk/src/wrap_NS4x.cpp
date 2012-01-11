@@ -55,7 +55,6 @@
 /** Debug DOS32TIB assertion. */
 #ifdef DEBUG
 #define NPXP_ASSERT_OS2FS()     \
-        extern void * DOS32TIB;                                                     \
         if (npGetFS() != (USHORT)(unsigned)&DOS32TIB)                               \
         {                                                                           \
             dprintf(("%s: fs is wrong (%x) !!!", szFunction, npGetFS()));           \
@@ -371,17 +370,27 @@ typedef struct _PluginInstance
 /** This variable is used to drag in XPCOM in the linking of a primary wrapper. */
 int             giNS4x;
 
-#ifdef __IBMCPP__
+extern "C" void *   NPJNICreateDownWrapperWeakStub(void);
+extern "C" unsigned upCreateWrapperWeakStub(void **pv1, void *pv2, int rc);
+extern "C" const char * getIIDCIDNameWeakStub(void *pv1);
+
+#if defined(__IBMCPP__)
 /*
  * This weak resolving ASSUMES that the caller cleans the stack!
  * (i.e. anything but __stdcall calling convention will work very nicely.)
  */
-extern "C" void *   NPJNICreateDownWrapperWeakStub(void);
-extern "C" unsigned upCreateWrapperWeakStub(void **pv1, void *pv2, int rc);
-extern "C" const char * getIIDCIDNameWeakStub(void *pv1);
 #pragma weak(NPJNICreateDownWrapper, NPJNICreateDownWrapperWeakStub)
 #pragma weak(upCreateWrapper, upCreateWrapperWeakStub)
 #pragma weak(getIIDCIDName, getIIDCIDNameWeakStub)
+
+#elif defined(__GNUC__)
+
+#include "plugin_GenericWeaks.cpp"
+
+extern "C" void *   NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, void *pv) __attribute__ ((weak, alias ("NPJNICreateDownWrapperWeakStub")));
+extern "C" unsigned upCreateWrapperWeak(void **pv1, void *pv2, int rc) __attribute__  ((weak, alias ("upCreateWrapperWeakStub")));
+extern "C" const char * getIIDCIDNameWeak(void *pv1) __attribute__  ((weak, alias ("getIIDCIDNameWeakStub")));
+
 #endif
 
 /*
@@ -1507,11 +1516,11 @@ void    NPW32CALLBACK np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 
-NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetEntryPoints";
     dprintf(("%s: enter - pCallbacks=%p pPlugin=%p", szFunction, pCallbacks, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1595,7 +1604,8 @@ NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODI
             {(void*)np4xUp_GetValue,        (void**)&pWrapper->w32.pfnGetValue,      (void**)&pCallbacks->getvalue },
             {(void*)np4xUp_SetValue,        (void**)&pWrapper->w32.pfnSetValue,      (void**)&pCallbacks->setvalue },
         };
-        for (int i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
+        int i;
+        for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
         {
             memset(pWrapper->aStubs[i].achMagic, 0xcc, sizeof(pWrapper->aStubs[i].achMagic));
             pWrapper->aStubs[i].chPush      = 0x68;
@@ -1631,11 +1641,11 @@ NPError             npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODI
 
 
 
-NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_Initialize";
     dprintf(("%s: enter - pFuncs=%p pPlugin=%p", szFunction, pFuncs, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1716,7 +1726,8 @@ NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAP
         {(void*)np4xDown_InvalidateRegion,  (void**)&pFuncs->invalidateregion,  (void**)&pWrapper->w32.pfnInvalidateRegion },
         {(void*)np4xDown_ForceRedraw,       (void**)&pFuncs->forceredraw,       (void**)&pWrapper->w32.pfnForceRedraw },
     };
-    for (int i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
+    int i;
+    for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
     {
         pWrapper->aStubs[i].chPush      = 0x68;
         pWrapper->aStubs[i].pvImm32bit  = pWrapper;
@@ -1760,11 +1771,11 @@ NPError             npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAP
 }
 
 
-NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_Shutdown";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
 
@@ -1805,11 +1816,11 @@ NPError             npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
 
 
 /* Unix only? */
-NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin)
+NPError OSCALL npGenericNP_GetValue(NPP future, NPPVariable variable, void *value, PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - future=%p variable=%d value=%p pPlugin=%p", szFunction, future, variable, value, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1848,11 +1859,11 @@ NPError             npGenericNP_GetValue(NPP future, NPPVariable variable, void 
 }
 
 
-char *              npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin)
+char * OSCALL npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     char *pszRc;
 
 

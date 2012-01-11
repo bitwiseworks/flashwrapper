@@ -61,7 +61,7 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 
     // Validate input.
     if (!VALID_PTR(pPlugin) || pPlugin->cb != sizeof(*pPlugin) ||
-        !pPlugin->szPluginDllName[0] || !pPlugin->szPluginName[0]) {
+        !pPlugin->szPluginDllName[0]) {
         dprintf(("%s: pPlugin is invalid !!!", szFunction));
         //DebugInt3();
         return FALSE;
@@ -84,7 +84,7 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
     pPlugin->pfnNP_GetValue           = npGenericNP_GetValue;
     pPlugin->pfnNP_GetMIMEDescription = npGenericNP_GetMIMEDescription;
 
-    dprintf(("%s: Successfully initialized %s", szFunction, pPlugin->szPluginName));
+    dprintf(("%s: Successfully initialized '%s'", szFunction, pPlugin->szPluginDllName));
     return TRUE;
 }
 
@@ -158,7 +158,7 @@ BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
         return FALSE;
     }
 
-    dprintf(("%s: Successfully initialized %s", szFunction, pPlugin->szPluginName));
+    dprintf(("%s: Successfully initialized '%s'", szFunction, pPlugin->szPluginDllName));
     return TRUE;
 }
 
