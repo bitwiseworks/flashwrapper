@@ -16,11 +16,14 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #define INCL_WINSHELLDATA
 #define INCL_BASE
 #include <os2.h>
-#include <string.h>
-#include <stdio.h>
 #include <win32type.h>
 
 #define NPODIN_NS4X
@@ -35,30 +38,49 @@
 #define MAJOR_BUILDNR(buildnr)          (buildnr >> 16)
 #define MINOR_BUILDNR(buildnr)          (buildnr & 0xffff)
 
+#define WIN32DLL_DEFAULT_NAME           "npswf32.dll"
+
 /**
  * This function returns all the win32 dll names.
  *
  * Any version checking and such should be done when this function is called.
  *
  * @returns Success indicator.
+ * @param   hmodWrapper         Wrapper DLL handle.
  * @param   pszPluginDllName    Buffer to store the DLL name.
  * @param   cchPluginDllName    Size of DLL name buffer.
  */
-extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName)
+extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
+                                    int cchPluginDllName)
 {
-    /*
-     * Get the full path name of the Win32 plugin dll.
-     */
-    int     rc;
+    APIRET rc;
 
-    rc = PrfQueryProfileData(HINI_USERPROFILE, "Flash10_Plugin", "AdobePluginPath", pszPluginDllName, (PULONG)&cchPluginDllName);
-    if (rc)
+    /*
+     * First, see if there is a direct specification of the DLL in the env.
+     */
+    const char *pszWin32Dll = getenv("NPFLOS2_WIN32DLL");
+    if (pszWin32Dll)
     {
-        strcat(pszPluginDllName, "\\npswf32.dll");
+        if (strlen(pszWin32Dll) + 1 > cchPluginDllName)
+            return FALSE;
+        strcpy(pszPluginDllName, pszWin32Dll);
         return TRUE;
     }
-    return FALSE;
 
+    /*
+     * If not, deduce the path from the wrapper DLL location.
+     */
+    rc = DosQueryModuleName(hmodWrapper, cchPluginDllName, pszPluginDllName);
+    if (rc != NO_ERROR)
+        return FALSE;
+
+    char *psz = strrchr(pszPluginDllName, '\\');
+    if (!psz ||
+        (psz - pszPluginDllName) + 1 + sizeof(WIN32DLL_DEFAULT_NAME) > cchPluginDllName)
+        return FALSE;
+
+    strcpy(psz + 1, WIN32DLL_DEFAULT_NAME);
+    return TRUE;
 }
 
 /**

@@ -25,10 +25,12 @@ extern "C" {
  * Any version checking and such should be done when this function is called.
  *
  * @returns Success indicator.
+ * @param   hmodWrapper         Wrapper DLL handle.
  * @param   pszPluginDllName    Buffer to store the DLL name.
  * @param   cchPluginDllName    Size of DLL name buffer.
  */
-extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName);
+extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
+                                    int cchPluginDllName);
 
 /**
  * Checks the build number of the custombuild dll after the lazy init have

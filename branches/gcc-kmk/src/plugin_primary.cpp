@@ -250,7 +250,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
         ghmodOurSelf = hmod;
 
         // Get the plugin names.
-        if (!npprimaryGetPluginNames(gPlugin.szPluginDllName,
+        if (!npprimaryGetPluginNames(hmod, gPlugin.szPluginDllName,
                                      sizeof(gPlugin.szPluginDllName))) {
             dprintf(("Flash plugin init failed in npprimaryGetPluginNames [%s]",
                      gPlugin.szPluginDllName));
