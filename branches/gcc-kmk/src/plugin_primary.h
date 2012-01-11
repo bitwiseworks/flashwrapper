@@ -32,6 +32,7 @@ extern "C" {
 extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
                                     int cchPluginDllName);
 
+#if 0 // not currently used
 /**
  * Checks the build number of the custombuild dll after the lazy init have
  * loaded it. Other checks can be performed as well.
@@ -41,6 +42,7 @@ extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
  * @param   hmodOdin    Module handle of DosLoadModule'ed custombuild dll.
  */
 extern BOOL npprimaryCheckBuildNumber(HMODULE hmodOdin);
+#endif
 
 /*
  * Drag in the right parts.

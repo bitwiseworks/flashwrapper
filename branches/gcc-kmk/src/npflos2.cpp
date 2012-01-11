@@ -83,6 +83,7 @@ extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
     return TRUE;
 }
 
+#if 0 // not currently used
 /**
  * Checks the build number of the custombuild dll after the lazy init have
  * loaded it. Other checks can be performed as well.
@@ -93,6 +94,12 @@ extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
  */
 extern BOOL npprimaryCheckBuildNumber(HMODULE hmodOdin)
 {
+    // note: Showing message boxes during DLL initialization is not a good idea
+    // since the application may not expect such blocking resulting into
+    // undefined behavior (this was seen with e.g. FF8 which would crash some
+    // seconds after opening the about:plugins page which caused the message box
+    // to appear).
+
     unsigned    uBuild = 0;
     unsigned (*WIN32API      pfnGetBuildNumber)(void);
     void     (*WIN32API      pfnSetPluginVersion)(ULONG);
@@ -116,4 +123,5 @@ fail:
                            MB_YESNO | MB_MOVEABLE | MB_WARNING | MB_APPLMODAL);
     return (rc == MBID_YES);
 }
+#endif
 
