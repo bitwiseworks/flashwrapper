@@ -16,11 +16,14 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #define INCL_WINSHELLDATA
 #define INCL_BASE
 #include <os2.h>
-#include <string.h>
-#include <stdio.h>
 #include <win32type.h>
 
 #define NPODIN_NS4X
@@ -35,45 +38,7 @@
 #define MAJOR_BUILDNR(buildnr)          (buildnr >> 16)
 #define MINOR_BUILDNR(buildnr)          (buildnr & 0xffff)
 
-/**
- * Get the full path to the ODIN dlls to use for the plugins.
- *
- * @returns Success indicator.
- * @param   pszCustomDllName    Buffer to store the custom dll name in.
- * @param   cchCustomDllName    Size of the buffer.
- */
-
-extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName)
-{
-    APIRET rc  = 1;
-    ULONG  ulBootDrv;
-    PSZ szODINPath = "";
-
-    if (!pszCustomDllName)
-        return FALSE;
-
-    rc=DosScanEnv("FLASH10_ODIN",(PCSZ*)&szODINPath);
-    if (rc != NO_ERROR || szODINPath[0] == '\0')
-    {
-        ULONG cbs = cchCustomDllName;
-        rc = PrfQueryProfileData(HINI_USERPROFILE, "KLIBC", "OdinPath", pszCustomDllName, &cbs);
-        if (!rc || pszCustomDllName[0] == '\0')
-        {
-            return FALSE;
-        }
-        else
-        {
-            strcat(pszCustomDllName, "\\");
-            return TRUE;
-        }
-    } else
-    {
-        dprintf(("Environment variable ODIN: [%s]", szODINPath));
-        //strcat(pszCustomDllName, "\\SYSTEM32\\");
-    }
-    strcpy(pszCustomDllName, szODINPath);
-    return TRUE;
-}
+#define WIN32DLL_DEFAULT_NAME           "npswf32.dll"
 
 /**
  * This function returns all the win32 dll names.
@@ -81,30 +46,44 @@ extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName)
  * Any version checking and such should be done when this function is called.
  *
  * @returns Success indicator.
+ * @param   hmodWrapper         Wrapper DLL handle.
  * @param   pszPluginDllName    Buffer to store the DLL name.
  * @param   cchPluginDllName    Size of DLL name buffer.
- * @param   pszPluginName       Buffer to store the short name in.
- * @param   cchPluginName       Size of short name buffer.
  */
-extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName,
-                                    char *pszPluginName, int cchPluginName)
+extern BOOL npprimaryGetPluginNames(HMODULE hmodWrapper, char *pszPluginDllName,
+                                    int cchPluginDllName)
 {
-    /*
-     * Get the full path name of the Win32 plugin dll.
-     */
-    int     rc;
+    APIRET rc;
 
-    rc = PrfQueryProfileData(HINI_USERPROFILE, "Flash10_Plugin", "AdobePluginPath", pszPluginDllName, (PULONG)&cchPluginDllName);
-    if (rc)
+    /*
+     * First, see if there is a direct specification of the DLL in the env.
+     */
+    const char *pszWin32Dll = getenv("NPFLOS2_WIN32DLL");
+    if (pszWin32Dll)
     {
-        strcat(pszPluginDllName, "\\npswf32.dll");
-        strcpy(pszPluginName, "npswf32.dll");
+        if (strlen(pszWin32Dll) + 1 > cchPluginDllName)
+            return FALSE;
+        strcpy(pszPluginDllName, pszWin32Dll);
         return TRUE;
     }
-    return FALSE;
 
+    /*
+     * If not, deduce the path from the wrapper DLL location.
+     */
+    rc = DosQueryModuleName(hmodWrapper, cchPluginDllName, pszPluginDllName);
+    if (rc != NO_ERROR)
+        return FALSE;
+
+    char *psz = strrchr(pszPluginDllName, '\\');
+    if (!psz ||
+        (psz - pszPluginDllName) + 1 + sizeof(WIN32DLL_DEFAULT_NAME) > cchPluginDllName)
+        return FALSE;
+
+    strcpy(psz + 1, WIN32DLL_DEFAULT_NAME);
+    return TRUE;
 }
 
+#if 0 // not currently used
 /**
  * Checks the build number of the custombuild dll after the lazy init have
  * loaded it. Other checks can be performed as well.
@@ -115,6 +94,12 @@ extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName
  */
 extern BOOL npprimaryCheckBuildNumber(HMODULE hmodOdin)
 {
+    // note: Showing message boxes during DLL initialization is not a good idea
+    // since the application may not expect such blocking resulting into
+    // undefined behavior (this was seen with e.g. FF8 which would crash some
+    // seconds after opening the about:plugins page which caused the message box
+    // to appear).
+
     unsigned    uBuild = 0;
     unsigned (*WIN32API      pfnGetBuildNumber)(void);
     void     (*WIN32API      pfnSetPluginVersion)(ULONG);
@@ -138,4 +123,5 @@ fail:
                            MB_YESNO | MB_MOVEABLE | MB_WARNING | MB_APPLMODAL);
     return (rc == MBID_YES);
 }
+#endif
 

@@ -22,7 +22,6 @@
     ULONG   ExceptionRegRec[2] = {0,0};                                         \
     void *  pExceptionRegRec = &ExceptionRegRec[0];                             \
     USHORT usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);    \
-    extern void * DOS32TIB;                                                     \
     if (usFSOld != (USHORT)(unsigned)&DOS32TIB)                                 \
     {                                                                           \
         dprintf(("%s: usFSOld != DOS32TIB !!!", __FUNCTION__));                 \
@@ -56,14 +55,12 @@
     ULONG   ExceptionRegRec[2] = {0,0};                                         \
     void *  pExceptionRegRec = NULL;                                            \
     extern USHORT _System GetFS(void);                                          \
-    extern void * DOS32TIB;                                                     \
     USHORT  usFSOld = GetFS();                                                  \
     if (usFSOld == (USHORT)(unsigned)&DOS32TIB)                                 \
     {                                                                           \
         pExceptionRegRec = &ExceptionRegRec[0];                                 \
         usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);       \
     }//
-
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -82,8 +79,6 @@
 #include <os2.h>
 
 #include "common.h"
-
-extern BOOL npprimaryGetOdinPath(char *pszCustomDllName, int cchCustomDllName);
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -195,94 +190,102 @@ BOOL    npResolveOdinAPIs(void)
 {
     int rc;
     int i;
-    char szPath[CCHMAXPATH] = {0};
+    char szPath[CCHMAXPATH * 2];
+    char szBuf[CCHMAXPATH];
+#if 0
     ULONG ulSavedCodePage;
-    char *pszEnd;
+#endif
+
+    dprintf(("Resolving Odin APIs..."));
+
+    const char *szOdinPath = getenv("NPFLOS2_ODINDLLPATH");
+#ifdef DEBUG
+    if (szOdinPath)
+        dprintf(("NPFLOS2_ODINDLLPATH is '%s', will use it", szOdinPath));
+    else
+        dprintf(("NPFLOS2_ODINDLLPATH is not set, will rely on [BEGIN]LIBPATH"));
+
+#endif
 
     /*
-     * Load the ODIN dlls.
-     *    First we need to determin where it is installed, then load it.
-     *    If we're really lucky we also must change the beginlibpath - we must!
-     *
+     * Load the ODIN dlls. If NPFLOS2_ODINDLLPATH is given, we must set
+     * BEGINLIBPATH as well to make sure that the right DLLs will be found
+     * first.
      */
-    if (npprimaryGetOdinPath(szPath, sizeof(szPath)))
+    if (szOdinPath)
     {
-        /*
-         * Load the ODIN dlls. (After updating the libpath.)
-         *
-         * We must save and restore the current code page since user32
-         * init code will change this.
-         */
-        dprintf(("Detected ODIN at: [%s]", szPath));
-
-        ulSavedCodePage = WinQueryCp (HMQ_CURRENT);
-        pszEnd = strrchr(szPath, '\\');
-        if (!pszEnd) pszEnd = strrchr(szPath, '/');
-        dprintf(("Codepage: %i", ulSavedCodePage));
-
-        if (pszEnd)
-        {
-            strcpy(pszEnd, ";%BEGINLIBPATH%");
-            DosSetExtLIBPATH(&szPath[0], BEGIN_LIBPATH);
-        }
-        //dprintf(("Codepage after set LIBPATH: %i", WinQueryCp (HMQ_CURRENT)));
-        //WinSetCp(HMQ_CURRENT, ulSavedCodePage);
-        //dprintf(("Codepage after restoring: %i", WinQueryCp (HMQ_CURRENT)));
-
-        /*
-         * Now resolv the Odin32 entrypoints we need.
-         *
-         * NOTE: Our custom build dlls export a limited number of functions
-         *       If this list is changed, make sure the def files are updated too!
-         */
-        for (i = 0; i < sizeof(aAPIs) / sizeof(aAPIs[0]); i++)
-        {
-            dprintf(("Loading: %d", i));
-            memset(szPath, 0, sizeof(szPath));
-            npprimaryGetOdinPath(szPath, sizeof(szPath));
-            strcat(szPath, aAPIs[i].pszModName);
-            dprintf(("Try Loading: %s", szPath));
-            rc = DosLoadModule(NULL, 0, &szPath[0], &aAPIs[i].modInst);
-            dprintf(("DosLoadModule('%s') rc: %d. HMOD: %x", szPath, rc, aAPIs[i].modInst));
-#if 0
-            rc = DosLoadModule(NULL, 0, aAPIs[i].pszModName, &aAPIs[i].modInst);
-            dprintf(("DosLoadModule('%s') rc: %d. HMOD: %x", aAPIs[i].pszModName, rc, aAPIs[i].modInst));
-            if (rc == ERROR_FILE_NOT_FOUND && 0 == aAPIs[i].modInst)
-            {
-                strcat(szPath, aAPIs[i].pszModName);
-                rc = DosLoadModule(NULL, 0, &szPath[0], &aAPIs[i].modInst);
-                dprintf(("DosLoadModule('%s') rc: %d. HMOD: %x", szPath, rc, aAPIs[i].modInst));
-            }
-#endif
-            if (rc && 0 == aAPIs[i].modInst)
-                return FALSE;
-
-            if (rc == ERROR_FILE_NOT_FOUND && 0 != aAPIs[i].modInst)
-                dprintf(("DosLoadModule('%s') strange behavior rc: %d. HMOD: %x", szPath, rc, aAPIs[i].modInst));
-
-            rc = DosQueryProcAddr(aAPIs[i].modInst, 0, aAPIs[i].pszName, (PFN*)aAPIs[i].ppfn);
-            if (rc)
-            {
-                if (!aAPIs[i].fMandatory)
-                {
-                    dprintf(("%s: DosQueryProcAddr(,0,'%s',) -> %d (not mandatory)", __FUNCTION__, aAPIs[i].pszName, rc));
-                    *aAPIs[i].ppfn = NULL;
-                    continue;
-                }
-                dprintf(("%s: DosQueryProcAddr(,0,'%s',) -> %d (mandatory) not found", __FUNCTION__, aAPIs[i].pszName, rc));
-                //ReleaseInt3(0xdeaddead, 0xdeadf001, i);
-                return FALSE;
-            }
-        }
-        registered_apis = i+1;
-
-        dprintf(("%s: Successfully resolved all Odin APIs", __FUNCTION__));
-        return TRUE;
-    } else
-    {
-        dprintf(("ODIN not detected at: [%s]", szPath));
+        strcpy(szPath, szOdinPath);
+        strcat(szPath, ";%BEGINLIBPATH%");
+        DosSetExtLIBPATH(szPath, BEGIN_LIBPATH);
+        /* Also set LIBPATHSTRICT=T to allow for multiple DLL copies */
+        DosSetExtLIBPATH("T", 3);
     }
-    return FALSE;
+
+#if 0
+    /*
+     * We must save and restore the current code page since user32
+     * init code will change this.
+     */
+    ulSavedCodePage = WinQueryCp (HMQ_CURRENT);
+    dprintf(("Codepage: %i", ulSavedCodePage));
+#endif
+
+    /*
+     * Now resolve the Odin32 entrypoints we need.
+     *
+     * NOTE: Our custom build dlls export a limited number of functions
+     *       If this list is changed, make sure the def files are updated too!
+     */
+    for (i = 0; i < sizeof(aAPIs) / sizeof(aAPIs[0]); i++)
+    {
+        if (szOdinPath)
+        {
+            strcpy(szPath, szOdinPath);
+            strcat(szPath, "\\");
+            strcat(szPath, aAPIs[i].pszModName);
+        }
+        else
+            strcpy(szPath, aAPIs[i].pszModName);
+
+        rc = DosLoadModule(szBuf, sizeof(szBuf), szPath, &aAPIs[i].modInst);
+        if (rc && aAPIs[i].modInst == 0)
+        {
+            dprintf(("ERROR: DosLoadModule(%s) returned %d (reason '%s')",
+                    szPath, rc, szBuf));
+            return FALSE;
+        }
+#ifdef DEBUG
+        if (rc)
+            dprintf(("WARNING: DosLoadModule(%s) returned rc %d and HMOD %x",
+                     szPath, rc, aAPIs[i].modInst));
+#endif
+
+        rc = DosQueryProcAddr(aAPIs[i].modInst, 0, aAPIs[i].pszName, (PFN*)aAPIs[i].ppfn);
+        if (rc)
+        {
+            if (!aAPIs[i].fMandatory)
+            {
+                dprintf(("WARNING: DosQueryProcAddr(%s,%s) returned %d (not mandatory)",
+                         aAPIs[i].pszModName, aAPIs[i].pszName, rc));
+                *aAPIs[i].ppfn = NULL;
+                continue;
+            }
+            dprintf(("ERROR: DosQueryProcAddr(%s,%s) returned %d (mandatory)",
+                     aAPIs[i].pszModName, aAPIs[i].pszName, rc));
+            //ReleaseInt3(0xdeaddead, 0xdeadf001, i);
+            return FALSE;
+        }
+
+#ifdef DEBUG
+        DosQueryModuleName(aAPIs[i].modInst, sizeof(szBuf), szBuf);
+        dprintf(("Loaded '%s' from '%s'", aAPIs[i].pszName, szBuf));
+#endif
+    }
+
+    registered_apis = i + 1;
+
+    dprintf(("Successfully resolved all Odin APIs"));
+    return TRUE;
 }
 
 
