@@ -1520,7 +1520,7 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
 {
     static const char szFunction[] = "npGenericNP_GetEntryPoints";
     dprintf(("%s: enter - pCallbacks=%p pPlugin=%p", szFunction, pCallbacks, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1645,7 +1645,7 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
 {
     static const char szFunction[] = "npGenericNP_Initialize";
     dprintf(("%s: enter - pFuncs=%p pPlugin=%p", szFunction, pFuncs, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1775,7 +1775,7 @@ NPError OSCALL npGenericNP_Shutdown(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_Shutdown";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
 
@@ -1820,7 +1820,7 @@ NPError OSCALL npGenericNP_GetValue(NPP future, NPPVariable variable, void *valu
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - future=%p variable=%d value=%p pPlugin=%p", szFunction, future, variable, value, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     NPError rc;
 
     /*
@@ -1863,7 +1863,7 @@ char * OSCALL npGenericNP_GetMIMEDescription(PNPODINWRAPPER pPlugin)
 {
     static const char szFunction[] = "npGenericNP_GetMIMEDescription";
     dprintf(("%s: enter - pPlugin=%p", szFunction, pPlugin));
-    DPRINTF_STR(pPlugin->szPluginName);
+    DPRINTF_STR(pPlugin->szPluginDllName);
     char *pszRc;
 
 

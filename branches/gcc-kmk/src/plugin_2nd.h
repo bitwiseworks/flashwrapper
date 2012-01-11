@@ -30,7 +30,6 @@ extern "C" {
  * @param   cchWrapperDLL       Size of the wrapper dll buffer.
  */
 extern BOOL np2ndaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName,
-                                   char *pszPluginName, int cchPluginName,
                                    char *pszWrapperDll, int cchWrapperDll);
 
 

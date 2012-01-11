@@ -27,11 +27,8 @@ extern "C" {
  * @returns Success indicator.
  * @param   pszPluginDllName    Buffer to store the DLL name.
  * @param   cchPluginDllName    Size of DLL name buffer.
- * @param   pszPluginName       Buffer to store the short name in.
- * @param   cchPluginName       Size of short name buffer.
  */
-extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName,
-                                    char *pszPluginName, int cchPluginName);
+extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName);
 
 /**
  * Checks the build number of the custombuild dll after the lazy init have

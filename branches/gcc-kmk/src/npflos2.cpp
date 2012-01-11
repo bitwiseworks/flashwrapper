@@ -43,11 +43,8 @@
  * @returns Success indicator.
  * @param   pszPluginDllName    Buffer to store the DLL name.
  * @param   cchPluginDllName    Size of DLL name buffer.
- * @param   pszPluginName       Buffer to store the short name in.
- * @param   cchPluginName       Size of short name buffer.
  */
-extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName,
-                                    char *pszPluginName, int cchPluginName)
+extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName)
 {
     /*
      * Get the full path name of the Win32 plugin dll.
@@ -58,7 +55,6 @@ extern BOOL npprimaryGetPluginNames(char *pszPluginDllName, int cchPluginDllName
     if (rc)
     {
         strcat(pszPluginDllName, "\\npswf32.dll");
-        strcpy(pszPluginName, "npswf32.dll");
         return TRUE;
     }
     return FALSE;

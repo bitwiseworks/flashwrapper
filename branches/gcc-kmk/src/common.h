@@ -263,12 +263,6 @@ typedef struct NPOdinPluginWrapper
      */
     char            szPluginDllName[260];
 
-    /** The short name of the plugin.
-     * Chiefly for logging purposes.
-     * This is input to the npGenericInit().
-     */
-    char            szPluginName[64];
-
     /** The Odin module handle of the wrapped plugin Dll.
      * npGenericLazyInit() will initialize this.
      * The workers use this as an indication on wether or not npGenericLazyInit() has been called.
