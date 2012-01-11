@@ -22,9 +22,11 @@
 
 #
 # Path to Odin SDK. If not set, it is assumed that it is accessible through the
-# environment.
+# environment. Optionally, a path to the library directory is given (defaults
+# to $(PATH_SDK_ODIN)/lib).
 #
-# PATH_SDK_ODIN := D:/Dev/Odin
+# PATH_SDK_ODIN := D:/Coding/odin/odin32
+# PATH_SDK_ODIN_LIB := D:/Coding/odin/odin32-build/os2.x86/release/stage/lib
 
 #
 # Path to the IBM Assembly Language Processor (may be found in the
