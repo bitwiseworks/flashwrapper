@@ -24,9 +24,9 @@ npflos2_SOURCES     = \
 # build an include resource file with the verision information
 npflos2.rc_DEPS = $(npflos2_0_OUTDIR)/npflos2-bld.rc
 npflos2_INCS += $(npflos2_0_OUTDIR)
-$$(npflos2_0_OUTDIR)/npflos2-bld.rc: $(PATH_ROOT)/Config.kmk
-	$(QUIET)cd $(npflos2_DEFPATH) && BldLevelInf0.cmd \
-        $(PLUGIN_VERSION) $(PLUGIN_BUILD) $@
+$$(npflos2_0_OUTDIR)/npflos2-bld.rc: $(PATH_ROOT)/Config.kmk $(PATH_SUB_CURRENT)/GenVerInfo.cmd
+	$(QUIET)cd $(npflos2_DEFPATH) && GenVerInfo.cmd \
+         [$@] [$(PLUGIN_VERSION)] [$(PLUGIN_BUILD)]
 
 npflos2_SOURCES.debug   = \
     dbg_VerifyExcptChain.asm
