@@ -1,6 +1,6 @@
-[ Flash 10 Plugin wrapper for eComStation Technology Preview ]
+[ Flash Plugin wrapper for eComStation Technology Preview ]
 
-This is a Technology Preview of the Flash 10 Plugin wrapper for
+This is a Technology Preview of the Flash Plugin wrapper for
 eComStation. It is intended to show the progress of this product
 and to give you an early experience of being able to use websites 
 implementing the latest Flash content.
@@ -18,8 +18,8 @@ support video playback. The unoffocial Flash 7/9 release which can be
 found on the internet does not work on a lot of websites as it identifies 
 itself as Flash 9 but can only display Flash 7 content.
 
-With the new release of Flash 10 we have up-to-date Flash support for 
-eComStation. This release also supports proper rendering of Flash 10 text
+With the new release of Flash we have up-to-date Flash support for 
+eComStation. This release also supports proper rendering of Flash text
 elements and Flash keyboard input works.
 
 Note: This code should not be used on production systems. 
@@ -29,7 +29,7 @@ Note: This code should not be used on production systems.
 Requirements
 ============
 
-- Flash 10 for eComStation requires eComStation version 1.2 or higher.  
+- Flash for eComStation requires eComStation version 1.2 or higher.  
   On older versions of eComStation the Flash plugin will not work.
 
 - Before installing the plugin please shutdown all your web browser
@@ -50,11 +50,11 @@ Requirements
   unofficial Flash 7/9 release is found, The DLL's will be renamed so the
   web browser will no longer load the older versions (they will *not* be
   deleted).  
-  See the section "How to uninstall Flash 10" for more details.
+  See the section "How to uninstall Flash" for more details.
 
-- This wrapper is using a customized ODIN build to run the Windows version
-  of the Flash 10 plugin. The ODIN build that is installed is not referenced
-  in your config.sys and can coexist with other builds.
+- This wrapper is using a regular ODIN build to run the Windows version
+  of the Flash plugin. This is the same ODIN build that is used to run
+  recent versions of Java for OS/2.
 
 * Supported web browsers:
 
@@ -106,16 +106,6 @@ a process killer like Top (available via CAD handler in eComStation) or
 Watchcat. As a last resort you may need to reboot your system by pressing 
 Ctrl-Alt-Del.
 
-* Check registry:
-
-If your web browser crashes at startup or loading a website with Flash 
-content, check with regedit2.exe that the key Flash10_plugin has the proper 
-keywords set.
-PluginWrapperPath= and AdobePluginPath= should be set to the directory
-where your browser plugins are located.  
-OdinPath= points to where the ODIN DLL's are installed for the ODIN build 
-used by Flash 10. 
-
 * Using SMP:
 
 When running a system with the SMP kernel and having the /SMP switch
@@ -159,14 +149,14 @@ To report bugs please visit http://svn.ecomstation.nl/flash10
 It's explained there what steps are needed and how to properly report a bug.
 
 
-How to uninstall Flash 10
-=========================
+How to uninstall Flash
+======================
 
-- Start Warpin.exe and select the 3 Flash 10 items in Warpin for uninstall.
+- Start Warpin.exe and select the 3 Flash items in Warpin for uninstall.
 
 - Restore previous plugin DLLs: 
 
-  When the Flash 10 installer detects Flash 5 (that ships with eComStation 
+  When the Flash installer detects Flash 5 (that ships with eComStation 
   1.2 and higher) in the plugin directory, it will rename it. The original 
   file is called npswf2.dll and will have been renamed to npswf2.dll.flash5.
   Remove the "flash5" portion from the file name so your old plugin will 
