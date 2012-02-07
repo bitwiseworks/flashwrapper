@@ -50,6 +50,6 @@ call lineout aOutFile, 'RCDATA NP_INFO_FileVersion { 'mozVersion' }'
  *
  *   call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash Wrapper for OS/2'mozBuild'\0" }'
  */
-call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash 10.0 r45\0" }'
+call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash 11.1 r102\0" }'
 
 call lineout aOutFile
