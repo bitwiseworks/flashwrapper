@@ -1,6 +1,4 @@
-#define INCL_NOBASEAPI
-#include <os2.h>
-#include <plugin_RCDefines.h>
+#include "plugin_RCDefines.h"
 
 /*
  * Icon
