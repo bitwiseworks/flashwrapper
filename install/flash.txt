@@ -1,26 +1,24 @@
-[ Flash Plugin wrapper for eComStation Technology Preview ]
+[ Flash Plugin Wrapper for eComStation Beta 1 ]
 
-This is a Technology Preview of the Flash Plugin wrapper for
-eComStation. It is intended to show the progress of this product
-and to give you an early experience of being able to use websites 
+This is the first Beta release of Flash Plugin Wrapper 
+for eComStation. It will enable you to use websites 
 implementing the latest Flash content.
 
 It is available to anyone with an active Software Subscription 
 Services for eComStation, via their download-area at the Mensys 
-Online Shop. http://www.mensys.net/login/
+Online Shop: http://www.mensys.net/login/
 
 
 Introduction
 ============
 
 The official Flash 5 included with eComStation is outdated and does not
-support video playback. The unoffocial Flash 7/9 release which can be
+support video playback. The unofficial Flash 7/9 release which can be
 found on the internet does not work on a lot of websites as it identifies 
 itself as Flash 9 but can only display Flash 7 content.
 
-With the new release of Flash we have up-to-date Flash support for 
-eComStation. This release also supports proper rendering of Flash text
-elements and Flash keyboard input works.
+With the new release of this Flash wrapper, up-to-date Flash support for 
+eComStation is provided. Currently it includes Flash Player 11.1.102.55.
 
 Note: This code should not be used on production systems. 
       Please make sure to have a proper backup of your system.
@@ -29,8 +27,9 @@ Note: This code should not be used on production systems.
 Requirements
 ============
 
-- Flash for eComStation requires eComStation version 1.2 or higher.  
-  On older versions of eComStation the Flash plugin will not work.
+- Flash Plugin Wrapper for eComStation requires eComStation version 1.2 
+  or higher. On older versions of eComStation the Flash plugin will refuse 
+  to work without notice.
 
 - Before installing the plugin please shutdown all your web browser
   sessions.  
@@ -50,15 +49,25 @@ Requirements
   unofficial Flash 7/9 release is found, The DLL's will be renamed so the
   web browser will no longer load the older versions (they will *not* be
   deleted).  
-  See the section "How to uninstall Flash" for more details.
+  See the section "How to uninstall Flash Plugin Wrapper" for more details.
 
-- This wrapper is using a regular ODIN build to run the Windows version
-  of the Flash plugin. This is the same ODIN build that is used to run
-  recent versions of Java for OS/2.
+- This wrapper requires Odin build 0.8.3 or higher. This or a later version 
+  can be found at the same download location as this package, or at Netlabs: 
+  ftp://ftp.netlabs.org/pub/odin/ 
+  ftp://ftp.netlabs.org/pub/odin/0.8.3/odin-0.8.3.zip
+
+- Odin requires GCC core 1.2.1 or higher. This or a later version 
+  can be found at the same download location as this package, or at Netlabs: 
+  ftp://ftp.netlabs.org/pub/libc/gcc4core-1_2_1.wpi
+
+- Odin requires LIBC 0.6.4 or higher. This or a later version 
+  can be found at the same download location as this package, or at Netlabs: 
+  ftp://ftp.netlabs.org/pub/libc/libc-0.6.4-csd4.wpi
 
 * Supported web browsers:
 
-- Firefox 2.0 or higher, including Firefox 3.x
+- Firefox 2.0 or higher, including Firefox 3.x, 4.x up to the latest releases
+  available
 - Seamonkey 
 - PmW-Fx (builds of the Firefox web browser by Peter Weilbacher)
 
@@ -73,7 +82,9 @@ Requirements
 
 * Supported audio drivers:
 
-- UNIAUD audio driver (please use latest UNIAUD from http://svn.netlabs.org/uniaud)
+- UNIAUD audio driver; please use the latest UNIAUD from 
+  http://svn.netlabs.org/uniaud or newer
+  (currently either Uniaud195-1924.zip or Uniaud195-211.zip)
 - The SB Live driver from Sander van Leeuwen
 - The Analog Devices AC 97 driver
 - The Cmedia 8738 driver by Rudiger Ihle
@@ -83,8 +94,7 @@ Requirements
 
 * Kernel:
 
-It is recommended to use eComStation with kernel 104a SMP/_W4. Higher 
-revisions of the kernel are not recommended.
+It is recommended to use eComStation with kernel 104a SMP/_W4 or higher. 
 
 With the bldlevel.exe command you should have something like this:
 
@@ -99,12 +109,21 @@ Description:     _SMP  IBM OS/2 Kernel
 Known limitations
 =================
 
-While this Flash build is reasonably stable it can sometimes crash your 
-web browser and in some occasions block the user input or hang the desktop.  
-If your keyboard and mouse input is blocked try to kill your web browser with 
-a process killer like Top (available via CAD handler in eComStation) or 
-Watchcat. As a last resort you may need to reboot your system by pressing 
-Ctrl-Alt-Del.
+* Stability:
+
+  While this Flash build is reasonably stable it can sometimes crash your 
+  web browser and in some occasions block the user input or hang the desktop.  
+  If your keyboard and mouse input is blocked try to kill your web browser 
+  with a process killer like Top (available via CAD handler in eComStation) 
+  or Watchcat. As a last resort you may need to reboot your system by pressing
+  Ctrl-Alt-Del.
+
+* Remove old Flash 10 Technology Preview from WarpIn:
+
+  Although not required, it is recommended to remove a possible existing Flash 10 
+  package from WarpIn prior to installation. This can be done by starting WarpIn 
+  (Desktop -> Local System -> Install/Remove -> WarpIN -> WarpIN) and 
+  right clicking the Flash 10 entry in the lefthand pane -> De-install all packages. 
 
 * Using SMP:
 
@@ -113,52 +132,44 @@ defined on the PSD=ACPI.PSD in your config.sys, this might result in
 rendering problems with the Panorama video driver, like:
 
 - some text in Flash content might not be displayed correctly
-- Flash video playback when running in 64k colour mode will have strange 
-  colour patterns rendered.
-  Switching to 16 million colours for the screen display fixes this problem
-- general stability is worse than when running in non-SMP mode
-
-These SMP issues are known and being worked on. This seems to be a defect 
-in the currently used customized ODIN code.
-
-* LIBPATHSTRICT: 
-
-The ODIN environment may handle the LIBPATHSTRICT option now. If not please
-disable it.
-LIBPATHSTRICT is for example used by Rich Walsh' utility RUN! and referring
-to your browser with a L in the filename (for example: firefox!L.exe)
-This restriction will be lifted in a future release.
-
-* Some websites like http://www.jibjab.com and http://www.joecartoon.com 
-  might crash the web browser.  
-
-* Some Flash menu items, when clicked on do not work. This is true for 
-  parts of Youtube movies.
+- when running in 64k colour mode, Flash video playback will have strange 
+  colour patterns rendered. Switching to 16 million colours for the screen
+  display fixes this problem. This problem does not occur with the Panorama
+  driver that was released in eComStation 2.0 GA.
 
 * When you right click on any SWF content and select 'settings' the dialog 
-  is corrupt or at least unusable.
+  may be corrupt or at least unusable. If the dialog cannot be closed it 
+  suffices to reload the webpage so the flash movie reinitializes. The 
+  settings dialog will disappear then.
 
-* Certain Flash content is not displayed, for example movies from CBS 
-  http://www.cbs.com/primetime/ncis/video/
+* Registry:
+
+  This release of the Flash Plugin Wrapper no longer uses the registry to 
+  find it's location. You can check with regedit2.exe if the key 
+  "Flash10_plugin" exists, but it should be removed by the installer. 
+  If it exists this is not a problem though.
 
 
 Reporting Bugs
 ==============
 
 To report bugs please visit http://svn.ecomstation.nl/flash10
-It's explained there what steps are needed and how to properly report a bug.
+Please follow the guidelines on what steps are needed in order to properly 
+report a bug.
 
 
-How to uninstall Flash
-======================
+How to uninstall Flash Plugin Wrapper for eComStation
+=====================================================
 
-- Start Warpin.exe and select the 3 Flash items in Warpin for uninstall.
+- Start Warpin.exe and select the 3 Flash Plugin Wrapper items in Warpin for 
+  uninstall.
 
 - Restore previous plugin DLLs: 
 
-  When the Flash installer detects Flash 5 (that ships with eComStation 
-  1.2 and higher) in the plugin directory, it will rename it. The original 
-  file is called npswf2.dll and will have been renamed to npswf2.dll.flash5.
+  When the Flash Plugin Wrapper installer detects Flash 5 (that ships with 
+  eComStation 1.2 and higher) in the plugin directory, it will rename it. The 
+  original file is called npswf2.dll and will have been renamed to 
+  npswf2.dll.flash5.
   Remove the "flash5" portion from the file name so your old plugin will 
   work again.
   If you had the "unofficial" flash 7/9 installed remove the ".flash7" 
@@ -223,7 +234,16 @@ Changelog
 21.09.2010
  - eComstation 2.0 support added
  - Enabled SMP again
- - build against latest ODIN
+ - built against latest ODIN
+
+07.02.2012
+ - Built with GCC 4.4.6
+ - Deduce Win32 plugin location from wrapper DLL location
+ - Locate Odin DLLs in a standard way through [BEGIN]LIBPATH by default
+ - Bump reported Flash version to 11.1 r102
+ - Bump wrapper version to 0.3.1
+ - Many Flash Plugin Wrapper specific fixes are present in Odin 0.8.2 and 
+   0.8.3, please see the changelog file of Odin.
 
 
 More information
@@ -233,7 +253,6 @@ Information on Software Subscription Services for eComStation can be found
 at: http://www.ecomstation.com/subscription/
 
 
-** (c) 2009-2010 Mensys BV **
+** (c) 2009-2012 Mensys BV **
 
 [eof]
-
