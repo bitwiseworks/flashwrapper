@@ -29,7 +29,14 @@
 # PATH_SDK_ODIN_LIB := D:/Coding/odin/odin32-build/os2.x86/release/stage/lib
 
 #
+# Path to the OS/2 Toolkit versoin 4.x. If not set, it is assumed that the
+# toolkit is accessible through the environment.
+#
+# PATH_SDK_OS2TK4 := D:/Dev/OS2TK45
+
+#
 # Path to the IBM Assembly Language Processor (may be found in the
-# OS/2 toolkit). Defaults to 'alp.exe'.
+# OS/2 toolkit). Defaults to '$(PATH_SDK_OS2TK4)/bin/alp.exe' if
+# PATH_SDK_OS2TK4 is set, or to 'alp.exe' otherwise.
 #
 # PATH_TOOL_ALP := alp.exe

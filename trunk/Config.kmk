@@ -88,5 +88,22 @@ endif
 #------------------------------------------------------------------------------
 
 ifeq ($(PATH_TOOL_ALP),)
+ifneq ($(PATH_SDK_OS2TK4),)
+PATH_TOOL_ALP := $(PATH_SDK_OS2TK4)/bin/alp.exe
+else
 PATH_TOOL_ALP := alp.exe
+endif
+endif
+
+ifneq ($(PATH_SDK_OS2TK4),)
+#
+# We can't add Toolkit includes in _INCS (it will casuse then to be searched
+# before GCC headers and lead to conflicts), so use -idirafter.
+#
+TEMPLATE_OdinCxx_CFLAGS    += -idirafter $(PATH_SDK_OS2TK4)/h
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
+#
+# INCLUDE is needed for ALP.
+#
+export INCLUDE := $(if $(INCLUDE),$(INCLUDE);)$(PATH_SDK_OS2TK4)/inc
 endif
