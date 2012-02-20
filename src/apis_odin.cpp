@@ -155,31 +155,31 @@ int registered_apis = 0;
 
 struct OdinEntryPoint aAPIs[] =
 {
-    {1, (void**)&pfnRegisterDummyExe,                  "_RegisterDummyExe@4", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnRegisterLxDll,                     "_RegisterLxDll@24", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnUnregisterLxDll,                   "_UnregisterLxDll@4", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnGetProcAddress,                    "GetProcAddress", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnLoadLibrary,                       "LoadLibraryA", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnFreeLibrary,                       "FreeLibrary", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnFindAtom,                          "GlobalFindAtomA", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnODIN_ThreadEnterOdinContext,       "_ODIN_ThreadEnterOdinContext@8", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnODIN_ThreadLeaveOdinContext,       "_ODIN_ThreadLeaveOdinContext@8", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnODIN_ThreadLeaveOdinContextNested, "_ODIN_ThreadLeaveOdinContextNested@8", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnODIN_ThreadEnterOdinContextNested, "_ODIN_ThreadEnterOdinContextNested@12", "KERNEL32.DLL", NULLHANDLE},
-    {1, (void**)&pfnSetFreeTypeIntegration,            "SetFreeTypeIntegration", "GDI32.DLL", NULLHANDLE},
-    {1, (void**)&pfnCreateFakeWindowEx,                "_CreateFakeWindowEx@8", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnDestroyFakeWindow,                 "_DestroyFakeWindow@4", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnRegisterClassA,                    "RegisterClassA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnGetWindowLongA,                    "GetWindowLongA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnSetWindowLongA,                    "SetWindowLongA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnSendMessageA,                      "SendMessageA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnCreateWindowExA,                   "CreateWindowExA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnDefWindowProcA,                    "DefWindowProcA", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnSetWindowPos,                      "SetWindowPos", "USER32.DLL", NULLHANDLE},
-    {0, (void**)&pfnGetDC,                             "GetDC", "USER32.DLL", NULLHANDLE},
-    {0, (void**)&pfnHPSToHDC,                          "_HPSToHDC", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnSetWindowAppearance,               "_SetWindowAppearance@4", "USER32.DLL", NULLHANDLE},
-    {1, (void**)&pfnEnableFlashAudio,                  "ODIN_EnableFlashAudio", "WINMM.DLL", NULLHANDLE},
+    {1, (void**)&pfnRegisterDummyExe,                  "_RegisterDummyExe@4", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnRegisterLxDll,                     "_RegisterLxDll@24", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnUnregisterLxDll,                   "_UnregisterLxDll@4", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnGetProcAddress,                    "GetProcAddress", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnLoadLibrary,                       "LoadLibraryA", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnFreeLibrary,                       "FreeLibrary", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnFindAtom,                          "GlobalFindAtomA", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadEnterOdinContext,       "_ODIN_ThreadEnterOdinContext@8", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadLeaveOdinContext,       "_ODIN_ThreadLeaveOdinContext@8", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadLeaveOdinContextNested, "_ODIN_ThreadLeaveOdinContextNested@8", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadEnterOdinContextNested, "_ODIN_ThreadEnterOdinContextNested@12", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnSetFreeTypeIntegration,            "SetFreeTypeIntegration", "GDI32", NULLHANDLE},
+    {1, (void**)&pfnCreateFakeWindowEx,                "_CreateFakeWindowEx@8", "USER32", NULLHANDLE},
+    {1, (void**)&pfnDestroyFakeWindow,                 "_DestroyFakeWindow@4", "USER32", NULLHANDLE},
+    {1, (void**)&pfnRegisterClassA,                    "RegisterClassA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnGetWindowLongA,                    "GetWindowLongA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnSetWindowLongA,                    "SetWindowLongA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnSendMessageA,                      "SendMessageA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnCreateWindowExA,                   "CreateWindowExA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnDefWindowProcA,                    "DefWindowProcA", "USER32", NULLHANDLE},
+    {1, (void**)&pfnSetWindowPos,                      "SetWindowPos", "USER32", NULLHANDLE},
+    {0, (void**)&pfnGetDC,                             "GetDC", "USER32", NULLHANDLE},
+    {0, (void**)&pfnHPSToHDC,                          "_HPSToHDC", "USER32", NULLHANDLE},
+    {1, (void**)&pfnSetWindowAppearance,               "_SetWindowAppearance@4", "USER32", NULLHANDLE},
+    {1, (void**)&pfnEnableFlashAudio,                  "ODIN_EnableFlashAudio", "WINMM", NULLHANDLE},
     //vladest        {0, (void**)&pfnJ2PluginHacks,                     "_J2PluginHacks@8"},
 };
 
@@ -228,6 +228,15 @@ BOOL    npResolveOdinAPIs(void)
      */
     ulSavedCodePage = WinQueryCp (HMQ_CURRENT);
     dprintf(("Codepage: %i", ulSavedCodePage));
+#endif
+
+#ifdef DEBUG
+    // CPREF says the length of Dos*ExtLIBPATH() (after expansion) is 1024 max
+    char szBigBuf[1024];
+    if (DosQueryExtLIBPATH(szBigBuf, BEGIN_LIBPATH) == NO_ERROR)
+        dprintf(("BEGINLIBPATH=%s", szBigBuf));
+    if (DosQueryExtLIBPATH(szBigBuf, 3) == NO_ERROR)
+        dprintf(("LIBPATHSTRICT=%c", szBigBuf[0]));
 #endif
 
     /*
