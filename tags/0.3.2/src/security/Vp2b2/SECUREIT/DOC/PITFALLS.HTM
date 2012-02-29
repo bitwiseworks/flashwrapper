@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+  <TITLE>SecureIt - Pitfalls to avoid</TITLE>
+</HEAD>
+<body background="backgrnd.gif" onLoad="parent.index.location.href='empty.htm'; return true">
+<h1>SecureIt - Pitfalls to avoid</h1>
+<p>
+Implementing good shareware protection is not without potential
+problems.  A few common pitfalls to avoid:
+<ul>
+<li>
+  When using callback and code patching, make sure that the code is
+  Based, ie always loaded at the same address in OS/2.  It is
+  possible to use Callback and Patching on code located in a DLL as
+  well, but the DLL must be based in order for this to work.
+<p>
+<li>
+  When using code patching, beware of relocatable code.  Do not attempt
+  to patch code that includes a call or jump instruction, since this
+  code may be relocated when the program is loaded and may not work
+  with patching.
+<p>
+<li>
+  SecureIt employs some anti-debugger tricks, that may keep a potential
+  pirate busy for a little while.  While you are writing and debugging
+  your application you must disable this, or your debugger will be
+  adversely affected as well. This is done by calling the <a
+  href="api.htm#KeyAllowDebugger">KeyAllowDebugger</a> API in the beginning of
+  your program, before any other Key* functions are called.
+
+<p>
+  Note, that even
+  <a href="api.htm#KeyAllowDebugger">KeyAllowDebugger</a> does not allow
+  you to debug the program if your debugger cannot be told to disregard
+  certain exceptions.  Even after
+  <a href="api.htm#KeyAllowDebugger">KeyAllowDebugger</a> has been called,
+  the SecureIt code will raise some exceptions, such as divide by zero,
+  and you must tell your debugger not to stop when encountering these.
+<p>
+  In Virtual Pascal, this is done by selecting the View->Exceptions
+  dialog, and unchecking XCPT_INTEGER_DIVIDE_BY_ZERO.  In Turbo
+  Debugger for OS/2, this is done by opening the CPU window, pressing
+  Ctrl-E, and setting Integer Divide By Zero exceptions to be handled
+  by the User program.  In IPMD, you should tell the debugger to let
+  the program handle the exception when one is encountered.
+<p>
+ Callback functions must not take any parameters.  Only functions
+ defined as
+<p>
+ Pascal:
+<pre>
+   procedure MyCallback;
+</pre>
+ C:
+<pre>
+   VOID MyCallback();
+</pre>
+ can be used as callback functions for SecureIt.
+<p>
+
+<li>
+  A call to <a href="api.htm#KeyAllowDebugger">KeyAllowDebugger</a> changes
+  some of the SecureIt DLL in memory.  Since OS/2 only loads a single
+  copy of a DLL even when multiple applications use it, it is not
+  possible to have two SecureIt applications running at the same time,
+  if one of them has called <a
+  href="api.htm#KeyAllowDebugger">KeyAllowDebugger</a> and the other has
+  not.
+
+<p>
+  Two or more applications that do not disable the anti-debugging code
+  of SecureIt can coexist without any problems.
+
+</ul>
+</body>
+</html>
