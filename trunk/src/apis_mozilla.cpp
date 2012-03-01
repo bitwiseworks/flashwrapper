@@ -333,11 +333,12 @@ BOOL    npResolveMozAPIs(void)
     for (i = 0; i < sizeof(aMods) / sizeof(aMods[0]); i++)
     {
         strcpy(pszName, aMods[i].pszDll);
+        strcat(pszName, ".DLL");
         aMods[i].hmod = NULLHANDLE;
         rc = DosLoadModule(NULL, 0, &szExeName[0], &aMods[i].hmod);
         if (rc)
         {
-            dprintf(("%s: DosLoadModule(0,0,%s,) -> %d", szFunction, &szExeName[0]));
+            dprintf(("%s: DosLoadModule(0,0,%s,) -> %d", szFunction, &szExeName[0], rc));
             fRc = FALSE;
             break;
         }
