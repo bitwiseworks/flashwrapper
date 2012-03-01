@@ -1,9 +1,0 @@
-The directory layout for create.cmd should be as folllows:
-
-12
-  eula.pdf
-  flash.lic
-  flash.txt
-  npflos2.dll
-13
-  npswf32.dll
