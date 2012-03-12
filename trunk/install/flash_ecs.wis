@@ -3,7 +3,7 @@
 	<TITLE>=("init")</TITLE>
 
         <REXX NAME="init">
-	 _title = "Flash Plugin Wrapper for eComStation Beta 1"
+	 _title = "Flash Plugin Wrapper for eComStation Beta 2"
 
 	 CrLf = '0d0a'x; _errmsg.1 = ''; _errmsg.2 = ''; _errmsg.3 = ''; _errors = 0
 
@@ -234,21 +234,25 @@
 
 	GetBrowserPath: procedure
 	  Browser=SysIni('USER','WPURLDEFAULTSETTINGS','DefaultBrowserExe')
-	  if Browser='ERROR:' then do
-	    Browser=SysIni('USER','Mozilla','Home')
-	      if Browser='ERROR:' then do
-	        rc=WirexxShowMessage('Browser lookup',,
-	        'The Mozilla/Firefox browser could not be found!')
-	        return 1
-	      end
-	  end
-	  else do
+	  if Browser><'ERROR:' then do
 	    exepos=lastpos('\',Browser)
 	    if exepos>0 then do
 	      Browser=left(Browser,exepos-1)
 	    end
 	    Browser=strip(Browser,'T','\')
-	  end /* Browser dir was found */
+	  end
+	  else do
+ 	   Browser=WirexxGetEnv('MOZILLA_HOME')
+	  if Browser='' then
+	   Browser=SysIni('USER','Mozilla','Home')
+	  if Browser='ERROR:' then do
+	        rc=WirexxShowMessage('Browser lookup',,
+	        'The Mozilla/Firefox browser could not be found!')
+	        return 1
+	  end
+	  Browser=strip(Browser,'T','\')
+	  Browser=Browser||'\Mozilla'
+	  end /* Browser directory not found in wpurldefaultsettings */
 	  return Browser
 
 	</REXX>
@@ -259,15 +263,14 @@
 	</VARPROMPT>
 
 		<PCK INDEX=12
-			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\3\1"
+			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\3\2"
 			TITLE="Flash Plugin Wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
-                        CREATEOBJECT="REPLACE WPFolder|Flash Plugin Wrapper for eComStation|<WP_APPSFOLDER>|ALWAYSSORT=YES;OBJECTID=<FLASH_FOR_ECS>;"
+                        CREATEOBJECT="REPLACE WPFolder|Flash Plugin Wrapper for eComStation|<WP_DESKTOP>|ALWAYSSORT=YES;OBJECTID=<FLASH_FOR_ECS>;"
                         CREATEOBJECT="REPLACE WPProgram|Flash Plugin Wrapper for eComStation^readme|<FLASH_FOR_ECS>|EXENAME=E.EXE;STARTUPDIR=$(12);PARAMETERS=flash.txt;OBJECTID=<FLASH_FOR_ECS_README>;"
-                        CREATEOBJECT="WPShadow|.|<WP_DESKTOP>|SHADOWID=<FLASH_FOR_ECS_SHADOW>;OBJECTID=<FLASH_FOR_ECS>;'
-		>Flash Plugin Wrapper 0.3.1 for eComStation
+		>Flash Plugin Wrapper 0.3.2 for eComStation
 		</PCK>
 
 		<PCK INDEX=13
