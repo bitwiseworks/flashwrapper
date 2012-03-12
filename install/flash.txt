@@ -1,8 +1,9 @@
-[ Flash Plugin Wrapper for eComStation Beta 1 ]
+[ Flash Plugin Wrapper for eComStation Beta 2 ]
 
-This is the first Beta release of Flash Plugin Wrapper 
+This is the second Beta release of Flash Plugin Wrapper 
 for eComStation. It will enable you to use websites 
-implementing the latest Flash content.
+implementing the latest Flash content. For a list of changes
+please refer to the end of this document.
 
 It is available to anyone with an active Software Subscription 
 Services for eComStation, via their download-area at the Mensys 
@@ -245,11 +246,13 @@ Changelog
  - Many Flash Plugin Wrapper specific fixes are present in Odin 0.8.2 and 
    0.8.3, please see the changelog file of Odin.
 
-29.02.2012
+01.03.2012
  - Bump wrapper version to 0.3.2
  - fixed a problem with Flash Plugin Wrapper not loaded when LIBPATHSTRICT
    was used (Tickets #46, #48)
-
+ - improved detection of Mozilla Plugin directory (Ticket #49)
+ - changed Warpin to create the Flash Plugin Wrapper folder on the desktop
+   (Ticket #50)
 
 More information
 ================
