@@ -7,11 +7,11 @@
 #------------------------------------------------------------------------------
 
 # Version: N.N.N[.N] where 1 <= N <= 127 (Mozilla requirement)
-PLUGIN_VERSION  = 0.3.3
+PLUGIN_VERSION  = 0.3.2
 
 # Build: Symbolic name like "Beta 1" (empty for GA builds). Ends with "test" in
 # intermediate builds
-PLUGIN_BUILD    = test
+PLUGIN_BUILD    = Beta 2
 
 #
 # Override handler for .asm files to compile them with the MASM-compilant tool
