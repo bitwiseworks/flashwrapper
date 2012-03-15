@@ -272,7 +272,7 @@ nsresult NS_NewGenericModule2(nsModuleInfo *info, nsIModule* *result)
     PTIB    ptib;
     DosGetInfoBlocks(&ptib, &ppib);
     pszName = GetBasename(strcpy(szXPCOM, ppib->pib_pchcmd));
-    strcpy(pszName, "XPCOM");
+    strcpy(pszName, "XPCOM.DLL");
     rc2 = DosLoadModule(NULL, 0, (PCSZ)szXPCOM, &hmod);
     if (!rc2)
     {

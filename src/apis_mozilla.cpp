@@ -333,6 +333,7 @@ BOOL    npResolveMozAPIs(void)
     for (i = 0; i < sizeof(aMods) / sizeof(aMods[0]); i++)
     {
         strcpy(pszName, aMods[i].pszDll);
+        // when we have a full path there must be an extension as well
         strcat(pszName, ".DLL");
         aMods[i].hmod = NULLHANDLE;
         rc = DosLoadModule(NULL, 0, &szExeName[0], &aMods[i].hmod);

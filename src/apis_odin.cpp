@@ -252,9 +252,15 @@ BOOL    npResolveOdinAPIs(void)
             strcpy(szPath, szOdinPath);
             strcat(szPath, "\\");
             strcat(szPath, aAPIs[i].pszModName);
+            // when we have a full path there must be an extension as well
+            strcat(szPath, ".DLL");
         }
         else
+        {
+            // otherwise there must be no extension (or the DLL won't be
+            // searched in LIBPATH in LIBPATHSTRICT=T mode)
             strcpy(szPath, aAPIs[i].pszModName);
+        }
 
         rc = DosLoadModule(szBuf, sizeof(szBuf), szPath, &aAPIs[i].modInst);
         if (rc && aAPIs[i].modInst == 0)
