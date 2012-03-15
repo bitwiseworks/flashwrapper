@@ -413,6 +413,7 @@ void *              NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, 
 BOOL _Optlink       NPJNIEqual(unsigned *pu, unsigned uSet, unsigned uCurrent);
 unsigned _System    npGetFS(void);
 unsigned _System    npRestoreOS2FS(void);
+unsigned _System    npSetFS(unsigned);
 
 /* internal debug stuff */
 int                 npdprintf(const char *pszFormat, ...);

@@ -33,16 +33,9 @@
 #define INCL_BASE
 #include <os2.h>
 
-#undef NPODIN
-
-#ifdef NPODIN
 #include "common.h"
-#else
-#define INCL_DEBUGONLY
-#include "nsPluginWrapper.h"
-#endif
 
-#ifdef NPODIN
+#ifdef ODIN_LOG
 /*******************************************************************************
 *   External Functions                                                         *
 *******************************************************************************/
@@ -53,7 +46,7 @@ int _System WriteLog(const char *, ...);
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#ifdef NPODIN
+#ifdef ODIN_LOG
 static const char szPrefix[] = "";
 #else
 static const char szPrefix[] = "";
@@ -65,9 +58,10 @@ static const char szPrefix[] = "";
  */
 int     npdprintf(const char *pszFormat, ...)
 {
-#if defined(NPODIN) && 0
+    // we may be called in the Win32, so switch to OS/2 before calling LIBC
     unsigned    selOldFS = npRestoreOS2FS();
-#else
+
+#ifndef ODIN_LOG
     static int      fInited = 0;
     static FILE *   phFile;
 #endif
@@ -92,7 +86,7 @@ int     npdprintf(const char *pszFormat, ...)
 #endif
     }
 
-#if defined(NPODIN) && 0
+#ifdef ODIN_LOG
     npSetFS(selOldFS);
     if (pfnWriteLog)
         pfnWriteLog("%s", &szMsg[0]);
@@ -123,6 +117,9 @@ int     npdprintf(const char *pszFormat, ...)
         fflush(phFile);
         //fclose(phFile);
     }
+
+    // restore the previous context
+    npSetFS(selOldFS);
 #endif
 
     return rc;
@@ -142,7 +139,7 @@ void _Optlink ReleaseInt3(unsigned uEAX, unsigned uEDX, unsigned uECX)
 }
 
 
-#ifdef NPODIN
+#if 0
 #ifdef DEBUG
 /**
  * Debug function which padds the stack.
