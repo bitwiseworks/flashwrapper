@@ -52,7 +52,6 @@ static const char szPrefix[] = "";
 static const char szPrefix[] = "";
 #endif
 
-
 /**
  * Writes to log.
  */
@@ -64,13 +63,47 @@ int     npdprintf(const char *pszFormat, ...)
 #ifndef ODIN_LOG
     static int      fInited = 0;
     static FILE *   phFile;
+    static ULONG    startTicks = 0;
+    static ULONG    startTime = 0;
 #endif
     char    szMsg[4096] = {0};
     int     rc;
     va_list args;
 
+#ifndef ODIN_LOG
+    if (!fInited)
+    {
+        fInited = 1;
+        phFile = fopen("npflos2.log", "w");
+        if (phFile)
+        {
+            DATETIME dt;
+            DosGetDateTime(&dt);
+            fprintf(phFile, "*** Log Opened on %04d-%02d-%02d %02d:%02d:%02d ***\n",
+                    dt.year, dt.month, dt.day, dt.hours, dt.minutes, dt.seconds);
+            fprintf(phFile, "*** Build Date: " __DATE__ " " __TIME__ " ***\n");
+
+            // initialize the current time counter
+            startTicks = WinGetCurrentTime(0);
+            startTime = dt.hours * 3600 + dt.minutes * 60 + dt.seconds;
+            startTime = (startTime * 1000) + dt.hundredths * 10;
+        }
+    }
+#endif
+
     strcpy(szMsg, szPrefix);
-    sprintf(szMsg, "(%x) ", WinGetCurrentTime(0));
+
+#ifndef ODIN_LOG
+    // get human readable time values
+    DWORD time = startTime + (WinGetCurrentTime(0) - startTicks);
+    DWORD h = (time / 3600000) % 24;
+    DWORD m = (time %= 3600000) / 60000;
+    DWORD s = (time %= 60000) / 1000;
+    DWORD ms = time % 1000;
+    sprintf(szMsg, "%02d:%02d:%02d.%03d: ", h, m, s, ms);
+#else
+    strcpy(szMsg, " ");
+#endif
 
     rc = strlen(szMsg);
     va_start(args, pszFormat);
@@ -98,19 +131,6 @@ int     npdprintf(const char *pszFormat, ...)
         szMsg[rc] = '\0';
     }
 
-    if (!fInited)
-    {
-        fInited = 1;
-        phFile = fopen("npflos2.log", "w");
-        if (phFile)
-        {
-            DATETIME dt;
-            DosGetDateTime(&dt);
-            fprintf(phFile, "*** Log Opened on %04d-%02d-%02d %02d:%02d:%02d ***\n",
-                    dt.year, dt.month, dt.day, dt.hours, dt.minutes, dt.seconds);
-            fprintf(phFile, "*** Build Date: " __DATE__ " " __TIME__ " ***\n");
-        }
-    }
     if (phFile)
     {
         fwrite(&szMsg[0], 1, rc, phFile);
