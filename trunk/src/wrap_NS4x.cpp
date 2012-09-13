@@ -83,7 +83,9 @@
             pInst->pOrgInstance = instance;                                         \
         }                                                                           \
         pInst->w32.ndata = pInst;                                                   \
-    }
+    }                                                                               \
+    dprintf(("%s: w32_instance=%p", szFunction, pInst ? &pInst->w32 : NULL));
+
 
 /** Get the 'correct' w32 instance pointer. */
 #define NP4XUP_W32_INSTANCE() \
@@ -103,10 +105,11 @@
     }                                                                               \
     else                                                                            \
     {                                                                               \
-        if ((char*)instance - __offsetof(NPLUGININSTANCE, w32) != (char*)pInst)       \
+        if ((char*)instance - __offsetof(NPLUGININSTANCE, w32) != (char*)pInst)     \
             dprintf(("%s: Bogus Instance Pointer pInst=%p, instance=%p!!!\n",       \
                      szFunction, pInst, instance));                                 \
-    }
+    }                                                                               \
+    dprintf(("%s: os2_instance=%p", szFunction, pInst ? pInst->pOrgInstance : NULL));
 
 /** Get the 'correct' netscape instance pointer. */
 #define NP4XDOWN_NS_INSTANCE() \
@@ -169,6 +172,7 @@
 #define INCL_BASE
 #include <os2.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -591,7 +595,7 @@ NPError NP_LOADDS np4xUp_NewStream(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller
     if (!rc)
         DPRINTF_STREAM(stream);
 
-    dprintf(("%s: leave rc=%d", szFunction, rc));
+    dprintf(("%s: leave rc=%d *stype=%d", szFunction, rc, *stype));
     return rc;
 }
 
@@ -635,6 +639,8 @@ int32_t NP_LOADDS np4xUp_WriteReady(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCalle
 }
 
 
+#define PRINTABLE_CHAR(ch) ((ch >= 32 && ch <= 127) ? ch : '.')
+
 int32_t NP_LOADDS np4xUp_Write(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPStream* stream, int32_t offset,
                                int32_t len, void* buffer)
 {
@@ -643,18 +649,40 @@ int32_t NP_LOADDS np4xUp_Write(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NP
              szFunction, pWrapper, instance, stream, offset, len, buffer));
     DPRINTF_STREAM(stream);
     NP4XUP_INSTANCE(FALSE);
-#if 0
+#ifdef DEBUG
     {
-        int i;
-        dprintf(("written buffer chunk: "));
-        for (i=0;i < 16;i++)
-            dprintf(("%02X",(unsigned char)*(((unsigned char*)buffer)+i+offset)));
-    }
-    {
-        int i;
-        dprintf(("without offset: "));
-        for (i=0;i < 16;i++)
-            dprintf(("%02X",(unsigned char)*(((unsigned char*)buffer)+i)));
+        enum { b_total = 256, b_line = 32,
+               len_line = b_line * 4 + 1 + 1,
+               num_line = (b_total + b_line - 1) / b_line,
+               len_total = len_line * num_line };
+        char str[len_total];
+        int off = 0;
+        for (int str_off = 0; str_off < len_total; str_off += len_line)
+        {
+            for (int i = 0; i < b_line; i++)
+            {
+                if (off < len)
+                {
+                    sprintf(str + str_off + i * 3, "%02X ", ((unsigned char *)buffer)[off]);
+                    str[str_off + b_line * 3 + 1 + i] = PRINTABLE_CHAR(((unsigned char *)buffer)[off]);
+                    off++;
+                }
+                else
+                {
+                    sprintf(str + str_off + i * 3, "   ", ((unsigned char *)buffer)[off]);
+                    str[str_off + b_line * 3 + 1 + i] = ' ';
+                }
+            }
+            str[str_off + b_line * 3] = ' ';
+            if (off == b_total || off == len)
+            {
+                str[str_off + b_line * 4 + 1] = '\0';
+                break;
+            }
+            else
+                str[str_off + b_line * 4 + 1] = '\n';
+        }
+        dprintf(("%s: first %d bytes of buffer:\n%s", szFunction, b_total, str));
     }
 #endif
     dprintf(("pfnWrite enter"));
@@ -1013,7 +1041,7 @@ void    NPW32CALLBACK np4xDown_Version(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvC
 NPError NPW32CALLBACK np4xDown_GetURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target, void* notifyData)
 {
     static const char szFunction[] = "np4xDown_GetURLNotify";
-    dprintf(("%s: enter - pWrapper=%p instance%p url=%p target=%p notifyData=%p",
+    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p target=%p notifyData=%p",
              szFunction, pWrapper, instance, url, target, notifyData));
     DPRINTF_STR(url);
     DPRINTF_STR(target);
