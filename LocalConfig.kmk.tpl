@@ -26,6 +26,7 @@
 # to $(PATH_SDK_ODIN)/lib).
 #
 # PATH_SDK_ODIN := D:/Coding/odin/odin32
+# PATH_SDK_ODIN_BIN := D:/Coding/odin/odin32-build/os2.x86/release/stage/bin
 # PATH_SDK_ODIN_LIB := D:/Coding/odin/odin32-build/os2.x86/release/stage/lib
 
 #
