@@ -359,7 +359,7 @@ extern HMODULE                  ghmodOurSelf;
 FARPROC WIN32API    odinGetProcAddress(HMODULE hInst, LPCSTR lpszProc);
 HMODULE WIN32API    odinLoadLibrary(LPCSTR lpszProc);
 BOOL WIN32API       odinFreeLibrary(HMODULE hInst);
-BOOL WIN32API       odinRegisterDummyExe(LPSTR pszExeName);
+BOOL WIN32API       odinRegisterDummyExeEx(LPSTR pszExeName, PVOID pResData);
 DWORD WIN32API      odinRegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData,
                                       DWORD MajorImageVersion, DWORD MinorImageVersion, DWORD Subsystem);
 BOOL WIN32API       odinUnregisterLxDll(HINSTANCE hInstance);

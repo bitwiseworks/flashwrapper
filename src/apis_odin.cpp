@@ -97,7 +97,7 @@ int (*_System            pfnWriteLog)(const char *pszFormat, ...);
 #define static //while debugging.
 
 /** Register Dummy Exe */
-static BOOL (*WIN32API          pfnRegisterDummyExe)(LPSTR pszExeName);
+static BOOL (*WIN32API          pfnRegisterDummyExeEx)(LPSTR pszExeName, PVOID pResData);
 /** RegisterLxDll */
 static DWORD (*WIN32API         pfnRegisterLxDll)(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData, DWORD MajorImageVersion,
                                                   DWORD MinorImageVersion, DWORD Subsystem);
@@ -155,7 +155,7 @@ int registered_apis = 0;
 
 struct OdinEntryPoint aAPIs[] =
 {
-    {1, (void**)&pfnRegisterDummyExe,                  "_RegisterDummyExe@4", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnRegisterDummyExeEx,                "_RegisterDummyExeEx@8", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnRegisterLxDll,                     "_RegisterLxDll@24", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnUnregisterLxDll,                   "_UnregisterLxDll@4", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnGetProcAddress,                    "GetProcAddress", "KERNEL32", NULLHANDLE},
@@ -308,11 +308,11 @@ BOOL    npResolveOdinAPIs(void)
  * LoadLibrary wrapper.
  * Assumes called from OS/2 context.
  */
-BOOL WIN32API       odinRegisterDummyExe(LPSTR pszExeName)
+BOOL WIN32API       odinRegisterDummyExeEx(LPSTR pszExeName, PVOID pResData)
 {
     BOOL fRc;
     ENTER_ODIN32_CONTEXT();
-    fRc = pfnRegisterDummyExe(pszExeName);
+    fRc = pfnRegisterDummyExeEx(pszExeName, pResData);
     LEAVE_ODIN32_CONTEXT();
     return fRc;
 }

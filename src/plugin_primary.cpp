@@ -98,6 +98,9 @@ NPODINWRAPPER   gPlugin =
 extern struct OdinEntryPoint aAPIs[];
 extern int                   registered_apis;
 
+// Win32 resource table (produced by wrc)
+extern DWORD firefoxfake_PEResTab;
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
@@ -359,7 +362,7 @@ BOOL    npInitTerm_Lazy(void)
     odinSetWindowAppearance( OS2_APPEARANCE_SYSMENU);
     // enable flash audio code
     odinEnableFlashAudio( TRUE);
-    
+
     // Register fake exe.
     char    szFakeName[CCHMAXPATH];
     PPIB    ppib;
@@ -368,12 +371,12 @@ BOOL    npInitTerm_Lazy(void)
     // this *must* include one or more '\\' !
     if (DosGetInfoBlocks(&ptib, &ppib) ||
         DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), szFakeName))
-        strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe"); 
+        strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe");
 
     dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
     //odinSetFreeTypeIntegration(TRUE);
-    if (!odinRegisterDummyExe(szFakeName)) {
-        dprintf(("npInitTerm_Lazy: odinRegisterDummyExe failed!"));
+    if (!odinRegisterDummyExeEx(szFakeName, &firefoxfake_PEResTab)) {
+        dprintf(("npInitTerm_Lazy: odinRegisterDummyExeEx failed!"));
         return FALSE;
     }
 
@@ -508,7 +511,7 @@ NPError OSCALL NP_Shutdown()
     return gPlugin.pfnNP_Shutdown(&gPlugin);
 }
 
-char * NP_GetMIMEDescription()
+const char * NP_GetMIMEDescription()
 {
     return gPlugin.pfnNP_GetMIMEDescription(&gPlugin);
 }
