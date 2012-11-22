@@ -1,0 +1,49 @@
+<HTML>
+
+<!-- Index for MakeKey.htm --!>
+
+<body background="backgrnd.gif">
+MakeKey Index
+<font size=-1>
+<p><a href="makekey.htm#top" target="text">About MakeKey</a>
+<p><a href="makekey.htm#config" target="text">Configuration keywords</a>
+<ul>
+  <li><a href="makekey.htm#debug" target="text">Debug</a>
+  <li><a href="makekey.htm#screenoutput" target="text">ScreenOutput</a>
+  <li><a href="makekey.htm#logfile" target="text">LogFile</a>
+  <li><a href="makekey.htm#programname" target="text">ProgramName</a>
+  <li><a href="makekey.htm#author" target="text">Author</a>
+  <li><a href="makekey.htm#reglogfile" target="text">RegLogFile</a>
+  <li><a href="makekey.htm#highasciicounts" target="text">HighAsciiCounts</a>
+  <li><a href="makekey.htm#rsaencodepassword" target="text">RSAEncodePassword</a>
+  <li><a href="makekey.htm#rsakeyfile" target="text">RSAKeyFile</a>
+  <li><a href="makekey.htm#useserialnumber" target="text">UseSerialNumber</a>
+  <li><a href="makekey.htm#getserialnumberfrom" target="text">GetSerialNumberFrom</a>
+  <li><a href="makekey.htm#nextserialnumber" target="text">NextSerialNumber</a>
+  <li><a href="makekey.htm#incrementserialnumber" target="text">IncrementSerialNumber</a>
+  <li><a href="makekey.htm#version" target="text">Version</a>
+  <li><a href="makekey.htm#uservalue" target="text">UserValue</a>
+  <li><a href="makekey.htm#callback" target="text">CallBack</a>
+  <li><a href="makekey.htm#codepatch" target="text">CodePatch</a>
+</ul>
+
+<p><a href="makekey.htm#MkTxt" target="text">Running MakeKey Text</a>
+<p><a href="makekey.htm#MkPM" target="text">Running MakeKey PM</a>
+<ul>
+  <li><a href="makekey.htm#settings" target="text">The MkPM Settings dialog</a>
+  <li><a href="makekey.htm#generate" target="text">Generating an MkClient</a>
+  <li><a href="makekey.htm#modify" target="text">How MkClient modifies itself</a>
+</ul>
+<p><a href="makekey.htm#MkClient" target="text">Running MkClient</a>
+<p><a href="makekey.htm#address" target="text">Addresses, Addresses</a>
+<ul>
+  <li><a href="makekey.htm#mapfile" target="text">The map file</a>
+  <li><a href="makekey.htm#debug" target="text">The debugger</a>
+  <li><a href="makekey.htm#dlls" target="text">DLLs</a>
+</ul>
+<p><a href="makekey.htm#passwords" target="text">The password strings</a>
+<p><a href="makekey.htm#example" target="text">An example of a MakeKey .KEY file</a>
+
+</font>
+</body>
+</html>
