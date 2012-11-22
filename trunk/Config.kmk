@@ -89,8 +89,8 @@ KBUILD_SDK_PATHS           += $(PATH_ROOT)
 TEMPLATE_Base               = Odin C/C++ sources
 TEMPLATE_Base_TOOL          = GXX3OMF
 TEMPLATE_Base_SDKS          = ODIN
-TEMPLATE_Base_INCS          = $(PATH_ROOT)/include/include/plugin \
-                              $(PATH_ROOT)/include/sdk/nspr/include
+TEMPLATE_Base_INCS          = $(PATH_ROOT)/include/mozilla/plugin \
+                              $(PATH_ROOT)/include/mozilla/nspr
 ## @todo need?
 #TEMPLATE_Base_DEFS          = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR
 TEMPLATE_Base_DEFS          = OS2EMX_PLAIN_CHAR NPODIN
