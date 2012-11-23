@@ -188,22 +188,29 @@
  */
 typedef struct _NP32PluginFuncs
 {
-    uint16_t                     size;
-    uint16_t                     version;
-    NPError     (* NP32_LOADDS pfnNew)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
-    NPError     (* NP32_LOADDS pfnDestroy)(NPP instance, NPSavedData** save);
-    NPError     (* NP32_LOADDS pfnSetWindow)(NPP instance, NPWindow* window);
-    NPError     (* NP32_LOADDS pfnNewStream)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
-    NPError     (* NP32_LOADDS pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
-    void        (* NP32_LOADDS pfnStreamAsFile)(NPP instance, NPStream* stream, const char* fname);
-    int32_t     (* NP32_LOADDS pfnWriteReady)(NPP instance, NPStream* stream);
-    int32_t     (* NP32_LOADDS pfnWrite)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
-    void        (* NP32_LOADDS pfnPrint)(NPP instance, NPPrint* platformPrint);
-    int16_t     (* NP32_LOADDS pfnHandleEvent)(NPP instance, void* event);
-    void        (* NP32_LOADDS pfnURLNotify)(NPP instance, const char* url, NPReason reason, void* notifyData);
-    void*       javaClass;
-    NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPPVariable variable, void *ret_alue);
-    NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPNVariable variable, void *ret_alue);
+    uint16_t size;
+    uint16_t version;
+    union
+    {
+        struct
+        {
+            NPError     (* NP32_LOADDS pfnNew)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
+            NPError     (* NP32_LOADDS pfnDestroy)(NPP instance, NPSavedData** save);
+            NPError     (* NP32_LOADDS pfnSetWindow)(NPP instance, NPWindow* window);
+            NPError     (* NP32_LOADDS pfnNewStream)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+            NPError     (* NP32_LOADDS pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
+            void        (* NP32_LOADDS pfnStreamAsFile)(NPP instance, NPStream* stream, const char* fname);
+            int32_t     (* NP32_LOADDS pfnWriteReady)(NPP instance, NPStream* stream);
+            int32_t     (* NP32_LOADDS pfnWrite)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
+            void        (* NP32_LOADDS pfnPrint)(NPP instance, NPPrint* platformPrint);
+            int16_t     (* NP32_LOADDS pfnHandleEvent)(NPP instance, void* event);
+            void        (* NP32_LOADDS pfnURLNotify)(NPP instance, const char* url, NPReason reason, void* notifyData);
+            void*       javaClass;
+            NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPPVariable variable, void *ret_alue);
+            NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPNVariable variable, void *ret_alue);
+        };
+        PFN functions[0];
+    };
 } NP32PluginFuncs;
 
 
@@ -266,7 +273,7 @@ typedef struct _PluginFuncsWrapper
     char                uaPadding1[8];
 
     /** Stub code for each handler. */
-    struct PluginFuncStuc
+    struct Stub
     {
         char            chPush;
         void *          pvImm32bit;
@@ -275,12 +282,11 @@ typedef struct _PluginFuncsWrapper
         char            chPopEcx;
         char            chRet;
         char            achMagic[4];    /* 0xcccccccc */
-    }   aStubs[32];
+    }   *pStubs;
 
     /** The stuff we present to the Win32 side. */
-    NP32PluginFuncs     w32;
-    /** Safety paddings */
-    unsigned            auPadding2[64];
+    NP32PluginFuncs *w32;
+
 } NPLUGINFUNCSWRAPPER,  *PNPLUGINFUNCSWRAPPER;
 
 
@@ -426,7 +432,7 @@ NPError NP_LOADDS np4xUp_New(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPMI
      */
     dprintf(("pfnNew enter"));
     NP4XUP_ENTER_ODIN(FALSE);
-    NPError rc = pWrapper->w32.pfnNew(pluginType, NP4XUP_W32_INSTANCE(), mode, argc, argn, argv, saved);
+    NPError rc = pWrapper->w32->pfnNew(pluginType, NP4XUP_W32_INSTANCE(), mode, argc, argn, argv, saved);
     NP4XUP_LEAVE_ODIN(FALSE);
     dprintf(("pfnNew leave"));
     /*
@@ -453,7 +459,7 @@ NPError NP_LOADDS np4xUp_Destroy(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, 
 
     dprintf(("pfnDestroy enter"));
     NP4XUP_ENTER_ODIN(FALSE);
-    NPError rc = pWrapper->w32.pfnDestroy(NP4XUP_W32_INSTANCE(), save);
+    NPError rc = pWrapper->w32->pfnDestroy(NP4XUP_W32_INSTANCE(), save);
     NP4XUP_LEAVE_ODIN(FALSE);
     dprintf(("pfnDestroy leave"));
 
@@ -519,10 +525,10 @@ NPError NP_LOADDS np4xUp_SetWindow(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller
     //if (window->y < 0) window->y = 0;
     //if (pWindow->y < 0) pWindow->y = 0;
     //////////////////////////////////
-    dprintf(("pfnSetWindow enter. address %08X", pWrapper->w32.pfnSetWindow));
+    dprintf(("pfnSetWindow enter. address %08X", pWrapper->w32->pfnSetWindow));
     NP4XUP_ENTER_ODIN(FALSE);
     NPError rc = 1;
-    rc = pWrapper->w32.pfnSetWindow(NP4XUP_W32_INSTANCE(), pWindow);
+    rc = pWrapper->w32->pfnSetWindow(NP4XUP_W32_INSTANCE(), pWindow);
     NP4XUP_LEAVE_ODIN(FALSE);
     dprintf(("pfnSetWindow leave"));
     #if 0
@@ -563,7 +569,7 @@ NPError NP_LOADDS np4xUp_NewStream(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller
 
     NP4XUP_ENTER_ODIN(FALSE);
     dprintf(("pfnNewStream enter"));
-    NPError rc = pWrapper->w32.pfnNewStream(NP4XUP_W32_INSTANCE(), type, stream, seekable, stype);
+    NPError rc = pWrapper->w32->pfnNewStream(NP4XUP_W32_INSTANCE(), type, stream, seekable, stype);
     dprintf(("pfnNewStream leave"));
     NP4XUP_LEAVE_ODIN(FALSE);
 
@@ -585,7 +591,7 @@ NPError NP_LOADDS np4xUp_DestroyStream(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCa
 
     NP4XUP_ENTER_ODIN(FALSE);
     dprintf(("pfnDestroyStream enter"));
-    NPError rc = pWrapper->w32.pfnDestroyStream(NP4XUP_W32_INSTANCE(), stream, reason);
+    NPError rc = pWrapper->w32->pfnDestroyStream(NP4XUP_W32_INSTANCE(), stream, reason);
     dprintf(("pfnDestroyStream leave"));
     NP4XUP_LEAVE_ODIN(FALSE);
 
@@ -604,7 +610,7 @@ int32_t NP_LOADDS np4xUp_WriteReady(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCalle
 
     dprintf(("pfnWriteReady enter"));
     NP4XUP_ENTER_ODIN(FALSE);
-    int32_t rc = pWrapper->w32.pfnWriteReady(NP4XUP_W32_INSTANCE(), stream);
+    int32_t rc = pWrapper->w32->pfnWriteReady(NP4XUP_W32_INSTANCE(), stream);
     NP4XUP_LEAVE_ODIN(FALSE);
     dprintf(("pfnWriteReady leave"));
 
@@ -662,7 +668,7 @@ int32_t NP_LOADDS np4xUp_Write(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NP
 #endif
     dprintf(("pfnWrite enter"));
     NP4XUP_ENTER_ODIN(FALSE);
-    int32_t rc = pWrapper->w32.pfnWrite(NP4XUP_W32_INSTANCE(), stream, offset, len, buffer);
+    int32_t rc = pWrapper->w32->pfnWrite(NP4XUP_W32_INSTANCE(), stream, offset, len, buffer);
     NP4XUP_LEAVE_ODIN(FALSE);
     dprintf(("pfnWrite leave"));
     DPRINTF_STREAM(stream);
@@ -683,7 +689,7 @@ void    NP_LOADDS np4xUp_StreamAsFile(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCal
 
     NP4XUP_ENTER_ODIN(FALSE);
     dprintf(("pfnStreamAsFile enter"));
-    pWrapper->w32.pfnStreamAsFile(NP4XUP_W32_INSTANCE(), stream, fname);
+    pWrapper->w32->pfnStreamAsFile(NP4XUP_W32_INSTANCE(), stream, fname);
     dprintf(("pfnStreamAsFile leave"));
     NP4XUP_LEAVE_ODIN(FALSE);
 
@@ -731,7 +737,7 @@ void    NP_LOADDS np4xUp_Print(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NP
         &&  platformPrint->print.fullPrint.platformPrint == NULL)
     {   /* assumes struct is 100% idendical on windows. */
         dprintf(("*simple printing case*"));
-        pWrapper->w32.pfnPrint(NP4XUP_W32_INSTANCE(), platformPrint);
+        pWrapper->w32->pfnPrint(NP4XUP_W32_INSTANCE(), platformPrint);
     }
     else
     {
@@ -740,7 +746,7 @@ void    NP_LOADDS np4xUp_Print(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NP
          */
 #if 0
         ReleaseInt3(0x44440001,0x44440001,0x44440001);
-        pWrapper->w32.pfnPrint(NP4XUP_W32_INSTANCE(), platformPrint);
+        pWrapper->w32->pfnPrint(NP4XUP_W32_INSTANCE(), platformPrint);
 #endif
     }
     NP4XUP_LEAVE_ODIN(FALSE);
@@ -761,7 +767,7 @@ int16_t NP_LOADDS np4xUp_HandleEvent(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCall
     ReleaseInt3(0x44440002,0x44440002,0x44440002);
 
     NP4XUP_ENTER_ODIN(FALSE);
-    NPError rc = pWrapper->w32.pfnHandleEvent(NP4XUP_W32_INSTANCE(), event);
+    NPError rc = pWrapper->w32->pfnHandleEvent(NP4XUP_W32_INSTANCE(), event);
     NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintf(("%s: leave rc=%d", szFunction, rc));
@@ -780,7 +786,7 @@ void    NP_LOADDS np4xUp_URLNotify(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller
     NP4XUP_INSTANCE(FALSE);
 
     NP4XUP_ENTER_ODIN(FALSE);
-    pWrapper->w32.pfnURLNotify(NP4XUP_W32_INSTANCE(), url, reason, notifyData);
+    pWrapper->w32->pfnURLNotify(NP4XUP_W32_INSTANCE(), url, reason, notifyData);
     NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintf(("%s: leave", szFunction));
@@ -795,7 +801,7 @@ void*   NP_LOADDS np4xUp_GetJavaClass(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCal
 
     NP4XUP_ENTER_ODIN(FALSE);
     ReleaseInt3(0x44440003,0x44440003,0x44440003);
-    void* rc = 0;// = pWrapper->w32.pfnGetJavaClass();
+    void* rc = 0;// = pWrapper->w32->pfnGetJavaClass();
     NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintf(("%s: leave rc=%p", szFunction, rc));
@@ -830,7 +836,7 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     if (variable <= NPPVpluginKeepLibraryInMemory)
     {
         NP4XUP_ENTER_ODIN(FALSE);
-        rc = pWrapper->w32.pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
+        rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
         NP4XUP_LEAVE_ODIN(FALSE);
         if (!rc)
         {
@@ -855,7 +861,7 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
                         struct nsID *pnsID = NULL;
                         dprintf(("%s: *(void**)value=%p", szFunction, *(void**)value));
                         NP4XUP_ENTER_ODIN(FALSE);
-                        NPError rc = pWrapper->w32.pfnGetValue(NP4XUP_W32_INSTANCE(), NPPVpluginScriptableIID, (void*)&pnsID);
+                        NPError rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), NPPVpluginScriptableIID, (void*)&pnsID);
                         NP4XUP_LEAVE_ODIN(FALSE);
                         if (!rc && VALID_PTR(pnsID))
                         {
@@ -911,7 +917,7 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
         InstanceData* instanceData = instance->pdata;
         NPObject* object = instanceData->scriptableObject;
         NP4XUP_ENTER_ODIN(FALSE);
-        rc = pWrapper->w32.pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
+        rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
         NP4XUP_LEAVE_ODIN(FALSE);
 #endif
     }
@@ -979,7 +985,7 @@ NPError NP_LOADDS np4xUp_SetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     }
 
     NP4XUP_ENTER_ODIN(FALSE);
-    NPError rc = pWrapper->w32.pfnSetValue(NP4XUP_W32_INSTANCE(), variable, value);
+    NPError rc = pWrapper->w32->pfnSetValue(NP4XUP_W32_INSTANCE(), variable, value);
     NP4XUP_LEAVE_ODIN(FALSE);
     if (!rc && VALID_PTR(value))
         dprintf(("%s: *(void**)value=%p", szFunction, *(void**)value));
@@ -988,6 +994,33 @@ NPError NP_LOADDS np4xUp_SetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     return rc;
 }
 
+
+/**
+ * Stub for not implemented functions.
+ *
+ * @param ordinal   Ordinal function number.
+ */
+void NP_LOADDS np4xUp_NotImplementedStub(int ordinal)
+{
+    dprintf(("%s: enter - ordinal=%d", __FUNCTION__, ordinal));
+
+    char msg[512];
+    snprintf(msg, sizeof(msg),
+             "The browser has called a Flash plugin function with ordinal %d which is not supported by this version of the Flash plugin wrapper.\n\n"
+             "Please report the following information to the vendor:\n"
+             "- Flash movie URL;\n"
+             "- Flash plugin wrapper version;\n"
+             "- Flash plugin DLL version;\n"
+             "- Browser version.\n\n"
+             "The application will now terminate.",
+             ordinal);
+
+    WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
+
+    dprintf(("%s: Terminating the application.", __FUNCTION__));
+    exit(333);
+    return;
+}
 
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -1534,7 +1567,7 @@ void NP32_LOADDS np4xDown_NotImplementedStub(int ordinal)
 
     WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
 
-    dprintf(("Terminating the application."));
+    dprintf(("%s: Terminating the application.", __FUNCTION__));
     exit(333);
     return;
 }
@@ -1574,9 +1607,23 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
     }
 
     /*
-     * Ok. Here we must create an blank wrapper for this callback table.
+     * Create wrapper for the function table.
+     *      Allocate.
+     *      Initiate it.
+     *      Create stubs.
      */
-    PNPLUGINFUNCSWRAPPER pWrapper = (PNPLUGINFUNCSWRAPPER)malloc(sizeof(NPLUGINFUNCSWRAPPER));
+
+    size_t funcCnt = (pCallbacks->size - sizeof(NPPluginFuncs::size) - sizeof(NPPluginFuncs::version)) / sizeof(PFN);
+
+    size_t w32StructSize = sizeof(NP32PluginFuncs::size) + sizeof(NP32PluginFuncs::version) + funcCnt * sizeof(PFN);
+
+    dprintf(("%s: pCallbacks->version=%d pCallbacks->size=%d funcCnt=%u w32StructSize=%u", szFunction, pCallbacks->version, pCallbacks->size, funcCnt, w32StructSize));
+
+    // allocate the main struct with space enough for NPLUGINFUNCSWRAPPER::Stub[funcCnt] and
+    // NP32PluginFuncs (i.e. incluing the functions we don't currently implement)
+    size_t totalStructSize = sizeof(NPLUGINFUNCSWRAPPER) + sizeof(NPLUGINFUNCSWRAPPER::Stub) * funcCnt + w32StructSize;
+
+    PNPLUGINFUNCSWRAPPER pWrapper = (PNPLUGINFUNCSWRAPPER)malloc(totalStructSize);
     if (!pWrapper)
     {
         dprintf(("%s: out of memory! Can't allocate wrapper!", szFunction));
@@ -1584,70 +1631,94 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
         return NPERR_OUT_OF_MEMORY_ERROR;
     }
 
-    memset(pWrapper, 0, sizeof(*pWrapper));
+    memset(pWrapper, 0, totalStructSize);
+
+    // set up pointers to function tables following the main struct
+    pWrapper->w32 = (NP32PluginFuncs *) (pWrapper + 1);
+    pWrapper->pStubs = (NPLUGINFUNCSWRAPPER::Stub *)(((char *)pWrapper->w32) + w32StructSize);
+
+    pWrapper->w32->size = pCallbacks->size;
+    pWrapper->w32->version = pCallbacks->version;
+
     pWrapper->pNative = pCallbacks;
-    memcpy(&pWrapper->w32, pCallbacks, sizeof(*pCallbacks));
-    dprintf(("%s: pCallback->version=%d pCallback->size=%d", szFunction, pCallbacks->version, pCallbacks->size));
-    for (int iPadding = 0; iPadding < sizeof(pWrapper->auPadding2) / sizeof(pWrapper->auPadding2[0]); iPadding++)
-        pWrapper->auPadding2[iPadding] = 0xbadd0000 | iPadding;
+
+    PFN *nativeFuncs = (PFN *) (&pCallbacks->version + 1);
+
+    // fill up the native function table with dummy stubs as flags (wrappers for implemented functions will overwrite them below and all dummy stubs will be replaced by a special callback sequence)
+    for (size_t i = 0; i < funcCnt; ++i)
+        nativeFuncs[i] = (PFN)&np4xUp_NotImplementedStub;
+
+    // fill up the function table with wrappers
+    PFN implementedWrappers[] =
+    {
+        (PFN)&np4xUp_New,
+        (PFN)&np4xUp_Destroy,
+        (PFN)&np4xUp_SetWindow,
+        (PFN)&np4xUp_NewStream,
+        (PFN)&np4xUp_DestroyStream,
+        (PFN)&np4xUp_StreamAsFile,
+        (PFN)&np4xUp_WriteReady,
+        (PFN)&np4xUp_Write,
+        (PFN)&np4xUp_Print,
+        (PFN)&np4xUp_HandleEvent,
+        (PFN)&np4xUp_URLNotify,
+        (PFN)&pCallbacks->javaClass,
+        (PFN)&np4xUp_GetValue,
+        (PFN)&np4xUp_SetValue,
+    };
+
+    enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
+
+    dprintf(("%s: will create not-implemented stubs for %d functions", szFunction, funcCnt - implementedWrappersCnt));
 
     /*
      * Call Real worker in Odin context.
      */
     unsigned ExceptionRegRec[2] = {0,0};
     USHORT selFSOld = pfnODIN_ThreadEnterOdinContext(&ExceptionRegRec[0], TRUE);
-    rc = pPlugin->pfnW32NP_GetEntryPoints(&pWrapper->w32);
+    rc = pPlugin->pfnW32NP_GetEntryPoints(pWrapper->w32);
     pfnODIN_ThreadLeaveOdinContext(&ExceptionRegRec[0], selFSOld);
     ExceptionRegRec[0] = ExceptionRegRec[1] = 0;
     if (!rc)
     {
-        pCallbacks->javaClass = pWrapper->w32.javaClass;
+        pCallbacks->javaClass = pWrapper->w32->javaClass;
 
-        /*
-         * Now we must create the wrapper stubs and fill it in. (this sucks)
-         * (I don't care using offsets of the pfns here, that just make it totaly unreable.)
-         * @todo put this into a function use by both wrapper creators and use fixed struct offsets
-         *       instead of creating the aStub on the stack.
-         */
-        struct GenerateStub
+        for (size_t i = 0; i < implementedWrappersCnt; ++i)
         {
-            /** Pointer to the wrapper function. */
-            void *  pfnWrapper;
-            /** Pointer to the wrapped function entry. */
-            void ** ppfnReal;
-            /** Where to put the stub pointer. */
-            void ** ppfn;
-        }   aStubs[] =
-        {
-            {(void*)np4xUp_New,             (void**)&pWrapper->w32.pfnNew,           (void**)&pCallbacks->newp },
-            {(void*)np4xUp_Destroy,         (void**)&pWrapper->w32.pfnDestroy,       (void**)&pCallbacks->destroy },
-            {(void*)np4xUp_SetWindow,       (void**)&pWrapper->w32.pfnSetWindow,     (void**)&pCallbacks->setwindow },
-            {(void*)np4xUp_NewStream,       (void**)&pWrapper->w32.pfnNewStream,     (void**)&pCallbacks->newstream },
-            {(void*)np4xUp_DestroyStream,   (void**)&pWrapper->w32.pfnDestroyStream, (void**)&pCallbacks->destroystream },
-            {(void*)np4xUp_StreamAsFile,    (void**)&pWrapper->w32.pfnStreamAsFile,  (void**)&pCallbacks->asfile },
-            {(void*)np4xUp_WriteReady,      (void**)&pWrapper->w32.pfnWriteReady,    (void**)&pCallbacks->writeready },
-            {(void*)np4xUp_Write,           (void**)&pWrapper->w32.pfnWrite,         (void**)&pCallbacks->write },
-            {(void*)np4xUp_Print,           (void**)&pWrapper->w32.pfnPrint,         (void**)&pCallbacks->print },
-            {(void*)np4xUp_HandleEvent,     (void**)&pWrapper->w32.pfnHandleEvent,   (void**)&pCallbacks->event },
-            {(void*)np4xUp_URLNotify,       (void**)&pWrapper->w32.pfnURLNotify,     (void**)&pCallbacks->urlnotify },
-            {(void*)np4xUp_GetValue,        (void**)&pWrapper->w32.pfnGetValue,      (void**)&pCallbacks->getvalue },
-            {(void*)np4xUp_SetValue,        (void**)&pWrapper->w32.pfnSetValue,      (void**)&pCallbacks->setvalue },
-        };
-        int i;
-        for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
-        {
-            memset(pWrapper->aStubs[i].achMagic, 0xcc, sizeof(pWrapper->aStubs[i].achMagic));
-            pWrapper->aStubs[i].chPush      = 0x68;
-            pWrapper->aStubs[i].pvImm32bit  = pWrapper;
-            pWrapper->aStubs[i].chCall      = 0xe8;
-            pWrapper->aStubs[i].offRel32bit = ((char*)aStubs[i].pfnWrapper - (char*)&pWrapper->aStubs[i].offRel32bit - 4);
-            pWrapper->aStubs[i].chPopEcx    = 0x59;
-            pWrapper->aStubs[i].chRet       = 0xc3;
-            *aStubs[i].ppfn = *aStubs[i].ppfnReal ? (void*)&pWrapper->aStubs[i] : NULL;
-            //dprintf(("%s: Win32 NP func pointer: %08X", szFunction, *(ULONG*)(*aStubs[i].ppfn)));
+            if (implementedWrappers[i] == NULL ||
+                implementedWrappers[i] == (PFN)&pCallbacks->javaClass)
+                continue;
+
+            pWrapper->pStubs[i].chPush      = 0x68;
+            pWrapper->pStubs[i].pvImm32bit  = pWrapper;
+            pWrapper->pStubs[i].chCall      = 0xe8;
+            pWrapper->pStubs[i].offRel32bit = (char*)implementedWrappers[i] - (char*)&pWrapper->pStubs[i].offRel32bit - 4;
+            pWrapper->pStubs[i].chPopEcx    = 0x59;
+            pWrapper->pStubs[i].chRet       = 0xc3;
+
+            // point to a stub only if plugin provides a function, otherwise set it also to NULL
+            nativeFuncs[i] = pWrapper->w32->functions[i] != NULL ? (PFN)&pWrapper->pStubs[i] : NULL;
+
+            memset(pWrapper->pStubs[i].achMagic, 0xcc, sizeof(pWrapper->pStubs[i].achMagic));
         }
-        memset(&pWrapper->aStubs[i], 0xcc,
-               (char*)&pWrapper->aStubs[sizeof(pWrapper->aStubs) / sizeof(pWrapper->aStubs[0])] - (char*)&pWrapper->aStubs[i]); /* nice, eh? */
+
+        // set up stubs stubs for unused functions
+        for (size_t i = 0; i < funcCnt; ++i)
+        {
+            if (nativeFuncs[i] == (PFN)&np4xUp_NotImplementedStub)
+            {
+                pWrapper->pStubs[i].chPush      = 0x68;
+                pWrapper->pStubs[i].pvImm32bit  = (void *)i;
+                pWrapper->pStubs[i].chCall      = 0xe8;
+                pWrapper->pStubs[i].offRel32bit = (char *)&np4xUp_NotImplementedStub - (char *)&pWrapper->pStubs[i].offRel32bit - 4;
+                pWrapper->pStubs[i].chPopEcx    = 0x59;
+                pWrapper->pStubs[i].chRet       = 0xc3;
+
+                nativeFuncs[i] = (PFN)&pWrapper->pStubs[i];
+
+                memset(pWrapper->pStubs[i].achMagic, 0xcc, sizeof(pWrapper->pStubs[i].achMagic));
+            }
+        }
 
         /** @todo Insert the wrapper into a list. */
 
@@ -1667,7 +1738,6 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
     NPXP_ASSERT_OS2FS();
     return rc;
 }
-
 
 
 NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER pPlugin)
@@ -1707,7 +1777,7 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
 
     size_t funcCnt = (pFuncs->size - sizeof(NPNetscapeFuncs::size) - sizeof(NPNetscapeFuncs::version)) / sizeof(PFN);
 
-    size_t w32StructSize = sizeof(_NP32NetscapeFuncs::size) + sizeof(_NP32NetscapeFuncs::version) + funcCnt * sizeof(PFN);
+    size_t w32StructSize = sizeof(NP32NetscapeFuncs::size) + sizeof(NP32NetscapeFuncs::version) + funcCnt * sizeof(PFN);
 
     dprintf(("%s: pFuncs->version=%d pFuncs->size=%d funcCnt=%u w32StructSize=%u", szFunction, pFuncs->version, pFuncs->size, funcCnt, w32StructSize));
 
@@ -1733,6 +1803,8 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
     pWrapper->w32->version = pFuncs->version;
 
     pWrapper->pNative = pFuncs;
+
+    PFN *nativeFuncs = (PFN *) (&pFuncs->version + 1);
 
     // fill up the w32 function table with dummy stubs as flags (wrappers for implemented functions will overwrite them below and all dummy stubs will be replaced by a special callback sequence)
     for (size_t i = 0; i < funcCnt; ++i)
@@ -1766,7 +1838,7 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
 
-    PFN *nativeFuncs = (PFN *) (&pFuncs->version + 1);
+    dprintf(("%s: will create not-implemented stubs for %d functions", szFunction, funcCnt - implementedWrappersCnt));
 
     for (size_t i = 0; i < implementedWrappersCnt; ++i)
     {
