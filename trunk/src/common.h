@@ -68,11 +68,8 @@
 /** PR calling convention */
 #define PRCALL
 
-/** Plugin Export Calling Convention for Win32. */
-#define NPW32CALL   __cdecl
-
 /** Plugin v4 Export Calling Convention for Win32. */
-#define NP4W32CALL  __stdcall
+#define W32OSCALL __stdcall // WINAPI
 
 /** The ordinal number of the npGenericInit() export. */
 #define NP_ORD_NPGENERICINIT        100
@@ -223,9 +220,7 @@ typedef struct NPOdinPluginWrapper *PNPODINWRAPPER;
 *******************************************************************************/
 #ifdef INCL_NS4X
 
-extern "C" {
 #include "npfunctions.h"
-}
 
 /* callback versions */
 typedef NPError     (* OSCALL PFN_NP_GetEntryPoints)(NPPluginFuncs* pCallbacks, PNPODINWRAPPER pPlugin);
@@ -237,11 +232,11 @@ typedef char *      (* OSCALL PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin)
 /* win32 versions */
 typedef struct _NP32PluginFuncs    *PNP32PluginFuncs;
 typedef struct _NP32NetscapeFuncs  *PNP32NetscapeFuncs;
-typedef NPError (*NP4W32CALL    PFNW32_NP_GetEntryPoints)(PNP32PluginFuncs pCallbacks);
-typedef NPError (*NP4W32CALL    PFNW32_NP_Initialize)(PNP32NetscapeFuncs pFuncs);
-typedef NPError (*NP4W32CALL    PFNW32_NP_Shutdown)(void);
-typedef NPError (*NP4W32CALL    PFNW32_NP_GetValue)(NPP future, NPPVariable variable, void *value);
-typedef char * (*NP4W32CALL     PFNW32_NP_GetMIMEDescription)(void);
+typedef NPError (*W32OSCALL    PFNW32_NP_GetEntryPoints)(PNP32PluginFuncs pCallbacks);
+typedef NPError (*W32OSCALL    PFNW32_NP_Initialize)(PNP32NetscapeFuncs pFuncs);
+typedef NPError (*W32OSCALL    PFNW32_NP_Shutdown)(void);
+typedef NPError (*W32OSCALL    PFNW32_NP_GetValue)(NPP future, NPPVariable variable, void *value);
+typedef char * (*W32OSCALL     PFNW32_NP_GetMIMEDescription)(void);
 
 /**
  * Per Plugin Structure.
