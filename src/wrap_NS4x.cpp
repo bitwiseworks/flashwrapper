@@ -163,11 +163,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#ifdef __IBMCPP__
-# include "moz_VACDefines.h"
-#else
-# include "moz_GCCDefines.h"
-#endif
+#include "moz_GCCDefines.h"
 
 #define INCL_BASE
 #include <os2.h>
@@ -182,93 +178,73 @@
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
+
+#define NP32_LOADDS   __cdecl
+
 #pragma pack(4)
+
 /**
  * Win 32 Plugin Entrypoints.
  */
-#define NPW32CALLBACK   __cdecl
-struct _NP32PluginFuncs
+typedef struct _NP32PluginFuncs
 {
     uint16_t                     size;
     uint16_t                     version;
-    NPError     (* NPW32CALLBACK pfnNew)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
-    NPError     (* NPW32CALLBACK pfnDestroy)(NPP instance, NPSavedData** save);
-    NPError     (* NPW32CALLBACK pfnSetWindow)(NPP instance, NPWindow* window);
-    NPError     (* NPW32CALLBACK pfnNewStream)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
-    NPError     (* NPW32CALLBACK pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
-    void        (* NPW32CALLBACK pfnStreamAsFile)(NPP instance, NPStream* stream, const char* fname);
-    int32_t     (* NPW32CALLBACK pfnWriteReady)(NPP instance, NPStream* stream);
-    int32_t     (* NPW32CALLBACK pfnWrite)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
-    void        (* NPW32CALLBACK pfnPrint)(NPP instance, NPPrint* platformPrint);
-    int16_t     (* NPW32CALLBACK pfnHandleEvent)(NPP instance, void* event);
-    void        (* NPW32CALLBACK pfnURLNotify)(NPP instance, const char* url, NPReason reason, void* notifyData);
+    NPError     (* NP32_LOADDS pfnNew)(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
+    NPError     (* NP32_LOADDS pfnDestroy)(NPP instance, NPSavedData** save);
+    NPError     (* NP32_LOADDS pfnSetWindow)(NPP instance, NPWindow* window);
+    NPError     (* NP32_LOADDS pfnNewStream)(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+    NPError     (* NP32_LOADDS pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
+    void        (* NP32_LOADDS pfnStreamAsFile)(NPP instance, NPStream* stream, const char* fname);
+    int32_t     (* NP32_LOADDS pfnWriteReady)(NPP instance, NPStream* stream);
+    int32_t     (* NP32_LOADDS pfnWrite)(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
+    void        (* NP32_LOADDS pfnPrint)(NPP instance, NPPrint* platformPrint);
+    int16_t     (* NP32_LOADDS pfnHandleEvent)(NPP instance, void* event);
+    void        (* NP32_LOADDS pfnURLNotify)(NPP instance, const char* url, NPReason reason, void* notifyData);
     void*       javaClass;
-    NPError     (* NPW32CALLBACK pfnGetValue)(NPP instance, NPPVariable variable, void *ret_alue);
-    NPError     (* NPW32CALLBACK pfnSetValue)(NPP instance, NPNVariable variable, void *ret_alue);
-};
+    NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPPVariable variable, void *ret_alue);
+    NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPNVariable variable, void *ret_alue);
+} NP32PluginFuncs;
 
 
 /**
  * Win32 Netscape Entrypoints.
  */
-struct _NP32NetscapeFuncs
+typedef struct _NP32NetscapeFuncs
 {
-    uint16_t                     size;
-    uint16_t                     version;
-    NPError     (* NPW32CALLBACK pfnGetURL)(NPP instance, const char* url, const char* window);
-    NPError     (* NPW32CALLBACK pfnPostURL)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file);
-    NPError     (* NPW32CALLBACK pfnRequestRead)(NPStream* stream, NPByteRange* rangeList);
-    NPError     (* NPW32CALLBACK pfnNewStream)(NPP instance, NPMIMEType type, const char* window, NPStream** stream);
-    int32_t     (* NPW32CALLBACK pfnWrite)(NPP instance, NPStream* stream, int32_t len, void* buffer);
-    NPError     (* NPW32CALLBACK pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
-    void        (* NPW32CALLBACK pfnStatus)(NPP instance, const char* message);
-    const char* (* NPW32CALLBACK pfnUserAgent)(NPP instance);
-    void*       (* NPW32CALLBACK pfnMemAlloc)(uint32_t size);
-    void        (* NPW32CALLBACK pfnMemFree)(void* ptr);
-    uint32_t    (* NPW32CALLBACK pfnMemFlush)(uint32_t size);
-    void        (* NPW32CALLBACK pfnReloadPlugins)(NPBool reloadPages);
-    void*       (* NPW32CALLBACK pfnGetJavaEnv)(void);
-    void*       (* NPW32CALLBACK pfnGetJavaPeer)(NPP instance);
-    NPError     (* NPW32CALLBACK pfnGetURLNotify)(NPP instance, const char* url, const char* window, void* notifyData);
-    NPError     (* NPW32CALLBACK pfnPostURLNotify)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData);
-    NPError     (* NPW32CALLBACK pfnGetValue)(NPP instance, NPNVariable variable, void *ret_alue);
-    NPError     (* NPW32CALLBACK pfnSetValue)(NPP instance, NPPVariable variable, void *ret_alue);
-    void        (* NPW32CALLBACK pfnInvalidateRect)(NPP instance, NPRect *rect);
-    void        (* NPW32CALLBACK pfnInvalidateRegion)(NPP instance, NPRegion region);
-    void        (* NPW32CALLBACK pfnForceRedraw)(NPP instance);
-/*
-    NPN_GetStringIdentifier getstringidentifier;
-    NPN_GetStringIdentifiers getstringidentifiers;
-    NPN_GetIntIdentifier getintidentifier;
-    NPN_IdentifierIsString identifierisstring;
-    NPN_UTF8FromIdentifier utf8fromidentifier;
-    NPN_IntFromIdentifier intfromidentifier;
-    NPN_CreateObject createobject;
-    NPN_RetainObject retainobject;
-    NPN_ReleaseObject releaseobject;
-    NPN_Invoke invoke;
-    NPN_InvokeDefault invokeDefault;
-    NPN_Evaluate evaluate;
-    NPN_GetProperty getproperty;
-    NPN_SetProperty setproperty;
-    NPN_RemoveProperty removeproperty;
-    NPN_HasProperty hasproperty;
-    NPN_HasMethod hasmethod;
-    NPN_ReleaseVariantValue releasevariantvalue;
-    NPN_SetException setexception;
-    NPN_PushPopupsEnabledState pushpopupsenabledstate;
-    NPN_PopPopupsEnabledState poppopupsenabledstate;
-    */
+    uint16_t size;
+    uint16_t version;
+    union
+    {
+        struct
+        {
+            NPError     (* NP32_LOADDS pfnGetURL)(NPP instance, const char* url, const char* window);
+            NPError     (* NP32_LOADDS pfnPostURL)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file);
+            NPError     (* NP32_LOADDS pfnRequestRead)(NPStream* stream, NPByteRange* rangeList);
+            NPError     (* NP32_LOADDS pfnNewStream)(NPP instance, NPMIMEType type, const char* window, NPStream** stream);
+            int32_t     (* NP32_LOADDS pfnWrite)(NPP instance, NPStream* stream, int32_t len, void* buffer);
+            NPError     (* NP32_LOADDS pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
+            void        (* NP32_LOADDS pfnStatus)(NPP instance, const char* message);
+            const char* (* NP32_LOADDS pfnUserAgent)(NPP instance);
+            void*       (* NP32_LOADDS pfnMemAlloc)(uint32_t size);
+            void        (* NP32_LOADDS pfnMemFree)(void* ptr);
+            uint32_t    (* NP32_LOADDS pfnMemFlush)(uint32_t size);
+            void        (* NP32_LOADDS pfnReloadPlugins)(NPBool reloadPages);
+            void*       (* NP32_LOADDS pfnGetJavaEnv)(void);
+            void*       (* NP32_LOADDS pfnGetJavaPeer)(NPP instance);
+            NPError     (* NP32_LOADDS pfnGetURLNotify)(NPP instance, const char* url, const char* window, void* notifyData);
+            NPError     (* NP32_LOADDS pfnPostURLNotify)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData);
+            NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPNVariable variable, void *ret_alue);
+            NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPPVariable variable, void *ret_alue);
+            void        (* NP32_LOADDS pfnInvalidateRect)(NPP instance, NPRect *rect);
+            void        (* NP32_LOADDS pfnInvalidateRegion)(NPP instance, NPRegion region);
+            void        (* NP32_LOADDS pfnForceRedraw)(NPP instance);
 
-    /*
-     * we are not implementing whole functions,
-     * but have to reserve memory for them
-     * currently, there is 21 missed functions
-     */
+        };
+        PFN functions[0];
+    };
+} NP32NetscapeFuncs;
 
-    char buf[21*4];
-
-};
 #pragma pack()
 
 /*******************************************************************************
@@ -302,7 +278,7 @@ typedef struct _PluginFuncsWrapper
     }   aStubs[32];
 
     /** The stuff we present to the Win32 side. */
-    struct _NP32PluginFuncs     w32;
+    NP32PluginFuncs     w32;
     /** Safety paddings */
     unsigned            auPadding2[64];
 } NPLUGINFUNCSWRAPPER,  *PNPLUGINFUNCSWRAPPER;
@@ -323,7 +299,7 @@ typedef struct _NetscapeFuncsWrapper
     char                auPadding[8];
 
     /** Stub code for each handler. */
-    struct NetscapeFuncStuc
+    struct Stub
     {
         char            chPush;
         void *          pvImm32bit;
@@ -332,12 +308,11 @@ typedef struct _NetscapeFuncsWrapper
         char            chPopEcx;
         char            chRet;
         char            achMagic[4];    /* 0xcccccccc */
-    }   aStubs[32];
+    }   *pStubs;
 
     /** The stuff we present to the Win32 side. */
-    struct _NP32NetscapeFuncs     w32;
-    /** Safety paddings */
-    unsigned            auPadding2[64];
+    NP32NetscapeFuncs *w32;
+
 } NETSCAPEFUNCSWRAPPER,  *PNETSCAPEFUNCSWRAPPER;
 
 #pragma pack()
@@ -1021,7 +996,7 @@ NPError NP_LOADDS np4xUp_SetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
 
 
 /* This is not a callback, but something most plugins implememnts somehow, remove it! */
-void    NPW32CALLBACK np4xDown_Version(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, int* plugin_major, int* plugin_minor,
+void    NP32_LOADDS np4xDown_Version(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, int* plugin_major, int* plugin_minor,
                                        int* netscape_major, int* netscape_minor)
 {
     static const char szFunction[] = "np4xDown_Version";
@@ -1038,7 +1013,7 @@ void    NPW32CALLBACK np4xDown_Version(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvC
 }
 
 
-NPError NPW32CALLBACK np4xDown_GetURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target, void* notifyData)
+NPError NP32_LOADDS np4xDown_GetURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target, void* notifyData)
 {
     static const char szFunction[] = "np4xDown_GetURLNotify";
     dprintf(("%s: enter - pWrapper=%p instance=%p url=%p target=%p notifyData=%p",
@@ -1057,7 +1032,7 @@ NPError NPW32CALLBACK np4xDown_GetURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void
 }
 
 
-NPError NPW32CALLBACK np4xDown_GetURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target)
+NPError NP32_LOADDS np4xDown_GetURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target)
 {
     static const char szFunction[] = "np4xDown_GetURL";
     dprintf(("%s: enter - pWrapper=%p instance%p url=%p target=%p",
@@ -1076,7 +1051,7 @@ NPError NPW32CALLBACK np4xDown_GetURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
 }
 
 
-NPError NPW32CALLBACK np4xDown_PostURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target, uint32_t len,
+NPError NP32_LOADDS np4xDown_PostURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, const char* target, uint32_t len,
                                              const char* buf, NPBool file, void* notifyData)
 {
     static const char szFunction[] = "np4xDown_PostURLNotify";
@@ -1096,7 +1071,7 @@ NPError NPW32CALLBACK np4xDown_PostURLNotify(PNETSCAPEFUNCSWRAPPER pWrapper, voi
 }
 
 
-NPError NPW32CALLBACK np4xDown_PostURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url,
+NPError NP32_LOADDS np4xDown_PostURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url,
                                        const char* target, uint32_t len,
                                        const char* buf, NPBool file)
 {
@@ -1117,7 +1092,7 @@ NPError NPW32CALLBACK np4xDown_PostURL(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvC
 }
 
 
-NPError NPW32CALLBACK np4xDown_RequestRead(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPStream* stream, NPByteRange* rangeList)
+NPError NP32_LOADDS np4xDown_RequestRead(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPStream* stream, NPByteRange* rangeList)
 {
     static const char szFunction[] = "np4xDown_RequestRead";
     dprintf(("%s: enter - pWrapper=%p stream=%p rangeList=%p",
@@ -1134,7 +1109,7 @@ NPError NPW32CALLBACK np4xDown_RequestRead(PNETSCAPEFUNCSWRAPPER pWrapper, void 
 }
 
 
-NPError NPW32CALLBACK np4xDown_NewStream(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPMIMEType type,
+NPError NP32_LOADDS np4xDown_NewStream(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPMIMEType type,
                                          const char* target, NPStream** stream)
 {
     static const char szFunction[] = "np4xDown_NewStream";
@@ -1159,7 +1134,7 @@ NPError NPW32CALLBACK np4xDown_NewStream(PNETSCAPEFUNCSWRAPPER pWrapper, void *p
 }
 
 
-int32_t NPW32CALLBACK np4xDown_Write(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPStream* stream, int32_t len, void* buffer)
+int32_t NP32_LOADDS np4xDown_Write(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPStream* stream, int32_t len, void* buffer)
 {
     static const char szFunction[] = "np4xDown_NewStream";
     dprintf(("%s: enter - pWrapper=%p instance=%p stream=%p len=%d buffer=%p",
@@ -1177,7 +1152,7 @@ int32_t NPW32CALLBACK np4xDown_Write(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCal
 }
 
 
-NPError NPW32CALLBACK np4xDown_DestroyStream(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPStream* stream, NPReason reason)
+NPError NP32_LOADDS np4xDown_DestroyStream(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPStream* stream, NPReason reason)
 {
     static const char szFunction[] = "np4xDown_DestroyStream";
     dprintf(("%s: enter - pWrapper=%p instance=%p stream=%p reason=%d",
@@ -1194,7 +1169,7 @@ NPError NPW32CALLBACK np4xDown_DestroyStream(PNETSCAPEFUNCSWRAPPER pWrapper, voi
 }
 
 
-void    NPW32CALLBACK np4xDown_Status(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* message)
+void    NP32_LOADDS np4xDown_Status(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* message)
 {
     static const char szFunction[] = "np4xDown_Status";
     dprintf(("%s: enter - pWrapper=%p instance=%p message=%p",
@@ -1212,7 +1187,7 @@ void    NPW32CALLBACK np4xDown_Status(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
 }
 
 
-const char* NPW32CALLBACK np4xDown_UserAgent(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
+const char* NP32_LOADDS np4xDown_UserAgent(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
 {
     static const char szFunction[] = "np4xDown_UserAgent";
     dprintf(("%s: enter - pWrapper=%p instance=%p",
@@ -1229,7 +1204,7 @@ const char* NPW32CALLBACK np4xDown_UserAgent(PNETSCAPEFUNCSWRAPPER pWrapper, voi
 }
 
 
-void*   NPW32CALLBACK np4xDown_MemAlloc(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, uint32_t size)
+void*   NP32_LOADDS np4xDown_MemAlloc(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, uint32_t size)
 {
     static const char szFunction[] = "np4xDown_MemAlloc";
     dprintf(("%s: enter - pWrapper=%p size=%d",
@@ -1244,7 +1219,7 @@ void*   NPW32CALLBACK np4xDown_MemAlloc(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
 }
 
 
-void    NPW32CALLBACK np4xDown_MemFree(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, void* ptr)
+void    NP32_LOADDS np4xDown_MemFree(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, void* ptr)
 {
     static const char szFunction[] = "np4xDown_MemFree";
     dprintf(("%s: enter - pWrapper=%p ptr=%p",
@@ -1259,7 +1234,7 @@ void    NPW32CALLBACK np4xDown_MemFree(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvC
 }
 
 
-uint32_t NPW32CALLBACK np4xDown_MemFlush(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, uint32_t size)
+uint32_t NP32_LOADDS np4xDown_MemFlush(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, uint32_t size)
 {
     static const char szFunction[] = "np4xDown_MemFlush";
     dprintf(("%s: enter - pWrapper=%p size=%d",
@@ -1274,7 +1249,7 @@ uint32_t NPW32CALLBACK np4xDown_MemFlush(PNETSCAPEFUNCSWRAPPER pWrapper, void *p
 }
 
 
-void    NPW32CALLBACK np4xDown_ReloadPlugins(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPBool reloadPages)
+void    NP32_LOADDS np4xDown_ReloadPlugins(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPBool reloadPages)
 {
     static const char szFunction[] = "np4xDown_ReloadPlugins";
     dprintf(("%s: enter - pWrapper=%p reloadPages=%d",
@@ -1289,7 +1264,7 @@ void    NPW32CALLBACK np4xDown_ReloadPlugins(PNETSCAPEFUNCSWRAPPER pWrapper, voi
 }
 
 
-void*   NPW32CALLBACK np4xDown_GetJavaEnv(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller)
+void*   NP32_LOADDS np4xDown_GetJavaEnv(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller)
 {
     static const char szFunction[] = "np4xDown_GetJavaEnv";
     dprintf(("%s: enter - pWrapper=%p", szFunction, pWrapper));
@@ -1317,7 +1292,7 @@ void*   NPW32CALLBACK np4xDown_GetJavaEnv(PNETSCAPEFUNCSWRAPPER pWrapper, void *
 }
 
 
-void*   NPW32CALLBACK np4xDown_GetJavaPeer(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
+void*   NP32_LOADDS np4xDown_GetJavaPeer(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
 {
     static const char szFunction[] = "np4xDown_GetJavaPeer";
     dprintf(("%s: enter - pWrapper=%p instance=%p", szFunction, pWrapper, instance));
@@ -1332,8 +1307,7 @@ void*   NPW32CALLBACK np4xDown_GetJavaPeer(PNETSCAPEFUNCSWRAPPER pWrapper, void 
 }
 
 
-
-NPError NPW32CALLBACK np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPNVariable variable, void *value)
+NPError NP32_LOADDS np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPNVariable variable, void *value)
 {
     static const char szFunction[] = "np4xDown_GetValue";
     NPError rc = 1;
@@ -1403,7 +1377,7 @@ NPError NPW32CALLBACK np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
 }
 
 
-NPError NPW32CALLBACK np4xDown_SetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPPVariable variable, void *value)
+NPError NP32_LOADDS np4xDown_SetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPPVariable variable, void *value)
 {
     static const char szFunction[] = "np4xDown_SetValue";
     dprintf(("%s: enter - pWrapper=%p instance=%p variable=%d value=%p",
@@ -1476,7 +1450,7 @@ NPError NPW32CALLBACK np4xDown_SetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
 }
 
 
-void    NPW32CALLBACK np4xDown_InvalidateRect(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPRect *invalidRect)
+void    NP32_LOADDS np4xDown_InvalidateRect(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPRect *invalidRect)
 {
     static const char szFunction[] = "np4xDown_InvalidateRect";
     dprintf(("%s: enter - pWrapper=%p instance=%p variable=%d invalidRect=%p",
@@ -1503,7 +1477,7 @@ void    NPW32CALLBACK np4xDown_InvalidateRect(PNETSCAPEFUNCSWRAPPER pWrapper, vo
 }
 
 
-void    NPW32CALLBACK np4xDown_InvalidateRegion(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPRegion invalidRegion)
+void    NP32_LOADDS np4xDown_InvalidateRegion(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPRegion invalidRegion)
 {
     static const char szFunction[] = "np4xDown_InvalidateRegion";
     dprintf(("%s: enter - pWrapper=%p instance=%p invalidRegion=%p (HRGN)",
@@ -1522,7 +1496,7 @@ void    NPW32CALLBACK np4xDown_InvalidateRegion(PNETSCAPEFUNCSWRAPPER pWrapper, 
 }
 
 
-void    NPW32CALLBACK np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
+void    NP32_LOADDS np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
 {
     static const char szFunction[] = "np4xDown_ForceRedraw";
     dprintf(("%s: enter - pWrapper=%p instance=%p",
@@ -1537,6 +1511,33 @@ void    NPW32CALLBACK np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void 
     return;
 }
 
+
+/**
+ * Stub for not implemented functions.
+ *
+ * @param ordinal   Ordinal function number.
+ */
+void NP32_LOADDS np4xDown_NotImplementedStub(int ordinal)
+{
+    dprintf(("%s: enter - ordinal=%d", __FUNCTION__, ordinal));
+
+    char msg[512];
+    snprintf(msg, sizeof(msg),
+             "The Flash plugin has called a browser function with ordinal %d which is not supported by this version of the Flash plugin wrapper.\n\n"
+             "Please report the following information to the vendor:\n"
+             "- Flash movie URL;\n"
+             "- Flash plugin wrapper version;\n"
+             "- Flash plugin DLL version;\n"
+             "- Browser version.\n\n"
+             "The application will now terminate.",
+             ordinal);
+
+    WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
+
+    dprintf(("Terminating the application."));
+    exit(333);
+    return;
+}
 
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -1702,10 +1703,19 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
      *      Allocate.
      *      Initiate it.
      *      Create stubs.
-     * @todo put this into a function use by both wrapper creators and use fixed struct offsets
-     *       instead of creating the aStub on the stack.
      */
-    PNETSCAPEFUNCSWRAPPER pWrapper = (PNETSCAPEFUNCSWRAPPER)malloc(sizeof(NETSCAPEFUNCSWRAPPER));
+
+    size_t funcCnt = (pFuncs->size - sizeof(NPNetscapeFuncs::size) - sizeof(NPNetscapeFuncs::version)) / sizeof(PFN);
+
+    size_t w32StructSize = sizeof(_NP32NetscapeFuncs::size) + sizeof(_NP32NetscapeFuncs::version) + funcCnt * sizeof(PFN);
+
+    dprintf(("%s: pFuncs->version=%d pFuncs->size=%d funcCnt=%u w32StructSize=%u", szFunction, pFuncs->version, pFuncs->size, funcCnt, w32StructSize));
+
+    // allocate the main struct with space enough for NETSCAPEFUNCSWRAPPER::Stub[funcCnt] and
+    // NP32NetscapeFuncs (i.e. incluing the functions we don't currently implement)
+    size_t totalStructSize = sizeof(NETSCAPEFUNCSWRAPPER) + sizeof(NETSCAPEFUNCSWRAPPER::Stub) * funcCnt + w32StructSize;
+
+    PNETSCAPEFUNCSWRAPPER pWrapper = (PNETSCAPEFUNCSWRAPPER)malloc(totalStructSize);
     if (!pWrapper)
     {
         dprintf(("%s: out of memory! Can't allocate wrapper!", szFunction));
@@ -1713,69 +1723,93 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
         return NPERR_OUT_OF_MEMORY_ERROR;
     }
 
-    memset(pWrapper, 0, sizeof(*pWrapper));
-    dprintf(("%s: pFuncs->version=%d pFuncs->size=%d", szFunction, pFuncs->version, pFuncs->size));
-    for (int iPadding = 0; iPadding < sizeof(pWrapper->auPadding2) / sizeof(pWrapper->auPadding2[0]); iPadding++)
-        pWrapper->auPadding2[iPadding] = 0xbbad0000 | iPadding;
+    memset(pWrapper, 0, totalStructSize);
+
+    // set up pointers to function tables following the main struct
+    pWrapper->w32 = (NP32NetscapeFuncs *) (pWrapper + 1);
+    pWrapper->pStubs = (NETSCAPEFUNCSWRAPPER::Stub *)(((char *)pWrapper->w32) + w32StructSize);
+
+    pWrapper->w32->size = pFuncs->size;
+    pWrapper->w32->version = pFuncs->version;
+
     pWrapper->pNative = pFuncs;
-   pWrapper->w32.version = pFuncs->version;
-    pWrapper->w32.size = pFuncs->size;
 
-    /* (I don't care using offsets of the pfns here, that just make it totaly unreable.) */
-    struct GenerateStub
+    // fill up the w32 function table with dummy stubs as flags (wrappers for implemented functions will overwrite them below and all dummy stubs will be replaced by a special callback sequence)
+    for (size_t i = 0; i < funcCnt; ++i)
+        pWrapper->w32->functions[i] = (PFN)&np4xDown_NotImplementedStub;
+
+    // fill up the function table with wrappers
+    PFN implementedWrappers[] =
     {
-        /** Pointer to the wrapper function. */
-        void *  pfnWrapper;
-        /** Pointer to the wrapped function entry. */
-        void ** ppfnReal;
-        /** Where to put the stub pointer. */
-        void ** ppfn;
-    }   aStubs[] =
-    {
-        {(void*)np4xDown_GetURL,            (void**)&pFuncs->geturl,            (void**)&pWrapper->w32.pfnGetURL },
-        {(void*)np4xDown_PostURL,           (void**)&pFuncs->posturl,           (void**)&pWrapper->w32.pfnPostURL },
-        {(void*)np4xDown_RequestRead,       (void**)&pFuncs->requestread,       (void**)&pWrapper->w32.pfnRequestRead },
-        {(void*)np4xDown_NewStream,         (void**)&pFuncs->newstream,         (void**)&pWrapper->w32.pfnNewStream },
-        {(void*)np4xDown_Write,             (void**)&pFuncs->write,             (void**)&pWrapper->w32.pfnWrite },
-        {(void*)np4xDown_DestroyStream,     (void**)&pFuncs->destroystream,     (void**)&pWrapper->w32.pfnDestroyStream },
-        {(void*)np4xDown_Status,            (void**)&pFuncs->status,            (void**)&pWrapper->w32.pfnStatus },
-        {(void*)np4xDown_UserAgent,         (void**)&pFuncs->uagent,            (void**)&pWrapper->w32.pfnUserAgent },
-        {(void*)np4xDown_MemAlloc,          (void**)&pFuncs->memalloc,          (void**)&pWrapper->w32.pfnMemAlloc },
-        {(void*)np4xDown_MemFree,           (void**)&pFuncs->memfree,           (void**)&pWrapper->w32.pfnMemFree },
-        {(void*)np4xDown_MemFlush,          (void**)&pFuncs->memflush,          (void**)&pWrapper->w32.pfnMemFlush },
-        {(void*)np4xDown_ReloadPlugins,     (void**)&pFuncs->reloadplugins,     (void**)&pWrapper->w32.pfnReloadPlugins },
-        {(void*)np4xDown_GetJavaEnv,        (void**)&pFuncs->getJavaEnv,        (void**)&pWrapper->w32.pfnGetJavaEnv },
-        {(void*)np4xDown_GetJavaPeer,       (void**)&pFuncs->getJavaPeer,       (void**)&pWrapper->w32.pfnGetJavaPeer },
-        {(void*)np4xDown_GetURLNotify,      (void**)&pFuncs->geturlnotify,      (void**)&pWrapper->w32.pfnGetURLNotify },
-        {(void*)np4xDown_PostURLNotify,     (void**)&pFuncs->posturlnotify,     (void**)&pWrapper->w32.pfnPostURLNotify },
-        {(void*)np4xDown_GetValue,          (void**)&pFuncs->getvalue,          (void**)&pWrapper->w32.pfnGetValue },
-        {(void*)np4xDown_SetValue,          (void**)&pFuncs->setvalue,          (void**)&pWrapper->w32.pfnSetValue },
-        {(void*)np4xDown_InvalidateRect,    (void**)&pFuncs->invalidaterect,    (void**)&pWrapper->w32.pfnInvalidateRect },
-        {(void*)np4xDown_InvalidateRegion,  (void**)&pFuncs->invalidateregion,  (void**)&pWrapper->w32.pfnInvalidateRegion },
-        {(void*)np4xDown_ForceRedraw,       (void**)&pFuncs->forceredraw,       (void**)&pWrapper->w32.pfnForceRedraw },
+        (PFN)&np4xDown_GetURL,
+        (PFN)&np4xDown_PostURL,
+        (PFN)&np4xDown_RequestRead,
+        (PFN)&np4xDown_NewStream,
+        (PFN)&np4xDown_Write,
+        (PFN)&np4xDown_DestroyStream,
+        (PFN)&np4xDown_Status,
+        (PFN)&np4xDown_UserAgent,
+        (PFN)&np4xDown_MemAlloc,
+        (PFN)&np4xDown_MemFree,
+        (PFN)&np4xDown_MemFlush,
+        (PFN)&np4xDown_ReloadPlugins,
+        (PFN)&np4xDown_GetJavaEnv,
+        (PFN)&np4xDown_GetJavaPeer,
+        (PFN)&np4xDown_GetURLNotify,
+        (PFN)&np4xDown_PostURLNotify,
+        (PFN)&np4xDown_GetValue,
+        (PFN)&np4xDown_SetValue,
+        (PFN)&np4xDown_InvalidateRect,
+        (PFN)&np4xDown_InvalidateRegion,
+        (PFN)&np4xDown_ForceRedraw,
     };
-    int i;
-    for (i = 0; i < sizeof(aStubs) / sizeof(aStubs[0]); i++)
-    {
-        pWrapper->aStubs[i].chPush      = 0x68;
-        pWrapper->aStubs[i].pvImm32bit  = pWrapper;
-        pWrapper->aStubs[i].chCall      = 0xe8;
-        pWrapper->aStubs[i].offRel32bit = ((char*)aStubs[i].pfnWrapper - (char*)&pWrapper->aStubs[i].offRel32bit - 4);
-        pWrapper->aStubs[i].chPopEcx    = 0x59;
-        pWrapper->aStubs[i].chRet       = 0xc3;
-        *aStubs[i].ppfn = *aStubs[i].ppfnReal ? (void*)&pWrapper->aStubs[i] : NULL;
-        memset(pWrapper->aStubs[i].achMagic, 0xcc, sizeof(pWrapper->aStubs[i].achMagic));
-    }
-    memset(&pWrapper->aStubs[i], 0xcc,
-           (char*)&pWrapper->aStubs[sizeof(pWrapper->aStubs) / sizeof(pWrapper->aStubs[0])] - (char*)&pWrapper->aStubs[i]); /* nice, eh? */
 
+    enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
+
+    PFN *nativeFuncs = (PFN *) (&pFuncs->version + 1);
+
+    for (size_t i = 0; i < implementedWrappersCnt; ++i)
+    {
+        if (implementedWrappers[i] == NULL)
+            continue;
+
+        pWrapper->pStubs[i].chPush      = 0x68;
+        pWrapper->pStubs[i].pvImm32bit  = pWrapper;
+        pWrapper->pStubs[i].chCall      = 0xe8;
+        pWrapper->pStubs[i].offRel32bit = (char *)implementedWrappers[i] - (char *)&pWrapper->pStubs[i].offRel32bit - 4;
+        pWrapper->pStubs[i].chPopEcx    = 0x59;
+        pWrapper->pStubs[i].chRet       = 0xc3;
+
+        // point to a stub only if Mozilla provides a function, otherwise set it also to NULL
+        pWrapper->w32->functions[i] = nativeFuncs[i] != NULL ? (PFN)&pWrapper->pStubs[i] : NULL;
+
+        memset(pWrapper->pStubs[i].achMagic, 0xcc, sizeof(pWrapper->pStubs[i].achMagic));
+    }
+
+    // set up stubs stubs for unused functions
+    for (size_t i = 0; i < funcCnt; ++i)
+    {
+        if (pWrapper->w32->functions[i] == (PFN)&np4xDown_NotImplementedStub)
+        {
+            pWrapper->pStubs[i].chPush      = 0x68;
+            pWrapper->pStubs[i].pvImm32bit  = (void *)i;
+            pWrapper->pStubs[i].chCall      = 0xe8;
+            pWrapper->pStubs[i].offRel32bit = (char *)&np4xDown_NotImplementedStub - (char *)&pWrapper->pStubs[i].offRel32bit - 4;
+            pWrapper->pStubs[i].chPopEcx    = 0x59;
+            pWrapper->pStubs[i].chRet       = 0xc3;
+
+            pWrapper->w32->functions[i] = (PFN)&pWrapper->pStubs[i];
+
+            memset(pWrapper->pStubs[i].achMagic, 0xcc, sizeof(pWrapper->pStubs[i].achMagic));
+        }
+    }
 
     /*
      * Call Real worker in Odin context.
      */
     unsigned ExceptionRegRec[2] = {0,0};
     USHORT selFSOld = pfnODIN_ThreadEnterOdinContext(&ExceptionRegRec[0], TRUE);
-    rc = pPlugin->pfnW32NP_Initialize(&pWrapper->w32);
+    rc = pPlugin->pfnW32NP_Initialize(pWrapper->w32);
     pfnODIN_ThreadLeaveOdinContext(&ExceptionRegRec[0], selFSOld);
     ExceptionRegRec[0] = ExceptionRegRec[1] = 0;
     if (!rc)
