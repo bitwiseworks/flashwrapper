@@ -909,13 +909,13 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
         }
     } else if (variable == 15) /* check for NPPVpluginScriptableNPObject */
     {
-#if 1
+#if 0 // @todo temporary
         /* we dont support any scriptable plugin objects atm */
         if (value) *(void**)value = NULL;
         rc = NPERR_GENERIC_ERROR;
 #else
-        InstanceData* instanceData = instance->pdata;
-        NPObject* object = instanceData->scriptableObject;
+        // InstanceData* instanceData = instance->pdata;
+        // NPObject* object = instanceData->scriptableObject;
         NP4XUP_ENTER_ODIN(FALSE);
         rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
         NP4XUP_LEAVE_ODIN(FALSE);
@@ -1397,11 +1397,12 @@ NPError NP32_LOADDS np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
             }
         }
     }
-#if 0
+#if 1 @todo temporary
     else if (variable == 15) /* check for private mode */
     {
-        if (value) *(bool*)value = FALSE;
-        rc = 0;
+        // if (value) *(bool*)value = FALSE;
+        // rc = 0;
+        rc = pWrapper->pNative->getvalue(NP4XDOWN_NS_INSTANCE(), variable, value);
     }
 #endif
     NP4XDOWN_ENTER_ODIN(FALSE);
@@ -1538,6 +1539,299 @@ void    NP32_LOADDS np4xDown_ForceRedraw(PNETSCAPEFUNCSWRAPPER pWrapper, void *p
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
     pWrapper->pNative->forceredraw(NP4XDOWN_NS_INSTANCE());
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+NPIdentifier NP32_LOADDS np4xDown_GetStringIdentifier(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, const NPUTF8* name)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p name=%s",
+             szFunction, pWrapper, name));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPIdentifier identifier = pWrapper->pNative->getstringidentifier(name);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave identifier=%x", szFunction, identifier));
+    return identifier;
+}
+
+
+void         NP32_LOADDS np4xDown_GetStringIdentifiers(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, const NPUTF8** names, int32_t nameCount, NPIdentifier* identifiers)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p names=%p nameCount=%d identifiers=%p",
+             szFunction, pWrapper, names, nameCount, identifiers));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->getstringidentifiers(names, nameCount, identifiers);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+NPIdentifier NP32_LOADDS np4xDown_GetIntIdentifier(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, int32_t intid)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p intid=%d",
+             szFunction, pWrapper, intid));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPIdentifier identifier = pWrapper->pNative->getintidentifier(intid);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave identifier=%x", szFunction, identifier));
+    return identifier;
+}
+
+
+bool         NP32_LOADDS np4xDown_IdentifierIsString(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPIdentifier identifier)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p identifier=%p",
+             szFunction, pWrapper, identifier));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->identifierisstring(identifier);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+NPUTF8*      NP32_LOADDS np4xDown_UTF8FromIdentifier(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPIdentifier identifier)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p identifier=%p",
+             szFunction, pWrapper, identifier));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPUTF8 *utf8 = pWrapper->pNative->utf8fromidentifier(identifier);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave utf8=%s", szFunction, utf8));
+    return utf8;
+}
+
+
+int32_t      NP32_LOADDS np4xDown_IntFromIdentifier(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPIdentifier identifier)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p identifier=%p",
+             szFunction, pWrapper, identifier));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    int32_t i = pWrapper->pNative->intfromidentifier(identifier);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave i=%d", szFunction, i));
+    return i;
+}
+
+
+NPObject* NP32_LOADDS np4xDown_CreateObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPClass *aClass)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p aClass=%p",
+             szFunction, pWrapper, instance, aClass));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPObject *object = pWrapper->pNative->createobject(NP4XDOWN_NS_INSTANCE(), aClass);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave object=%x", szFunction, object));
+    return object;
+}
+
+
+NPObject* NP32_LOADDS np4xDown_RetainObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPObject *obj)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p obj=%p",
+             szFunction, pWrapper, obj));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPObject *object = pWrapper->pNative->retainobject(obj);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave object=%x", szFunction, object));
+    return object;
+}
+
+
+void NP32_LOADDS np4xDown_ReleaseObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPObject *obj)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p obj=%p",
+             szFunction, pWrapper, obj));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->releaseobject(obj);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+bool NP32_LOADDS np4xDown_Invoke(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, NPIdentifier methodName, const NPVariant *args, uint32_t argCount, NPVariant *result)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p methodName=%p args=%p argCount=%d result=%p",
+             szFunction, pWrapper, instance, obj, methodName, args, argCount, result));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->invoke(NP4XDOWN_NS_INSTANCE(), obj, methodName, args, argCount, result);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+bool NP32_LOADDS np4xDown_InvokeDefault(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, const NPVariant *args, uint32_t argCount, NPVariant *result)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p args=%p argCount=%d result=%p",
+             szFunction, pWrapper, instance, obj, args, argCount, result));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->invokeDefault(NP4XDOWN_NS_INSTANCE(), obj, args, argCount, result);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_Evaluate(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPString *script, NPVariant *result)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p script=%p result=%p",
+             szFunction, pWrapper, instance, obj, script, result));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->evaluate(NP4XDOWN_NS_INSTANCE(), obj, script, result);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_GetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, NPVariant *result)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p result=%p",
+             szFunction, pWrapper, instance, obj, propertyName, result));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->getproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, result);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_SetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, const NPVariant *value)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p value=%p",
+             szFunction, pWrapper, instance, obj, propertyName, value));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->setproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, value);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_RemoveProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p",
+             szFunction, pWrapper, instance, obj, propertyName));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->removeproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_HasProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p",
+             szFunction, pWrapper, instance, obj, propertyName));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->hasproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+bool NP32_LOADDS np4xDown_HasMethod(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p",
+             szFunction, pWrapper, instance, obj, propertyName));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    bool rc = pWrapper->pNative->hasmethod(NP4XDOWN_NS_INSTANCE(), obj, propertyName);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
+    return rc;
+}
+
+
+void NP32_LOADDS np4xDown_ReleaseVariantValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPVariant *variant)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p variant=%p",
+             szFunction, pWrapper, variant));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->releasevariantvalue(variant);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+void NP32_LOADDS np4xDown_SetException(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPObject *obj, const NPUTF8 *message)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p obj=%p message=%s",
+             szFunction, pWrapper, obj, message));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->setexception(obj, message);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave", szFunction));
@@ -1834,6 +2128,25 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
         (PFN)&np4xDown_InvalidateRect,
         (PFN)&np4xDown_InvalidateRegion,
         (PFN)&np4xDown_ForceRedraw,
+        (PFN)&np4xDown_GetStringIdentifier,
+        (PFN)&np4xDown_GetStringIdentifiers,
+        (PFN)&np4xDown_GetIntIdentifier,
+        (PFN)&np4xDown_IdentifierIsString,
+        (PFN)&np4xDown_UTF8FromIdentifier,
+        (PFN)&np4xDown_IntFromIdentifier,
+        (PFN)&np4xDown_CreateObject,
+        (PFN)&np4xDown_RetainObject,
+        (PFN)&np4xDown_ReleaseObject,
+        (PFN)&np4xDown_Invoke,
+        (PFN)&np4xDown_InvokeDefault,
+        (PFN)&np4xDown_Evaluate,
+        (PFN)&np4xDown_GetProperty,
+        (PFN)&np4xDown_SetProperty,
+        (PFN)&np4xDown_RemoveProperty,
+        (PFN)&np4xDown_HasProperty,
+        (PFN)&np4xDown_HasMethod,
+        (PFN)&np4xDown_ReleaseVariantValue,
+        (PFN)&np4xDown_SetException,
     };
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
