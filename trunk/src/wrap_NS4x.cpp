@@ -64,6 +64,62 @@
 #define NPXP_ASSERT_OS2FS()     do {} while (0)
 #endif
 
+/*
+ * NPVariant wrapper macros
+ */
+
+/** Set up input NP32Variant to NPVariant conversion */
+#define NP4XDOWN_BEGIN_IN_NPVARIANT(w32)                                            \
+    NPVariant os2##w32;                                                             \
+    const NPVariant *os2##w32##Ptr = NULL;                                          \
+    if (w32) {                                                                      \
+        os2##w32##Ptr = &os2##w32;                                                  \
+        convertNPVariant(w32, &os2##w32);                                           \
+    }
+
+/** Get ptr to input NPVariant converted from NP32Variant */
+#define NP4XDOWN_USE_IN_NPVARIANT(w32) os2##w32##Ptr
+
+/** Finalize input NP32Variant to NPVariant conversion */
+#define NP4XDOWN_END_IN_NPVARIANT(w32) do {} while (0)
+
+/** Set up in/out NP32Variant to NPVariant conversion */
+#define NP4XDOWN_BEGIN_OUT_NPVARIANT(w32)                                           \
+    NPVariant os2##w32, *os2##w32##Ptr = NULL;                                      \
+    if (w32) {                                                                      \
+        os2##w32##Ptr = &os2##w32;                                                  \
+        convertNPVariant(w32, &os2##w32);                                           \
+    }
+
+/** Get ptr to in/out NPVariant converted from NP32Variant */
+#define NP4XDOWN_USE_OUT_NPVARIANT(w32) os2##w32##Ptr
+
+/** Finalize in/out NP32Variant to NPVariant conversion */
+#define NP4XDOWN_END_OUT_NPVARIANT(w32)                                             \
+    if (w32)                                                                        \
+        convertNPVariant(&os2##w32, w32);
+
+/** Set up input array of NP32Variant to NPVariant conversion */
+#define NP4XDOWN_BEGIN_IN_NPVARIANTS(w32, cnt)                                      \
+    NPVariant *os2##w32##Ptr = NULL;                                                \
+    if (w32) {                                                                      \
+        os2##w32##Ptr = (NPVariant *)malloc(sizeof(NPVariant) * cnt);               \
+        for (int i = 0; i < cnt; i++)                                               \
+            convertNPVariant(&w32[i], &os2##w32##Ptr[i]);                           \
+    }
+
+/** Get ptr to input array of NPVariant converted from NP32Variant */
+#define NP4XDOWN_USE_IN_NPVARIANTS(w32) (const NPVariant *)os2##w32##Ptr
+
+/** Finalize input array NP32Variant to NPVariant conversion */
+#define NP4XDOWN_END_IN_NPVARIANTS(w32)                                             \
+    if (os2##w32##Ptr)                                                              \
+        free(os2##w32##Ptr);
+
+/*
+ * Other stuff
+ */
+
 /** Get and validate the instance pointer */
 #define NP4XUP_INSTANCE(fAllowNULL) \
     PNPLUGININSTANCE    pInst = (PNPLUGININSTANCE)instance->pdata;                  \
@@ -252,6 +308,21 @@ typedef struct _NP32NetscapeFuncs
     };
 } NP32NetscapeFuncs;
 
+// NPVariant is 16 bytes on Win32 (12 bytes on all GCC platforms)
+typedef struct _NP32Variant
+{
+    NPVariantType type;
+    uint32_t padding;
+    union
+    {
+        bool boolValue;
+        int32_t intValue;
+        double doubleValue;
+        NPString stringValue;
+        NPObject *objectValue;
+    } value;
+} NP32Variant;
+
 #pragma pack()
 
 /*******************************************************************************
@@ -383,6 +454,58 @@ extern "C" const char * getIIDCIDNameWeak(void *pv1) __attribute__  ((weak, alia
  */
 #pragma info(nocnd)
 #pragma info(trd)
+
+
+#ifdef DEBUG
+static void dprintfNPVariant(const char *text, const NPVariant *value)
+{
+    if (!value)
+    {
+        dprintf(("%s: WARNING: NULL NPVariant pointer!", text));
+        return;
+    }
+
+    switch (value->type)
+    {
+        case NPVariantType_Void:
+            dprintf(("%s: void", text));
+            break;
+        case NPVariantType_Null:
+            dprintf(("%s: null", text));
+            break;
+        case NPVariantType_Bool:
+            dprintf(("%s: bool: %s", text, value->value.boolValue ? "true" : "false"));
+            break;
+        case NPVariantType_Int32:
+            dprintf(("%s: integer: %d", text, value->value.intValue));
+            break;
+        case NPVariantType_Double:
+            dprintf(("%s: double: %f", text, value->value.doubleValue));
+            break;
+        case NPVariantType_String:
+            dprintf(("%s: string (%u): %s", text, value->value.stringValue.UTF8Length, value->value.stringValue.UTF8Characters));
+            break;
+        case NPVariantType_Object:
+            dprintf(("%s: object: %p", text, value->value.objectValue));
+            break;
+    }
+}
+#else
+define dprintfNPVariant(a, b) do {} while (0)
+#endif
+
+void convertNPVariant(const NP32Variant *from, NPVariant *to)
+{
+    memcpy((char *)&to->type, (char *)&from->type, sizeof(NPVariantType));
+    memcpy((char *)&to->value, (char *)&from->value, sizeof(NPVariant::value));
+}
+
+void convertNPVariant(const NPVariant *from, NP32Variant *to)
+{
+    memcpy((char *)&to->type, (char *)&from->type, sizeof(NPVariantType));
+    memset((char *)&to->padding, 0, sizeof(NP32Variant::padding));
+    memcpy((char *)&to->value, (char *)&from->value, sizeof(NPVariant::value));
+}
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 // UP wrappers (stuff that is presented to netscape/mozilla)
@@ -817,19 +940,20 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     dprintf(("%s: enter - pWrapper=%p instance=%p variable=%d value=%p",
              szFunction, pWrapper, instance, variable, value));
     NP4XUP_INSTANCE(FALSE);
+
     switch (variable)
     {
-    case NPPVpluginDescriptionString:       dprintf(("variable=NPPVpluginDescriptionString")); break;
-    case NPPVpluginNameString:              dprintf(("variable=NPPVpluginNameString")); break;
-    case NPPVpluginWindowBool:              dprintf(("variable=NPPVpluginWindowBool")); break;
-    case NPPVpluginTransparentBool:         dprintf(("variable=NPPVpluginTransparentBool")); break;
-    case NPPVjavaClass:                     dprintf(("variable=NPPVjavaClass")); break;
-    case NPPVpluginWindowSize:              dprintf(("variable=NPPVpluginWindowSize")); break;
-    case NPPVpluginTimerInterval:           dprintf(("variable=NPPVpluginTimerInterval")); break;
-    case NPPVpluginScriptableInstance:      dprintf(("variable=NPPVpluginScriptableInstance")); break;
-    case NPPVpluginScriptableIID:           dprintf(("variable=NPPVpluginScriptableIID")); break;
-    case NPPVjavascriptPushCallerBool:      dprintf(("variable=NPPVjavascriptPushCallerBool")); break;
-    case NPPVpluginKeepLibraryInMemory:     dprintf(("variable=NPPVpluginKeepLibraryInMemory")); break;
+        case NPPVpluginDescriptionString:   dprintf(("%s: NPPVpluginDescriptionString", szFunction)); break;
+        case NPPVpluginNameString:          dprintf(("%s: NPPVpluginNameString", szFunction)); break;
+        case NPPVpluginWindowBool:          dprintf(("%s: NPPVpluginWindowBool", szFunction)); break;
+        case NPPVpluginTransparentBool:     dprintf(("%s: NPPVpluginTransparentBool", szFunction)); break;
+        case NPPVjavaClass:                 dprintf(("%s: NPPVjavaClass", szFunction)); break;
+        case NPPVpluginWindowSize:          dprintf(("%s: NPPVpluginWindowSize", szFunction)); break;
+        case NPPVpluginTimerInterval:       dprintf(("%s: NPPVpluginTimerInterval", szFunction)); break;
+        case NPPVpluginScriptableInstance:  dprintf(("%s: NPPVpluginScriptableInstance", szFunction)); break;
+        case NPPVpluginScriptableIID:       dprintf(("%s: NPPVpluginScriptableIID", szFunction)); break;
+        case NPPVjavascriptPushCallerBool:  dprintf(("%s: NPPVjavascriptPushCallerBool", szFunction)); break;
+        case NPPVpluginKeepLibraryInMemory: dprintf(("%s: NPPVpluginKeepLibraryInMemory", szFunction)); break;
     }
 
     //@todo TEXT: NPPVpluginNameString and NPPVpluginDescriptionString
@@ -909,7 +1033,7 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
         }
     } else if (variable == 15) /* check for NPPVpluginScriptableNPObject */
     {
-#if 0 // @todo temporary
+#if 1 // @todo temporary
         /* we dont support any scriptable plugin objects atm */
         if (value) *(void**)value = NULL;
         rc = NPERR_GENERIC_ERROR;
@@ -1343,11 +1467,13 @@ void*   NP32_LOADDS np4xDown_GetJavaPeer(PNETSCAPEFUNCSWRAPPER pWrapper, void *p
 NPError NP32_LOADDS np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPNVariable variable, void *value)
 {
     static const char szFunction[] = "np4xDown_GetValue";
-    NPError rc = 1;
     dprintf(("%s: enter - pWrapper=%p instance=%p variable=%d value=%p",
              szFunction, pWrapper, instance, variable, value));
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    NPError rc;
+    bool bSupported = true;
 
     switch (variable)
     {
@@ -1357,13 +1483,17 @@ NPError NP32_LOADDS np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
         case NPNVjavascriptEnabledBool: dprintf(("%s: NPNVjavascriptEnabledBool", szFunction)); break;
         case NPNVasdEnabledBool:        dprintf(("%s: NPNVasdEnabledBool", szFunction)); break;
         case NPNVisOfflineBool:         dprintf(("%s: NPNVisOfflineBool", szFunction)); break;
+        case NPNVWindowNPObject:        dprintf(("%s: NPNVWindowNPObject", szFunction)); break;
+        case NPNVPluginElementNPObject: dprintf(("%s: NPNVPluginElementNPObject", szFunction)); break;
+        case NPNVprivateModeBool:       dprintf(("%s: NPNVprivateModeBool", szFunction)); break;
+        case NPNVdocumentOrigin:        dprintf(("%s: NPNVdocumentOrigin", szFunction)); break;
         default:
-           dprintf(("%s: Unknown variable %d", szFunction, variable));
-           break;
+            bSupported = false;
+            dprintf(("%s: Unsupported variable %d", szFunction, variable));
+            break;
     }
 
-    /* Win32 plugin crashes if operates value == 15 */
-    if (variable <= NPNVisOfflineBool)
+    if (bSupported)
     {
         rc = pWrapper->pNative->getvalue(NP4XDOWN_NS_INSTANCE(), variable, value);
 
@@ -1389,22 +1519,23 @@ NPError NP32_LOADDS np4xDown_GetValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
             case NPNVjavascriptEnabledBool:
             case NPNVasdEnabledBool:
             case NPNVisOfflineBool:
+            case NPNVprivateModeBool:
                 dprintf(("%s: *value=%s", szFunction, *((bool*)value) ? "true" : "false"));
                 break;
+            case NPNVdocumentOrigin:
+                dprintf(("%s: *value=%s", szFunction, *((char**)value)));
+                break;
             default:
-                dprintf(("%s: unknown id *value=%#08x", szFunction, *((void**)value)));
+                dprintf(("%s: *value=%#08x", szFunction, *((void**)value)));
                 break;
             }
         }
     }
-#if 1 @todo temporary
-    else if (variable == 15) /* check for private mode */
+    else
     {
-        // if (value) *(bool*)value = FALSE;
-        // rc = 0;
-        rc = pWrapper->pNative->getvalue(NP4XDOWN_NS_INSTANCE(), variable, value);
+        rc = NPERR_GENERIC_ERROR;
     }
-#endif
+
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%d", szFunction, rc));
     return rc;
@@ -1682,7 +1813,7 @@ void NP32_LOADDS np4xDown_ReleaseObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
 }
 
 
-bool NP32_LOADDS np4xDown_Invoke(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, NPIdentifier methodName, const NPVariant *args, uint32_t argCount, NPVariant *result)
+bool NP32_LOADDS np4xDown_Invoke(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, NPIdentifier methodName, const NP32Variant *args, uint32_t argCount, NP32Variant *result)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p methodName=%p args=%p argCount=%d result=%p",
@@ -1690,14 +1821,20 @@ bool NP32_LOADDS np4xDown_Invoke(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller,
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    bool rc = pWrapper->pNative->invoke(NP4XDOWN_NS_INSTANCE(), obj, methodName, args, argCount, result);
+    NP4XDOWN_BEGIN_IN_NPVARIANTS(args, argCount);
+    NP4XDOWN_BEGIN_OUT_NPVARIANT(result);
+
+    bool rc = pWrapper->pNative->invoke(NP4XDOWN_NS_INSTANCE(), obj, methodName, NP4XDOWN_USE_IN_NPVARIANTS(args), argCount, NP4XDOWN_USE_OUT_NPVARIANT(result));
+
+    NP4XDOWN_END_OUT_NPVARIANT(result);
+    NP4XDOWN_END_IN_NPVARIANTS(args);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
     return rc;
 }
 
-bool NP32_LOADDS np4xDown_InvokeDefault(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, const NPVariant *args, uint32_t argCount, NPVariant *result)
+bool NP32_LOADDS np4xDown_InvokeDefault(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject* obj, const NP32Variant *args, uint32_t argCount, NP32Variant *result)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p args=%p argCount=%d result=%p",
@@ -1705,7 +1842,13 @@ bool NP32_LOADDS np4xDown_InvokeDefault(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    bool rc = pWrapper->pNative->invokeDefault(NP4XDOWN_NS_INSTANCE(), obj, args, argCount, result);
+    NP4XDOWN_BEGIN_IN_NPVARIANTS(args, argCount);
+    NP4XDOWN_BEGIN_OUT_NPVARIANT(result);
+
+    bool rc = pWrapper->pNative->invokeDefault(NP4XDOWN_NS_INSTANCE(), obj, NP4XDOWN_USE_IN_NPVARIANTS(args), argCount, NP4XDOWN_USE_OUT_NPVARIANT(result));
+
+    NP4XDOWN_END_OUT_NPVARIANT(result);
+    NP4XDOWN_END_IN_NPVARIANTS(args);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
@@ -1713,7 +1856,7 @@ bool NP32_LOADDS np4xDown_InvokeDefault(PNETSCAPEFUNCSWRAPPER pWrapper, void *pv
 }
 
 
-bool NP32_LOADDS np4xDown_Evaluate(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPString *script, NPVariant *result)
+bool NP32_LOADDS np4xDown_Evaluate(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPString *script, NP32Variant *result)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p script=%p result=%p",
@@ -1721,7 +1864,11 @@ bool NP32_LOADDS np4xDown_Evaluate(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCalle
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    bool rc = pWrapper->pNative->evaluate(NP4XDOWN_NS_INSTANCE(), obj, script, result);
+    NP4XDOWN_BEGIN_OUT_NPVARIANT(result);
+
+    bool rc = pWrapper->pNative->evaluate(NP4XDOWN_NS_INSTANCE(), obj, script, NP4XDOWN_USE_OUT_NPVARIANT(result));
+
+    NP4XDOWN_END_OUT_NPVARIANT(result);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
@@ -1729,7 +1876,7 @@ bool NP32_LOADDS np4xDown_Evaluate(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCalle
 }
 
 
-bool NP32_LOADDS np4xDown_GetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, NPVariant *result)
+bool NP32_LOADDS np4xDown_GetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, NP32Variant *result)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p result=%p",
@@ -1737,7 +1884,13 @@ bool NP32_LOADDS np4xDown_GetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    bool rc = pWrapper->pNative->getproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, result);
+    NP4XDOWN_BEGIN_OUT_NPVARIANT(result);
+
+    bool rc = pWrapper->pNative->getproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, NP4XDOWN_USE_OUT_NPVARIANT(result));
+    if (rc)
+        dprintfNPVariant(szFunction, NP4XDOWN_USE_OUT_NPVARIANT(result));
+
+    NP4XDOWN_END_OUT_NPVARIANT(result);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
@@ -1745,7 +1898,7 @@ bool NP32_LOADDS np4xDown_GetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
 }
 
 
-bool NP32_LOADDS np4xDown_SetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, const NPVariant *value)
+bool NP32_LOADDS np4xDown_SetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPObject *obj, NPIdentifier propertyName, const NP32Variant *value)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p obj=%p propertyName=%p value=%p",
@@ -1753,7 +1906,13 @@ bool NP32_LOADDS np4xDown_SetProperty(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCa
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    bool rc = pWrapper->pNative->setproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, value);
+    NP4XDOWN_BEGIN_IN_NPVARIANT(value);
+
+    dprintfNPVariant(szFunction, NP4XDOWN_USE_IN_NPVARIANT(value));
+
+    bool rc = pWrapper->pNative->setproperty(NP4XDOWN_NS_INSTANCE(), obj, propertyName, NP4XDOWN_USE_IN_NPVARIANT(value));
+
+    NP4XDOWN_END_IN_NPVARIANT(value);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
@@ -1809,14 +1968,20 @@ bool NP32_LOADDS np4xDown_HasMethod(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCall
 }
 
 
-void NP32_LOADDS np4xDown_ReleaseVariantValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPVariant *variant)
+void NP32_LOADDS np4xDown_ReleaseVariantValue(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NP32Variant *variant)
 {
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p variant=%p",
              szFunction, pWrapper, variant));
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    pWrapper->pNative->releasevariantvalue(variant);
+    NP4XDOWN_BEGIN_OUT_NPVARIANT(variant);
+
+    dprintfNPVariant(szFunction, NP4XDOWN_USE_OUT_NPVARIANT(variant));
+
+    pWrapper->pNative->releasevariantvalue(NP4XDOWN_USE_OUT_NPVARIANT(variant));
+
+    NP4XDOWN_END_OUT_NPVARIANT(variant);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave", szFunction));
