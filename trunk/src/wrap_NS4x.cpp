@@ -491,7 +491,7 @@ static void dprintfNPVariant(const char *text, const NPVariant *value)
     }
 }
 #else
-define dprintfNPVariant(a, b) do {} while (0)
+#define dprintfNPVariant(a, b) do {} while (0)
 #endif
 
 void convertNPVariant(const NP32Variant *from, NPVariant *to)
