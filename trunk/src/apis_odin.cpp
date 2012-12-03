@@ -4,10 +4,11 @@
  * and stuff is setup correctly before entering Odin32. This file contains
  * all the wrapping stuff.
  *
- * InnoTek Systemberatung GmbH confidential
- *
  * Copyright (c) 2003 InnoTek Systemberatung GmbH
- * Author: knut st. osmundsen <bird@anduin.net>
+ * Copyright (c) 2012 bww bitwise works GmbH
+ *
+ * Authors: knut st. osmundsen <bird@anduin.net>
+ *          Dmitriy Kuminov <dmik@dmik.org>
  *
  * All Rights Reserved
  *

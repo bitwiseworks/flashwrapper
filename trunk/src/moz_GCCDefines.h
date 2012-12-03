@@ -3,10 +3,11 @@
  * The stuff defined to build Mozilla stuff correctly on OS/2.
  * (Sure, it's all in and not all is needed, but who care?)
  *
- * InnoTek Systemberatung GmbH confidential
- *
  * Copyright (c) 2003 InnoTek Systemberatung GmbH
- * Author: knut st. osmundsen <bird@anduin.net>
+ * Copyright (c) 2012 bww bitwise works GmbH
+ *
+ * Authors: knut st. osmundsen <bird@anduin.net>
+ *          Dmitriy Kuminov <dmik@dmik.org>
  *
  * All Rights Reserved
  *
