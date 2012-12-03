@@ -272,7 +272,7 @@
 
 /** Leave odin context and go back into the OS/2 netscape/mozilla class callbackcontext. */
 #define NP4XCLASS_LEAVE_ODIN(fDebug) \
-    NP4XUP_LEAVE_ODIN(fDebug) \
+    NP4XUP_LEAVE_ODIN(fDebug); \
     npobj->_class = (NPClass *)&pInst->newClass
 
 /** dprintf a nsID structure (reference to such). */
