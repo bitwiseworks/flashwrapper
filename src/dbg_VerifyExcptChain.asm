@@ -2,10 +2,11 @@
 ;
 ; Verify the OS/2 Exception Chain.
 ;
-; InnoTek Systemberatung GmbHconfidential
-;
 ; Copyright (c) 2003 InnoTek Systemberatung GmbH
-; Author: knut st. osmundsen <bird@anduin.net>
+; Copyright (c) 2012 bww bitwise works GmbH
+;
+; Authors: knut st. osmundsen <bird@anduin.net>
+;          Dmitriy Kuminov <dmik@dmik.org>
 ;
 ; All Rights Reserved
 ;

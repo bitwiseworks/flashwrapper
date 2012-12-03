@@ -3,10 +3,11 @@
  * Include file for the Primary Plugin Wrapper.
  * This defines the external function(s) upon which plugin_primary.c depends.
  *
- * InnoTek Systemberatung GmbH confidential
- *
  * Copyright (c) 2003 InnoTek Systemberatung GmbH
- * Author: knut st. osmundsen <bird-srcspam@anduin.net>
+ * Copyright (c) 2012 bww bitwise works GmbH
+ *
+ * Authors: knut st. osmundsen <bird@anduin.net>
+ *          Dmitriy Kuminov <dmik@dmik.org>
  *
  * All Rights Reserved
  *
