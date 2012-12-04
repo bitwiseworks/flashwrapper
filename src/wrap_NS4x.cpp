@@ -640,10 +640,10 @@ void convertNPVariant(const NPVariant *from, NP32Variant *to)
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 
-NPObject *np4xClass_AllocateFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPP npp, NPClass *aClass)
+NPObject *np4xClass_AllocateFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPP instance, NPClass *aClass)
 {
     static const char *szFunction = __FUNCTION__;
-    dprintf(("%s: enter - pInst=%p npp=%p aClass=%p", szFunction, pInst, npp, aClass));
+    dprintf(("%s: enter - pInst=%p instance=%p aClass=%p", szFunction, pInst, instance, aClass));
     dprintf(("%s: pw32Class %p", szFunction, pInst->pw32Class));
 
     // sanity
@@ -655,7 +655,7 @@ NPObject *np4xClass_AllocateFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPP
 
     NP4XUP_ENTER_ODIN(FALSE);
 
-    NPObject *object = pInst->pw32Class->pfnAllocateFunction(npp, &pInst->newClass);
+    NPObject *object = pInst->pw32Class->pfnAllocateFunction(NP4XUP_W32_INSTANCE(), &pInst->newClass);
 
     NP4XUP_LEAVE_ODIN(FALSE);
 
@@ -1428,58 +1428,22 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
 
         NPObject *pObject = NULL;
 
+        // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
+        pInst->pw32Class = &pInst->newClass;
+
         NP4XUP_ENTER_ODIN(FALSE);
         rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
         NP4XUP_LEAVE_ODIN(FALSE);
 
-        if (!rc)
+        // sanity
+        if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
         {
-            dprintf(("%s: class %p version %d", szFunction, pObject->_class, pObject->_class->structVersion));
-
-            // save the original class
-            pInst->pw32Class = (NP32Class *)pObject->_class;
-
-            memset(&pInst->newClass, 0, sizeof(pInst->newClass));
-            pInst->newClass.structVersion = pObject->_class->structVersion;
-
-            // fill up the function table with wrappers
-            PFN implementedWrappers[sizeof(pInst->aStubs)/sizeof(pInst->aStubs[0])] =
-            {
-                (PFN)&np4xClass_AllocateFunction,
-                (PFN)&np4xClass_DeallocateFunction,
-                (PFN)&np4xClass_InvalidateFunction,
-                (PFN)&np4xClass_HasMethodFunction,
-                (PFN)&np4xClass_InvokeFunction,
-                (PFN)&np4xClass_InvokeDefaultFunction,
-                (PFN)&np4xClass_HasPropertyFunction,
-                (PFN)&np4xClass_GetPropertyFunction,
-                (PFN)&np4xClass_SetPropertyFunction,
-                (PFN)&np4xClass_RemovePropertyFunction,
-                (PFN)&np4xClass_EnumerationFunction,
-                (PFN)&np4xClass_ConstructFunction,
-            };
-
-            // Set up wrappers for NPClass methods
-            for (size_t i = 0; i < sizeof(pInst->aStubs)/sizeof(pInst->aStubs[0]); ++i)
-            {
-                pInst->aStubs[i].chPush      = 0x68;
-                pInst->aStubs[i].pvImm32bit  = pInst;
-                pInst->aStubs[i].chCall      = 0xe8;
-                pInst->aStubs[i].offRel32bit = (char*)implementedWrappers[i] - (char*)&pInst->aStubs[i].offRel32bit - 4;
-                pInst->aStubs[i].chPopEcx    = 0x59;
-                pInst->aStubs[i].chRet       = 0xc3;
-
-                // point to a stub only if plugin provides a function, otherwise set it also to NULL
-                pInst->newClass.functions[i] = pInst->pw32Class->functions[i] != NULL ? (PFN)&pInst->aStubs[i] : NULL;
-
-                memset(pInst->aStubs[i].achMagic, 0xcc, sizeof(pInst->aStubs[i].achMagic));
-            }
-
-            // replace the class in the object
-            pObject->_class = (NPClass *)&pInst->newClass;
-
-            *(void**)value = pObject;
+            dprintf(("%s: ERROR: pObject->_class must be %p", szFunction, &pInst->newClass));
+            rc = NPERR_GENERIC_ERROR;
         }
+
+        if (!rc)
+            *(void**)value = pObject;
 #endif
     }
     dprintf(("%s: leave rc=%p", szFunction, rc));
@@ -2211,6 +2175,54 @@ NPObject* NP32_LOADDS np4xDown_CreateObject(PNETSCAPEFUNCSWRAPPER pWrapper, void
              szFunction, pWrapper, instance, aClass));
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    // check if we are being called as a result of np4xUp_GetValue(NPPVpluginScriptableNPObject)
+    if (pInst->pw32Class = &pInst->newClass)
+    {
+        dprintf(("%s: w32 class %p version %d", szFunction, aClass, aClass->structVersion));
+
+        // save the original class
+        pInst->pw32Class = (NP32Class *)aClass;
+
+        memset(&pInst->newClass, 0, sizeof(pInst->newClass));
+        pInst->newClass.structVersion = aClass->structVersion;
+
+        // fill up the function table with wrappers
+        PFN implementedWrappers[NP32Class::FunctionCount] =
+        {
+            (PFN)&np4xClass_AllocateFunction,
+            (PFN)&np4xClass_DeallocateFunction,
+            (PFN)&np4xClass_InvalidateFunction,
+            (PFN)&np4xClass_HasMethodFunction,
+            (PFN)&np4xClass_InvokeFunction,
+            (PFN)&np4xClass_InvokeDefaultFunction,
+            (PFN)&np4xClass_HasPropertyFunction,
+            (PFN)&np4xClass_GetPropertyFunction,
+            (PFN)&np4xClass_SetPropertyFunction,
+            (PFN)&np4xClass_RemovePropertyFunction,
+            (PFN)&np4xClass_EnumerationFunction,
+            (PFN)&np4xClass_ConstructFunction,
+        };
+
+        // Set up wrappers for NPClass methods
+        for (size_t i = 0; i < NP32Class::FunctionCount; ++i)
+        {
+            pInst->aStubs[i].chPush      = 0x68;
+            pInst->aStubs[i].pvImm32bit  = pInst;
+            pInst->aStubs[i].chCall      = 0xe8;
+            pInst->aStubs[i].offRel32bit = (char*)implementedWrappers[i] - (char*)&pInst->aStubs[i].offRel32bit - 4;
+            pInst->aStubs[i].chPopEcx    = 0x59;
+            pInst->aStubs[i].chRet       = 0xc3;
+
+            // point to a stub only if plugin provides a function, otherwise set it also to NULL
+            pInst->newClass.functions[i] = pInst->pw32Class->functions[i] != NULL ? (PFN)&pInst->aStubs[i] : NULL;
+
+            memset(pInst->aStubs[i].achMagic, 0xcc, sizeof(pInst->aStubs[i].achMagic));
+        }
+
+        // replace the class to be used
+        aClass = (NPClass *)&pInst->newClass;
+    }
 
     NPObject *object = pWrapper->pNative->createobject(NP4XDOWN_NS_INSTANCE(), aClass);
 
