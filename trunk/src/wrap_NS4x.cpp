@@ -403,6 +403,10 @@ typedef struct _NP32Class
 {
     uint32_t structVersion;
 
+#if NP_CLASS_STRUCT_VERSION != 3
+#error Check _NP32Class::functions length!
+#endif
+
     union
     {
         struct
@@ -420,8 +424,10 @@ typedef struct _NP32Class
             bool (*pfnEnumerationFunction)(NPObject *npobj, NPIdentifier **value, uint32_t *count);
             bool (*pfnConstructFunction)(NPObject *npobj, const NP32Variant *args, uint32_t argCount, NP32Variant *result);
         };
-        PFN functions[0];
+        PFN functions[12]; /* as of NP_CLASS_STRUCT_VERSION */
     };
+
+    enum { FunctionCount = sizeof(functions) / sizeof(functions[0]) };
 
 } NP32Class;
 
@@ -517,8 +523,6 @@ typedef struct _PluginInstance
     /** The stuff we present to the plugin. */
     NPP_t       w32;
 
-#if NP_CLASS_STRUCT_VERSION == 3
-
     /** Stub code for each NPClass method of the scriptable object (NPPVpluginScriptableNPObject) */
     struct Stub
     {
@@ -529,11 +533,7 @@ typedef struct _PluginInstance
         char            chPopEcx;
         char            chRet;
         char            achMagic[4];    /* 0xcccccccc */
-    }   aStubs[12]; /* as of NP_CLASS_STRUCT_VERSION == 3 */
-
-#else
-    #error Check _PluginInstance::Stub struct!
-#endif
+    }   aStubs[NP32Class::FunctionCount];
 
     /** Original Win32 class of the scriptable object (NPPVpluginScriptableNPObject) */
     NP32Class *pw32Class;
@@ -711,12 +711,10 @@ bool np4xClass_HasMethodFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPObjec
     NP4XCLASS_SANITY_CHECK(false);
 
     NP4XCLASS_ENTER_ODIN(FALSE);
-dprintf(("===1 %p", npobj->_class));
 
     bool rc = pInst->pw32Class->pfnHasMethodFunction(npobj, name);
 
     NP4XCLASS_LEAVE_ODIN(FALSE);
-dprintf(("===2"));
 
     dprintf(("%s: leave rc=%s", szFunction, rc ? "true" : "false"));
     return rc;
