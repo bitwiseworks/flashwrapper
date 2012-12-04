@@ -662,7 +662,7 @@ NPObject *np4xClass_AllocateFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPP
     if (object)
         object->_class = (NPClass *)&pInst->newClass;
 
-    dprintf(("%s: leave object=%d", szFunction, object));
+    dprintf(("%s: leave object=%p", szFunction, object));
     return object;
 }
 
@@ -678,7 +678,8 @@ void np4xClass_DeallocateFunction(PNPLUGININSTANCE pInst, void *pvCaller, NPObje
 
     pInst->pw32Class->pfnDeallocateFunction(npobj);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    // Must not use NP4XCLASS_LEAVE_ODIN() since it would try to modify the just freed npobj
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintf(("%s: leave", szFunction));
     return;
