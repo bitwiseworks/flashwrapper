@@ -1,6 +1,6 @@
-[ Flash Plugin Wrapper for eComStation Beta 2 ]
+[ Flash Plugin Wrapper for eComStation 0.4.0 ]
 
-This is the second Beta release of Flash Plugin Wrapper 
+This is the first non Beta release of Flash Plugin Wrapper 
 for eComStation. It will enable you to use websites 
 implementing the latest Flash content. For a list of changes
 please refer to the end of this document.
@@ -52,18 +52,20 @@ Requirements
   deleted).  
   See the section "How to uninstall Flash Plugin Wrapper" for more details.
 
-- This wrapper requires Odin build 0.8.3 or higher. This or a later version 
+- This wrapper requires Odin build 0.8.6 or higher. This or a later version 
   can be found at the same download location as this package, or at Netlabs: 
   ftp://ftp.netlabs.org/pub/odin/ 
-  ftp://ftp.netlabs.org/pub/odin/0.8.3/odin-0.8.3.zip
+  ftp://ftp.netlabs.org/pub/odin/0.8.6/odin-0.8.6.zip
+  If you use rpm installed Odin, please do a "yum update odin" to get the
+  latest version.
 
 - Odin requires GCC core 1.2.1 or higher. This or a later version 
   can be found at the same download location as this package, or at Netlabs: 
   ftp://ftp.netlabs.org/pub/libc/gcc4core-1_2_1.wpi
 
-- Odin requires LIBC 0.6.4 or higher. This or a later version 
+- Odin requires LIBC 0.6.5 or higher. This or a later version 
   can be found at the same download location as this package, or at Netlabs: 
-  ftp://ftp.netlabs.org/pub/libc/libc-0.6.4-csd4.wpi
+  ftp://ftp.netlabs.org/pub/libc/libc-0.6.5-csd5.wpi
 
 * Supported web browsers:
 
@@ -254,11 +256,21 @@ Changelog
  - changed Warpin to create the Flash Plugin Wrapper folder on the desktop
    (Ticket #50)
 
+05.12.2012
+ - Bump wrapper version to 0.4.0
+ - fixed the ActionScript to JavaScript and vice versa callbacks
+   (Tickets #8, #34, #69)
+ - Many Flash Plugin Warpper specific fixes are present in Odin 0.8.6,
+   please see the changelog file of Odin.
+
 More information
 ================
 
 Information on Software Subscription Services for eComStation can be found
 at: http://www.ecomstation.com/subscription/
+
+Information for Flash Plugin Wrapper can also be found at:
+http://svn.ecomstation.nl/flash10
 
 
 ** (c) 2009-2012 Mensys BV **
