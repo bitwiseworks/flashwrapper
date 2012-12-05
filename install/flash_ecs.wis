@@ -3,14 +3,14 @@
 	<TITLE>=("init")</TITLE>
 
         <REXX NAME="init">
-	 _title = "Flash Plugin Wrapper for eComStation Beta 2"
+	 _title = "Flash Plugin Wrapper for eComStation"
 
 	 CrLf = '0d0a'x; _errmsg.1 = ''; _errmsg.2 = ''; _errmsg.3 = ''; _errors = 0
 
 	 /* validate existence and level of Odin32 */
 	 bldlevel. = ''
 	 rc = bldlevelx('kernel32.dll', 'bldlevel')
-         if normalize(bldlevel.!version) < 83 then do
+         if normalize(bldlevel.!version) < 86 then do
 	  _errors = _errors + 1
           _errmsg.1  = '** No valid installation of Odin found **'||crlf
           if bldlevel.!filename = '' then 
@@ -32,13 +32,13 @@
           _errmsg.2 = _errmsg.2 || 'Please make sure you have the proper version of GCC (gcc446.dll) installed.'||crlf||crlf
          end
 
-	 /* validate existence of proper LIBC core (libc064.dll) */
+	 /* validate existence of proper LIBC core (libc065.dll) */
 	 bldlevel. = ''
-	 rc = bldlevelx('libc064.dll', 'bldlevel')
+	 rc = bldlevelx('libc065.dll', 'bldlevel')
           if bldlevel.!filename = '' then do
 	   _errors = _errors + 1
            _errmsg.3 = '** LIBC core not detected **'||crlf
-           _errmsg.3 = _errmsg.3 || 'Please make sure you have the proper version of LIBC (libc064.dll) installed.'||crlf||crlf
+           _errmsg.3 = _errmsg.3 || 'Please make sure you have the proper version of LIBC (libc065.dll) installed.'||crlf||crlf
 	  end
 
 	 /* one or more validations failed, abort installer */
@@ -263,14 +263,14 @@
 	</VARPROMPT>
 
 		<PCK INDEX=12
-			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\3\2"
+			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\4\0"
 			TITLE="Flash Plugin Wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
                         CREATEOBJECT="REPLACE WPFolder|Flash Plugin Wrapper for eComStation|<WP_DESKTOP>|ALWAYSSORT=YES;OBJECTID=<FLASH_FOR_ECS>;"
                         CREATEOBJECT="REPLACE WPProgram|Flash Plugin Wrapper for eComStation^readme|<FLASH_FOR_ECS>|EXENAME=E.EXE;STARTUPDIR=$(12);PARAMETERS=flash.txt;OBJECTID=<FLASH_FOR_ECS_README>;"
-		>Flash Plugin Wrapper 0.3.2 for eComStation
+		>Flash Plugin Wrapper 0.4.0 for eComStation
 		</PCK>
 
 		<PCK INDEX=13
