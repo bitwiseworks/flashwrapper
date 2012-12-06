@@ -2474,9 +2474,10 @@ void NP32_LOADDS np4xDown_PushPopupsEnabledState(PNETSCAPEFUNCSWRAPPER pWrapper,
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p enabled=%d",
              szFunction, pWrapper, instance, enabled));
+    NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    pWrapper->pNative->pushpopupsenabledstate(instance, enabled);
+    pWrapper->pNative->pushpopupsenabledstate(NP4XDOWN_NS_INSTANCE(), enabled);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave", szFunction));
@@ -2489,9 +2490,10 @@ void NP32_LOADDS np4xDown_PopPopupsEnabledState(PNETSCAPEFUNCSWRAPPER pWrapper, 
     static const char *szFunction = __FUNCTION__;
     dprintf(("%s: enter - pWrapper=%p instance=%p",
              szFunction, pWrapper, instance));
+    NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    pWrapper->pNative->poppopupsenabledstate(instance);
+    pWrapper->pNative->poppopupsenabledstate(NP4XDOWN_NS_INSTANCE());
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintf(("%s: leave", szFunction));
