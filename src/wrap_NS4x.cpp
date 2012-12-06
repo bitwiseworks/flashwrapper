@@ -1332,6 +1332,8 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
              szFunction, pWrapper, instance, variable, value));
     NP4XUP_INSTANCE(FALSE);
 
+    bool bSupported = true;
+
     switch (variable)
     {
         case NPPVpluginDescriptionString:   dprintf(("%s: NPPVpluginDescriptionString", szFunction)); break;
@@ -1345,10 +1347,15 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
         case NPPVpluginScriptableIID:       dprintf(("%s: NPPVpluginScriptableIID", szFunction)); break;
         case NPPVjavascriptPushCallerBool:  dprintf(("%s: NPPVjavascriptPushCallerBool", szFunction)); break;
         case NPPVpluginKeepLibraryInMemory: dprintf(("%s: NPPVpluginKeepLibraryInMemory", szFunction)); break;
+        case NPPVpluginScriptableNPObject:  dprintf(("%s: NPPVpluginScriptableNPObject", szFunction)); break;
+        default:
+            bSupported = false;
+            dprintf(("%s: Unsupported variable %d", szFunction, variable));
+            break;
     }
 
     //@todo TEXT: NPPVpluginNameString and NPPVpluginDescriptionString
-    if (variable <= NPPVpluginKeepLibraryInMemory)
+    if (bSupported)
     {
         NP4XUP_ENTER_ODIN(FALSE);
         rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
@@ -1412,6 +1419,32 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
                     }
                 }
                 break;
+
+            case NPPVpluginScriptableNPObject:
+                {
+                    NPObject *pObject = NULL;
+
+                    // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
+                    pInst->bInGetScriptableObject = true;
+
+                    NP4XUP_ENTER_ODIN(FALSE);
+                    rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
+                    NP4XUP_LEAVE_ODIN(FALSE);
+
+                    pInst->bInGetScriptableObject = false;
+
+                    // sanity
+                    if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
+                    {
+                        dprintf(("%s: ERROR: pObject->_class must be %p", szFunction, &pInst->newClass));
+                        rc = NPERR_GENERIC_ERROR;
+                    }
+
+                    if (!rc)
+                        *(void**)value = pObject;
+                }
+                break;
+
             case NPPVjavaClass:
             case NPPVpluginWindowSize:
             case NPPVpluginTimerInterval:
@@ -1420,40 +1453,15 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
             default:
                 if (VALID_PTR(value))
                     dprintf(("%s: *(void**)value=%p", szFunction, *(void**)value));
+                break;
             }
         }
-    } else if (variable == 15) /* check for NPPVpluginScriptableNPObject */
-    {
-#if 0 // @todo temporary
-        /* we dont support any scriptable plugin objects atm */
-        if (value) *(void**)value = NULL;
-        rc = NPERR_GENERIC_ERROR;
-#else
-        // InstanceData* instanceData = instance->pdata;
-        // NPObject* object = instanceData->scriptableObject;
-
-        NPObject *pObject = NULL;
-
-        // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
-        pInst->bInGetScriptableObject = true;
-
-        NP4XUP_ENTER_ODIN(FALSE);
-        rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
-        NP4XUP_LEAVE_ODIN(FALSE);
-
-        pInst->bInGetScriptableObject = false;
-
-        // sanity
-        if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
-        {
-            dprintf(("%s: ERROR: pObject->_class must be %p", szFunction, &pInst->newClass));
-            rc = NPERR_GENERIC_ERROR;
-        }
-
-        if (!rc)
-            *(void**)value = pObject;
-#endif
     }
+    else
+    {
+        rc = NPERR_GENERIC_ERROR;
+    }
+
     dprintf(("%s: leave rc=%p", szFunction, rc));
     return rc;
 }
