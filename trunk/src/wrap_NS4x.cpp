@@ -541,6 +541,9 @@ typedef struct _PluginInstance
     /** Substituted class */
     NP32Class newClass;
 
+    /** Flag indicating that we're making the NPPVpluginScriptableNPObject request */
+    bool bInGetScriptableObject;
+
 } NPLUGININSTANCE, *PNPLUGININSTANCE;
 
 
@@ -934,6 +937,8 @@ NPError NP_LOADDS np4xUp_New(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPMI
     pInst->pOrgInstance = instance;
     pInst->pWndData = NULL;
     pInst->pw32Class = NULL;
+    memset(&pInst->newClass, 0, sizeof(pInst->newClass));
+    pInst->bInGetScriptableObject = false;
     instance->pdata = pInst;
 
     /*
@@ -1430,11 +1435,13 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
         NPObject *pObject = NULL;
 
         // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
-        pInst->pw32Class = &pInst->newClass;
+        pInst->bInGetScriptableObject = true;
 
         NP4XUP_ENTER_ODIN(FALSE);
         rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
         NP4XUP_LEAVE_ODIN(FALSE);
+
+        pInst->bInGetScriptableObject = false;
 
         // sanity
         if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
@@ -2178,7 +2185,7 @@ NPObject* NP32_LOADDS np4xDown_CreateObject(PNETSCAPEFUNCSWRAPPER pWrapper, void
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
     // check if we are being called as a result of np4xUp_GetValue(NPPVpluginScriptableNPObject)
-    if (pInst->pw32Class = &pInst->newClass)
+    if (pInst->bInGetScriptableObject)
     {
         dprintf(("%s: w32 class %p version %d", szFunction, aClass, aClass->structVersion));
 
