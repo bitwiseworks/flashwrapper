@@ -2454,6 +2454,36 @@ void NP32_LOADDS np4xDown_SetException(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvC
 }
 
 
+void NP32_LOADDS np4xDown_PushPopupsEnabledState(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPBool enabled)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p enabled=%d",
+             szFunction, pWrapper, instance, enabled));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->pushpopupsenabledstate(instance, enabled);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+void NP32_LOADDS np4xDown_PopPopupsEnabledState(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p",
+             szFunction, pWrapper, instance));
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->poppopupsenabledstate(instance);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
 /**
  * Stub for not implemented functions.
  *
@@ -2762,6 +2792,8 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
         (PFN)&np4xDown_HasMethod,
         (PFN)&np4xDown_ReleaseVariantValue,
         (PFN)&np4xDown_SetException,
+        (PFN)&np4xDown_PushPopupsEnabledState,
+        (PFN)&np4xDown_PopPopupsEnabledState,
     };
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
