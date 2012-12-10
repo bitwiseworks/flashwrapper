@@ -665,6 +665,59 @@ void convertNPVariant(const NPVariant *from, NP32Variant *to)
     memcpy((char *)&to->value, (char *)&from->value, sizeof(NPVariant::value));
 }
 
+static void showMissingOrdinalMsg(int ordinal, const char *errString, const char *errString2)
+{
+    FILE *phErrFile;
+    char msg[512];
+    char *env;
+    char logfile[_MAX_PATH +1] = {0};
+    char logfilename[] = "npflos2_error.txt";
+
+    // create the logfile variable
+    env = getenv("TEMP");
+    if (env == NULL)
+    {
+        env = getenv("TMP");
+    }
+    if (env != NULL)
+    {
+        strncpy(logfile, env, sizeof(logfile) -1);
+        strncat(logfile, "\\", sizeof(logfile) - strlen(logfile) -1);
+        strncat(logfile, logfilename, sizeof(logfile) - strlen(logfile) -1);  
+    }
+    else
+    {
+        strncat(logfile, logfilename, sizeof(logfile) -1);
+    }
+
+    snprintf(msg, sizeof(msg),
+             "The %s has called a %s function with ordinal %d which is not supported by this version of the Flash plugin wrapper.\n"
+             "For your convience a file called %s was created.\n\n"
+             "Please report the following information to the vendor:\n"
+             "- Flash movie URL;\n"
+             "- Flash plugin wrapper version;\n"
+             "- Flash plugin DLL version;\n"
+             "- Browser version.\n\n"
+             "The application will now terminate.",
+             errString, errString2, ordinal, logfile);
+
+    phErrFile = fopen(logfile, "w");
+    if (phErrFile)
+    {
+        DATETIME dt;
+        DosGetDateTime(&dt);
+        fprintf(phErrFile, "*** Log Opened on %04d-%02d-%02d %02d:%02d:%02d ***\n",
+                dt.year, dt.month, dt.day, dt.hours, dt.minutes, dt.seconds);
+        fprintf(phErrFile, "*** Build Date: " __DATE__ " " __TIME__ " ***\n");
+        fprintf(phErrFile, msg);
+        fclose(phErrFile);
+    }
+
+    WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
+
+    return;
+}
+
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 // UP wrappers (stuff that is presented to netscape/mozilla)
@@ -1589,19 +1642,8 @@ void NP_LOADDS np4xUp_NotImplementedStub(int ordinal)
 {
     dprintf(("%s: enter - ordinal=%d", __FUNCTION__, ordinal));
 
-    char msg[512];
-    snprintf(msg, sizeof(msg),
-             "The browser has called a Flash plugin function with ordinal %d which is not supported by this version of the Flash plugin wrapper.\n\n"
-             "Please report the following information to the vendor:\n"
-             "- Flash movie URL;\n"
-             "- Flash plugin wrapper version;\n"
-             "- Flash plugin DLL version;\n"
-             "- Browser version.\n\n"
-             "The application will now terminate.",
-             ordinal);
-
-    WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
-
+    showMissingOrdinalMsg(ordinal, "browser", "Flash plugin");
+    
     dprintf(("%s: Terminating the application.", __FUNCTION__));
     exit(333);
     return;
@@ -2570,18 +2612,7 @@ void NP32_LOADDS np4xDown_NotImplementedStub(int ordinal)
 {
     dprintf(("%s: enter - ordinal=%d", __FUNCTION__, ordinal));
 
-    char msg[512];
-    snprintf(msg, sizeof(msg),
-             "The Flash plugin has called a browser function with ordinal %d which is not supported by this version of the Flash plugin wrapper.\n\n"
-             "Please report the following information to the vendor:\n"
-             "- Flash movie URL;\n"
-             "- Flash plugin wrapper version;\n"
-             "- Flash plugin DLL version;\n"
-             "- Browser version.\n\n"
-             "The application will now terminate.",
-             ordinal);
-
-    WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, msg, NULL, 0, MB_ERROR | MB_OK | MB_SYSTEMMODAL);
+    showMissingOrdinalMsg(ordinal, "Flash plugin", "browser");
 
     dprintf(("%s: Terminating the application.", __FUNCTION__));
     exit(333);
