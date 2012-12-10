@@ -334,6 +334,9 @@ typedef struct _NP32PluginFuncs
             void*       javaClass;
             NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPPVariable variable, void *ret_alue);
             NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPNVariable variable, void *ret_alue);
+            NPBool      (* NP32_LOADDS pfnGotFocus)(NPP instance, NPFocusDirection direction);
+            void        (* NP32_LOADDS pfnLostFocus)(NPP instance);
+            void        (* NP32_LOADDS pfnURLRedirectNotify)(NPP instance, const char* url, int32_t status, void* notifyData);
         };
         PFN functions[0];
     };
@@ -351,28 +354,9 @@ typedef struct _NP32NetscapeFuncs
     {
         struct
         {
-            NPError     (* NP32_LOADDS pfnGetURL)(NPP instance, const char* url, const char* window);
-            NPError     (* NP32_LOADDS pfnPostURL)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file);
-            NPError     (* NP32_LOADDS pfnRequestRead)(NPStream* stream, NPByteRange* rangeList);
-            NPError     (* NP32_LOADDS pfnNewStream)(NPP instance, NPMIMEType type, const char* window, NPStream** stream);
-            int32_t     (* NP32_LOADDS pfnWrite)(NPP instance, NPStream* stream, int32_t len, void* buffer);
-            NPError     (* NP32_LOADDS pfnDestroyStream)(NPP instance, NPStream* stream, NPReason reason);
-            void        (* NP32_LOADDS pfnStatus)(NPP instance, const char* message);
-            const char* (* NP32_LOADDS pfnUserAgent)(NPP instance);
-            void*       (* NP32_LOADDS pfnMemAlloc)(uint32_t size);
-            void        (* NP32_LOADDS pfnMemFree)(void* ptr);
-            uint32_t    (* NP32_LOADDS pfnMemFlush)(uint32_t size);
-            void        (* NP32_LOADDS pfnReloadPlugins)(NPBool reloadPages);
-            void*       (* NP32_LOADDS pfnGetJavaEnv)(void);
-            void*       (* NP32_LOADDS pfnGetJavaPeer)(NPP instance);
-            NPError     (* NP32_LOADDS pfnGetURLNotify)(NPP instance, const char* url, const char* window, void* notifyData);
-            NPError     (* NP32_LOADDS pfnPostURLNotify)(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData);
-            NPError     (* NP32_LOADDS pfnGetValue)(NPP instance, NPNVariable variable, void *ret_alue);
-            NPError     (* NP32_LOADDS pfnSetValue)(NPP instance, NPPVariable variable, void *ret_alue);
-            void        (* NP32_LOADDS pfnInvalidateRect)(NPP instance, NPRect *rect);
-            void        (* NP32_LOADDS pfnInvalidateRegion)(NPP instance, NPRegion region);
-            void        (* NP32_LOADDS pfnForceRedraw)(NPP instance);
-
+            // Note: we don't need Win32-like Netscape function pointers here since we would never
+            // call these from our code and the whole struct is only used as a placeholder for
+            // stub creation magic
         };
         PFN functions[0];
     };
@@ -1544,6 +1528,58 @@ NPError NP_LOADDS np4xUp_SetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
 }
 
 
+NPBool  NP_LOADDS np4xUp_GotFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, NPFocusDirection direction)
+{
+    static const char szFunction[] = "np4xUp_GotFocus";
+    dprintf(("%s: enter - pWrapper=%p instance=%p directions=%p",
+             szFunction, pWrapper, instance, direction));
+    //@todo See if any of this is right
+    NP4XUP_INSTANCE(FALSE);
+
+    NP4XUP_ENTER_ODIN(FALSE);
+    NPBool rc = pWrapper->w32->pfnGotFocus(NP4XUP_W32_INSTANCE(), direction);
+    NP4XUP_LEAVE_ODIN(FALSE);
+
+    dprintf(("%s: leave rc=%p", szFunction, rc));
+    return rc;
+}
+
+void    NP_LOADDS np4xUp_LostFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
+{
+    static const char szFunction[] = "np4xUp_LostFocus";
+    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p reaons=%d notifyData=%p",
+             szFunction, pWrapper, instance));
+    //@todo See if any of this is right
+    NP4XUP_INSTANCE(FALSE);
+
+    NP4XUP_ENTER_ODIN(FALSE);
+    pWrapper->w32->pfnLostFocus(NP4XUP_W32_INSTANCE());
+    NP4XUP_LEAVE_ODIN(FALSE);
+
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
+void    NP_LOADDS np4xUp_URLRedirectNotify(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url,
+                                   int32_t status, void* notifyData)
+{
+    static const char szFunction[] = "np4xUp_URLRedirectNotify";
+    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p reaons=%d notifyData=%p",
+             szFunction, pWrapper, instance, url, status, notifyData));
+    DPRINTF_STR(url);
+    //@todo TEXT: url needs attention.
+    NP4XUP_INSTANCE(FALSE);
+
+    NP4XUP_ENTER_ODIN(FALSE);
+    pWrapper->w32->pfnURLRedirectNotify(NP4XUP_W32_INSTANCE(), url, status, notifyData);
+    NP4XUP_LEAVE_ODIN(FALSE);
+
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
 /**
  * Stub for not implemented functions.
  *
@@ -2509,6 +2545,22 @@ void NP32_LOADDS np4xDown_PopPopupsEnabledState(PNETSCAPEFUNCSWRAPPER pWrapper, 
 }
 
 
+void NP32_LOADDS np4xDown_URLRedirectResponse(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, void* notifyData, NPBool allow)
+{
+    static const char *szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p instance=%p notifyData=%p allow=%d",
+             szFunction, pWrapper, instance, allow));
+    NP4XDOWN_INSTANCE(FALSE);
+    NP4XDOWN_LEAVE_ODIN(FALSE);
+
+    pWrapper->pNative->urlredirectresponse(NP4XDOWN_NS_INSTANCE(), notifyData, allow);
+
+    NP4XDOWN_ENTER_ODIN(FALSE);
+    dprintf(("%s: leave", szFunction));
+    return;
+}
+
+
 /**
  * Stub for not implemented functions.
  *
@@ -2629,6 +2681,9 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
         (PFN)&pCallbacks->javaClass,
         (PFN)&np4xUp_GetValue,
         (PFN)&np4xUp_SetValue,
+        (PFN)&np4xUp_GotFocus,
+        (PFN)&np4xUp_LostFocus,
+        (PFN)&np4xUp_URLRedirectNotify,
     };
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
@@ -2819,6 +2874,19 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs * pFuncs, PNPODINWRAPPER p
         (PFN)&np4xDown_SetException,
         (PFN)&np4xDown_PushPopupsEnabledState,
         (PFN)&np4xDown_PopPopupsEnabledState,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        (PFN)&np4xDown_URLRedirectResponse,
     };
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
