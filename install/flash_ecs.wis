@@ -10,12 +10,12 @@
 	 /* validate existence and level of Odin32 */
 	 bldlevel. = ''
 	 rc = bldlevelx('kernel32.dll', 'bldlevel')
-         if normalize(bldlevel.!version) < 86 then do
+         if normalize(bldlevel.!version) < 87 then do
 	  _errors = _errors + 1
           _errmsg.1  = '** No valid installation of Odin found **'||crlf
           if bldlevel.!filename = '' then 
 	  _errmsg.1 = _errmsg.1 || 'Could not detect any version of Odin on your system.'; else
-          _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.3 is required.'
+          _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.7 is required.'
           _errmsg.1 = _errmsg.1 || crlf||'Please make sure you have the proper version of Odin installed.'||crlf||crlf
          end
 
