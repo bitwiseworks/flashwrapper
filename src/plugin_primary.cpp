@@ -416,6 +416,9 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
 
         case DLL_THREAD_ATTACH: {
 
+        // Attaching to Win32 threads should be not needed for Flash since Netscape
+        // only calls it on Thread 1.
+#if 0
             dprintf(("%s: DLL_THREAD_ATTACH. Instance: 0x%X", szFunction, hInstance));
             if (gfHandleDllEvents) {
 
@@ -439,11 +442,15 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             }
 
             dprintf(("%s: DLL_THREAD_ATTACHED", szFunction));
+#endif
             return TRUE;
         }
 
         case DLL_THREAD_DETACH: {
 
+        // Attaching to Win32 threads should be not needed for Flash since Netscape
+        // only calls it on Thread 1.
+#if 0
             dprintf(("%s: DLL_THREAD_DETACH. Instance: 0x%X", szFunction, hInstance));
             if (gfHandleDllEvents) {
 
@@ -467,6 +474,8 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
                 pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld);
             }
 
+            dprintf(("%s: DLL_THREAD_DETACHED", szFunction));
+
             // Get memory stats if debug build.
 #if defined(DEBUG) && 0
             extern void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc, unsigned long *pnrcalls_free, unsigned long *ptotalmemalloc);
@@ -479,6 +488,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             dprintf((" cFrees         = %d (%#x)", cFrees,  cFrees));
             dprintf((" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated));
             dprintf(("####InitTerm###### npj2 Heap statistics ####InitTerm#####"));
+#endif
 #endif
             return TRUE;
         }
