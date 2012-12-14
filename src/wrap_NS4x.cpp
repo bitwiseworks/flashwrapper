@@ -683,7 +683,7 @@ static void showMissingOrdinalMsg(int ordinal, const char *errString, const char
     {
         strncpy(logfile, env, sizeof(logfile) -1);
         strncat(logfile, "\\", sizeof(logfile) - strlen(logfile) -1);
-        strncat(logfile, logfilename, sizeof(logfile) - strlen(logfile) -1);  
+        strncat(logfile, logfilename, sizeof(logfile) - strlen(logfile) -1);
     }
     else
     {
@@ -1402,11 +1402,41 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     //@todo TEXT: NPPVpluginNameString and NPPVpluginDescriptionString
     if (bSupported)
     {
-        NP4XUP_ENTER_ODIN(FALSE);
-        rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
-        NP4XUP_LEAVE_ODIN(FALSE);
-        if (!rc)
+        switch (variable)
         {
+        case NPPVpluginScriptableNPObject:
+            {
+                NPObject *pObject = NULL;
+
+                // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
+                pInst->bInGetScriptableObject = true;
+
+                NP4XUP_ENTER_ODIN(FALSE);
+                rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
+                NP4XUP_LEAVE_ODIN(FALSE);
+
+                pInst->bInGetScriptableObject = false;
+
+                // sanity
+                if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
+                {
+                    dprintf(("%s: ERROR: pObject->_class must be %p", szFunction, &pInst->newClass));
+                    rc = NPERR_GENERIC_ERROR;
+                }
+
+                if (!rc)
+                    *(void**)value = pObject;
+            }
+            break;
+
+        default:
+            NP4XUP_ENTER_ODIN(FALSE);
+            rc = pWrapper->w32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, value);
+            NP4XUP_LEAVE_ODIN(FALSE);
+
+            if (rc)
+                break;
+
             switch (variable)
             {
             case NPPVpluginDescriptionString:
@@ -1500,6 +1530,7 @@ NPError NP_LOADDS np4xUp_GetValue(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
                     dprintf(("%s: *(void**)value=%p", szFunction, *(void**)value));
                 break;
             }
+            break;
         }
     }
     else
@@ -1643,7 +1674,7 @@ void NP_LOADDS np4xUp_NotImplementedStub(int ordinal)
     dprintf(("%s: enter - ordinal=%d", __FUNCTION__, ordinal));
 
     showMissingOrdinalMsg(ordinal, "browser", "Flash plugin");
-    
+
     dprintf(("%s: Terminating the application.", __FUNCTION__));
     exit(333);
     return;
@@ -2329,7 +2360,7 @@ NPObject* NP32_LOADDS np4xDown_CreateObject(PNETSCAPEFUNCSWRAPPER pWrapper, void
     NPObject *object = pWrapper->pNative->createobject(NP4XDOWN_NS_INSTANCE(), aClass);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
-    dprintf(("%s: leave object=%x", szFunction, object));
+    dprintf(("%s: leave object=%x (refcnt=%d)", szFunction, object, object ? object->referenceCount : 0));
     return object;
 }
 
@@ -2337,14 +2368,14 @@ NPObject* NP32_LOADDS np4xDown_CreateObject(PNETSCAPEFUNCSWRAPPER pWrapper, void
 NPObject* NP32_LOADDS np4xDown_RetainObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPObject *obj)
 {
     static const char *szFunction = __FUNCTION__;
-    dprintf(("%s: enter - pWrapper=%p obj=%p",
-             szFunction, pWrapper, obj));
+    dprintf(("%s: enter - pWrapper=%p obj=%p (refcnt=%d)",
+             szFunction, pWrapper, obj, obj ? obj->referenceCount : 0));
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
     NPObject *object = pWrapper->pNative->retainobject(obj);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
-    dprintf(("%s: leave object=%x", szFunction, object));
+    dprintf(("%s: leave object=%x (refcnt=%d)", szFunction, object, object ? object->referenceCount : 0));
     return object;
 }
 
@@ -2352,8 +2383,8 @@ NPObject* NP32_LOADDS np4xDown_RetainObject(PNETSCAPEFUNCSWRAPPER pWrapper, void
 void NP32_LOADDS np4xDown_ReleaseObject(PNETSCAPEFUNCSWRAPPER pWrapper, void *pvCaller, NPObject *obj)
 {
     static const char *szFunction = __FUNCTION__;
-    dprintf(("%s: enter - pWrapper=%p obj=%p",
-             szFunction, pWrapper, obj));
+    dprintf(("%s: enter - pWrapper=%p obj=%p (refcnt=%d)",
+             szFunction, pWrapper, obj, obj ? obj->referenceCount : 0));
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
     pWrapper->pNative->releaseobject(obj);
