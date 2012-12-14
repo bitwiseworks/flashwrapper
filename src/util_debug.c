@@ -13,6 +13,7 @@
  */
 
 #define INCL_WIN
+#define INCL_DOSPROCESS
 #include <os2.h>
 
 /*******************************************************************************
@@ -30,9 +31,6 @@
 #ifdef __IBMC__
 #include <builtin.h>
 #endif
-
-#define INCL_BASE
-#include <os2.h>
 
 #include "common.h"
 
@@ -101,7 +99,11 @@ int     npdprintf(const char *pszFormat, ...)
     DWORD m = (time %= 3600000) / 60000;
     DWORD s = (time %= 60000) / 1000;
     DWORD ms = time % 1000;
-    sprintf(szMsg, "%02d:%02d:%02d.%03d: ", h, m, s, ms);
+    // get thread info
+    PTIB ptib;
+    DosGetInfoBlocks(&ptib, NULL);
+    // put it all together
+    sprintf(szMsg, "%02d:%02d:%02d.%03d t%02d: ", h, m, s, ms, ptib->tib_ptib2->tib2_ultid);
 #else
     strcpy(szMsg, " ");
 #endif
