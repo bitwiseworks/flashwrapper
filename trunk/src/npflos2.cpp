@@ -7,7 +7,7 @@
  * Copyright (c) 2012 bww bitwise works GmbH
  *
  * Authors: knut st. osmundsen <bird@anduin.net>
- *          Dmitriy Kuminov <dmik@dmik.org>
+ *          Dmitriy Kuminov <coding@dmik.org>
  *
  * All Rights Reserved
  *
