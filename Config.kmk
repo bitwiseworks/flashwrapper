@@ -11,7 +11,7 @@ PLUGIN_VERSION  = 0.4.0
 
 # Build: Symbolic name like "Beta 1" (empty for GA builds). Ends with "test" in
 # intermediate builds
-PLUGIN_BUILD    = test
+PLUGIN_BUILD    = GA
 
 #
 # Handler for Wine RC (.orc) source files

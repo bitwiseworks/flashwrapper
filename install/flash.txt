@@ -1,12 +1,12 @@
-[ Flash Plugin Wrapper for eComStation 0.4.0 ]
+[ Flash Plugin Wrapper for eComStation version 0.4.0 GA ]
 
-This is the first non Beta release of Flash Plugin Wrapper 
-for eComStation. It will enable you to use websites 
+This is the first GA release of Flash Plugin Wrapper
+for eComStation. It will enable you to use websites
 implementing the latest Flash content. For a list of changes
 please refer to the end of this document.
 
-It is available to anyone with an active Software Subscription 
-Services for eComStation, via their download-area at the Mensys 
+It is available to anyone with an active Software Subscription
+Services for eComStation, via their download-area at the Mensys
 Online Shop: http://www.mensys.net/login/
 
 
@@ -15,27 +15,27 @@ Introduction
 
 The official Flash 5 included with eComStation is outdated and does not
 support video playback. The unofficial Flash 7/9 release which can be
-found on the internet does not work on a lot of websites as it identifies 
+found on the internet does not work on a lot of websites as it identifies
 itself as Flash 9 but can only display Flash 7 content.
 
-With the new release of this Flash wrapper, up-to-date Flash support for 
-eComStation is provided. Currently it includes Flash Player 11.1.102.55.
+With the new release of this Flash wrapper, up-to-date Flash support for
+eComStation is provided. Currently it includes Flash Player 11.5.502.135.
 
-Note: This code should not be used on production systems. 
+Note: This code should not be used on production systems.
       Please make sure to have a proper backup of your system.
 
 
 Requirements
 ============
 
-- Flash Plugin Wrapper for eComStation requires eComStation version 1.2 
-  or higher. On older versions of eComStation the Flash plugin will refuse 
+- Flash Plugin Wrapper for eComStation requires eComStation version 1.2
+  or higher. On older versions of eComStation the Flash plugin will refuse
   to work without notice.
 
 - Before installing the plugin please shutdown all your web browser
-  sessions.  
+  sessions.
 
-- On eComStation the default plugin browser plugin path is defined by 
+- On eComStation the default plugin browser plugin path is defined by
   the "SET MOZ_PLUGIN_PATH=" variable set in the config.sys.
 
   If the MOZ_PLUGIN_PATH is not found the installer will try to find the
@@ -43,30 +43,30 @@ Requirements
   WPURLSETTINGS->DefaultBrowserExe.  It will then copy your plugin file to
   %browser-direcytory%\plugins.
 
-  If the correct path could not be found, the installer will ask you to 
+  If the correct path could not be found, the installer will ask you to
   provide the path.
 
 - When Flash 5 from Innotek (included with eComStation by default) or the
   unofficial Flash 7/9 release is found, The DLL's will be renamed so the
   web browser will no longer load the older versions (they will *not* be
-  deleted).  
+  deleted).
   See the section "How to uninstall Flash Plugin Wrapper" for more details.
 
-- This wrapper requires Odin build 0.8.7 or higher. This or a later version 
-  can be found at the same download location as this package, or at Netlabs: 
-  ftp://ftp.netlabs.org/pub/odin/ 
+- This wrapper requires Odin build 0.8.7 or higher. This or a later version
+  can be found at the same download location as this package, or at Netlabs:
+  ftp://ftp.netlabs.org/pub/odin/
   ftp://ftp.netlabs.org/pub/odin/0.8.7/odin-0.8.7.zip
   If you use rpm installed Odin, please do a "yum update odin" to get the
   latest version.
 
-- Odin requires GCC core 1.2.1 or higher. This or a later version 
-  can be found at the same download location as this package, or at Netlabs: 
+- Odin requires GCC core 1.2.1 or higher. This or a later version
+  can be found at the same download location as this package, or at Netlabs:
   ftp://ftp.netlabs.org/pub/libc/gcc4core-1_2_1.wpi
   If you use rpm installed Odin, then this prereq will be checked and also
   installed if needed.
 
-- Odin requires LIBC 0.6.5 or higher. This or a later version 
-  can be found at the same download location as this package, or at Netlabs: 
+- Odin requires LIBC 0.6.5 or higher. This or a later version
+  can be found at the same download location as this package, or at Netlabs:
   ftp://ftp.netlabs.org/pub/libc/libc-0.6.5-csd5.wpi
   If you use rpm installed Odin, then this prereq will be checked and also
   installed if needed.
@@ -75,21 +75,21 @@ Requirements
 
 - Firefox 2.0 or higher, including Firefox 3.x, 4.x up to the latest releases
   available
-- Seamonkey 
+- Seamonkey
 - PmW-Fx (builds of the Firefox web browser by Peter Weilbacher)
 
   Other web browsers, like for example Netscape 4.61, are not supported.
 
 * Supported video drivers:
 
-- SNAP build 3.1.8 
+- SNAP build 3.1.8
 - The Panorama video driver
 
   Both drivers ship with eComStation 1.2R and up.
 
 * Supported audio drivers:
 
-- UNIAUD audio driver; please use the latest UNIAUD from 
+- UNIAUD audio driver; please use the latest UNIAUD from
   http://svn.netlabs.org/uniaud or newer
   (currently either Uniaud195-1924.zip or Uniaud195-211.zip)
 - The SB Live driver from Sander van Leeuwen
@@ -101,7 +101,7 @@ Requirements
 
 * Kernel:
 
-It is recommended to use eComStation with kernel 104a SMP/_W4 or higher. 
+It is recommended to use eComStation with kernel 104a SMP/_W4 or higher.
 
 With the bldlevel.exe command you should have something like this:
 
@@ -118,19 +118,19 @@ Known limitations
 
 * Stability:
 
-  While this Flash build is reasonably stable it can sometimes crash your 
-  web browser and in some occasions block the user input or hang the desktop.  
-  If your keyboard and mouse input is blocked try to kill your web browser 
-  with a process killer like Top (available via CAD handler in eComStation) 
+  While this Flash build is reasonably stable it can sometimes crash your
+  web browser and in some occasions block the user input or hang the desktop.
+  If your keyboard and mouse input is blocked try to kill your web browser
+  with a process killer like Top (available via CAD handler in eComStation)
   or Watchcat. As a last resort you may need to reboot your system by pressing
   Ctrl-Alt-Del.
 
 * Remove old Flash 10 Technology Preview from WarpIn:
 
-  Although not required, it is recommended to remove a possible existing Flash 10 
-  package from WarpIn prior to installation. This can be done by starting WarpIn 
-  (Desktop -> Local System -> Install/Remove -> WarpIN -> WarpIN) and 
-  right clicking the Flash 10 entry in the lefthand pane -> De-install all packages. 
+  Although not required, it is recommended to remove a possible existing Flash 10
+  package from WarpIn prior to installation. This can be done by starting WarpIn
+  (Desktop -> Local System -> Install/Remove -> WarpIN -> WarpIN) and
+  right clicking the Flash 10 entry in the lefthand pane -> De-install all packages.
 
 * Using SMP:
 
@@ -139,21 +139,21 @@ defined on the PSD=ACPI.PSD in your config.sys, this might result in
 rendering problems with the Panorama video driver, like:
 
 - some text in Flash content might not be displayed correctly
-- when running in 64k colour mode, Flash video playback will have strange 
+- when running in 64k colour mode, Flash video playback will have strange
   colour patterns rendered. Switching to 16 million colours for the screen
   display fixes this problem. This problem does not occur with the Panorama
   driver that was released in eComStation 2.0 GA.
 
-* When you right click on any SWF content and select 'settings' the dialog 
-  may be corrupt or at least unusable. If the dialog cannot be closed it 
-  suffices to reload the webpage so the flash movie reinitializes. The 
+* When you right click on any SWF content and select 'settings' the dialog
+  may be corrupt or at least unusable. If the dialog cannot be closed it
+  suffices to reload the webpage so the flash movie reinitializes. The
   settings dialog will disappear then.
 
 * Registry:
 
-  This release of the Flash Plugin Wrapper no longer uses the registry to 
-  find it's location. You can check with regedit2.exe if the key 
-  "Flash10_plugin" exists, but it should be removed by the installer. 
+  This release of the Flash Plugin Wrapper no longer uses the registry to
+  find it's location. You can check with regedit2.exe if the key
+  "Flash10_plugin" exists, but it should be removed by the installer.
   If it exists this is not a problem though.
 
 
@@ -161,26 +161,26 @@ Reporting Bugs
 ==============
 
 To report bugs please visit http://svn.ecomstation.nl/flash10
-Please follow the guidelines on what steps are needed in order to properly 
+Please follow the guidelines on what steps are needed in order to properly
 report a bug.
 
 
 How to uninstall Flash Plugin Wrapper for eComStation
 =====================================================
 
-- Start Warpin.exe and select the 3 Flash Plugin Wrapper items in Warpin for 
+- Start Warpin.exe and select the 3 Flash Plugin Wrapper items in Warpin for
   uninstall.
 
-- Restore previous plugin DLLs: 
+- Restore previous plugin DLLs:
 
-  When the Flash Plugin Wrapper installer detects Flash 5 (that ships with 
-  eComStation 1.2 and higher) in the plugin directory, it will rename it. The 
-  original file is called npswf2.dll and will have been renamed to 
+  When the Flash Plugin Wrapper installer detects Flash 5 (that ships with
+  eComStation 1.2 and higher) in the plugin directory, it will rename it. The
+  original file is called npswf2.dll and will have been renamed to
   npswf2.dll.flash5.
-  Remove the "flash5" portion from the file name so your old plugin will 
+  Remove the "flash5" portion from the file name so your old plugin will
   work again.
-  If you had the "unofficial" flash 7/9 installed remove the ".flash7" 
-  portion from the file names (npswf2.dll, npswf32.dll and flashwin.dll), to 
+  If you had the "unofficial" flash 7/9 installed remove the ".flash7"
+  portion from the file names (npswf2.dll, npswf32.dll and flashwin.dll), to
   restore the functionality of your orginal Flash plugin.
 
 
@@ -199,8 +199,8 @@ Changelog
  - odin (comctl32): added additional check for NULL pointer of DPA_GetPtr()
 
 26.04.2009:
- - odin (kernel32):reworked autocommit. now its tries to commit page when 
-   other autocommit workers are done (for example - dib section). 
+ - odin (kernel32):reworked autocommit. now its tries to commit page when
+   other autocommit workers are done (for example - dib section).
 
 12.05.2009:
  - fixed flash10 video
@@ -215,7 +215,7 @@ Changelog
  - Fixed crash when click RMB on an Flash animations
 
 26.09.2009:
- - Fixed crash when click About dialog and clicks on flash animations, 
+ - Fixed crash when click About dialog and clicks on flash animations,
    points on an new URLs
 
 28.09.2009:
@@ -249,7 +249,7 @@ Changelog
  - Locate Odin DLLs in a standard way through [BEGIN]LIBPATH by default
  - Bump reported Flash version to 11.1 r102
  - Bump wrapper version to 0.3.1
- - Many Flash Plugin Wrapper specific fixes are present in Odin 0.8.2 and 
+ - Many Flash Plugin Wrapper specific fixes are present in Odin 0.8.2 and
    0.8.3, please see the changelog file of Odin.
 
 01.03.2012
@@ -260,10 +260,12 @@ Changelog
  - changed Warpin to create the Flash Plugin Wrapper folder on the desktop
    (Ticket #50)
 
-05.12.2012
- - Bump wrapper version to 0.4.0
- - fixed the ActionScript to JavaScript and vice versa callbacks
-   (Tickets #8, #34, #69)
+19.12.2012
+ - Bump wrapper version to 0.4.0 GA.
+ - Add support for cross-scripting (calling Flash ActionScript from container's
+   JavaScript and vice versa, tickets #8, #34, #69 and many more). This makes
+   many modern Flash sites work.
+ - Bump reported Flash version to 11.5 r502.
  - Many Flash Plugin Warpper specific fixes are present in Odin 0.8.6 and
    0.8.7, please see the changelog file of Odin.
 
