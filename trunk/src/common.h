@@ -88,6 +88,7 @@ extern void * DOS32TIB;
 *******************************************************************************/
 #include <win32type.h>
 #include <odin.h>
+#include <custombuild.h>
 
 /* taken from odinlx.h */
 #ifdef __cplusplus
@@ -332,6 +333,10 @@ extern void (*WIN32API          pfnODIN_ThreadLeaveOdinContext)(void *pException
 extern USHORT (*WIN32API        pfnODIN_ThreadLeaveOdinContextNested)(void *pExceptionRegRec, BOOL fRemoveOdinExcpt);
 /** ODIN_ThreadEnterOdinContextNested - global */
 extern void (*WIN32API          pfnODIN_ThreadEnterOdinContextNested)(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
+/** ODIN_ThreadContextSave - global */
+extern void (*WIN32API          pfnODIN_ThreadContextSave)(PODINTHREADCTX pCtx, unsigned fFlags);
+/** ODIN_ThreadContextRestore - global */
+extern void (*WIN32API          pfnODIN_ThreadContextRestore)(PODINTHREADCTX pCtx, unsigned fFlags);
 /** WriteLog */
 extern int (*_System            pfnWriteLog)(const char *pszFormat, ...);
 
