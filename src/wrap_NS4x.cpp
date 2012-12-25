@@ -337,6 +337,8 @@ typedef struct _NP32PluginFuncs
             NPBool      (* NP32_LOADDS pfnGotFocus)(NPP instance, NPFocusDirection direction);
             void        (* NP32_LOADDS pfnLostFocus)(NPP instance);
             void        (* NP32_LOADDS pfnURLRedirectNotify)(NPP instance, const char* url, int32_t status, void* notifyData);
+            NPError     (* NP32_LOADDS pfnClearSiteData)(const char* site, uint64_t flags, uint64_t maxAge);
+            char**      (* NP32_LOADDS pfnGetSitesWithData)(void);
         };
         PFN functions[0];
     };
@@ -1660,6 +1662,37 @@ void    NP_LOADDS np4xUp_URLRedirectNotify(PNPLUGINFUNCSWRAPPER pWrapper, void *
 }
 
 
+NPError NP_LOADDS np4xUp_ClearSiteData(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, const char* site, uint64_t flags, uint64_t maxAge)
+{
+    static const char* szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p site=%p flags=%lx maxAge=%ld",
+             szFunction, pWrapper, site, flags, maxAge));
+    DPRINTF_STR(site);
+
+    NP4XUP_ENTER_ODIN(FALSE);
+    NPError rc = pWrapper->w32->pfnClearSiteData(site, flags, maxAge);
+    NP4XUP_LEAVE_ODIN(FALSE);
+
+    dprintf(("%s: leave rc=%p", szFunction, rc));
+    return rc;
+}
+
+
+char**  NP_LOADDS np4xUp_GetSitesWithData(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller)
+{
+    static const char* szFunction = __FUNCTION__;
+    dprintf(("%s: enter - pWrapper=%p",
+             szFunction, pWrapper));
+
+    NP4XUP_ENTER_ODIN(FALSE);
+    char **ret = pWrapper->w32->pfnGetSitesWithData();
+    NP4XUP_LEAVE_ODIN(FALSE);
+
+    dprintf(("%s: leave ret=%p", szFunction, ret));
+    return ret;
+}
+
+
 /**
  * Stub for not implemented functions.
  *
@@ -2742,6 +2775,8 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs* pCallbacks, PNPODINWRAP
         (PFN)&np4xUp_GotFocus,
         (PFN)&np4xUp_LostFocus,
         (PFN)&np4xUp_URLRedirectNotify,
+        (PFN)&np4xUp_ClearSiteData,
+        (PFN)&np4xUp_GetSitesWithData,
     };
 
     enum { implementedWrappersCnt = sizeof(implementedWrappers) / sizeof(implementedWrappers[0]) };
