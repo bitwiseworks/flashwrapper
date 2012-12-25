@@ -231,11 +231,14 @@
     unsigned ExceptionRegRec[2] = {0,0}; \
     USHORT selFSOld = pfnODIN_ThreadEnterOdinContext(&ExceptionRegRec[0], TRUE); \
     VERIFY_EXCEPTION_CHAIN(); \
+    ODINTHREADCTX ctx; \
+    pfnODIN_ThreadContextSave(&ctx, OTCTXF_SAVE_FPU | OTCTXF_LOAD_FPU_ODIN32); \
     if (fDebug) DebugInt3()
 
 /** Leave odin context and go back into the OS/2 netscape/mozilla context. */
 #define NP4XUP_LEAVE_ODIN(fDebug) \
     if (fDebug) DebugInt3();  \
+    pfnODIN_ThreadContextRestore(&ctx, OTCTXF_SAVE_FPU); \
     VERIFY_EXCEPTION_CHAIN(); \
     pfnODIN_ThreadLeaveOdinContext(&ExceptionRegRec[0], selFSOld); \
     ExceptionRegRec[0] = ExceptionRegRec[1] = 0; \

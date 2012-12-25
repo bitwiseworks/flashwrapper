@@ -92,6 +92,10 @@ void (*WIN32API          pfnODIN_ThreadLeaveOdinContext)(void *pExceptionRegRec,
 USHORT (*WIN32API        pfnODIN_ThreadLeaveOdinContextNested)(void *pExceptionRegRec, BOOL fRemoveOdinExcpt);
 /** ODIN_ThreadEnterOdinContextNested - global */
 void (*WIN32API          pfnODIN_ThreadEnterOdinContextNested)(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
+/** ODIN_ThreadContextSave - global */
+void (*WIN32API          pfnODIN_ThreadContextSave)(PODINTHREADCTX pCtx, unsigned fFlags);
+/** ODIN_ThreadContextRestore - global */
+void (*WIN32API          pfnODIN_ThreadContextRestore)(PODINTHREADCTX pCtx, unsigned fFlags);
 /** WriteLog */
 int (*_System            pfnWriteLog)(const char *pszFormat, ...);
 
@@ -167,6 +171,8 @@ struct OdinEntryPoint aAPIs[] =
     {1, (void**)&pfnODIN_ThreadLeaveOdinContext,       "_ODIN_ThreadLeaveOdinContext@8", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnODIN_ThreadLeaveOdinContextNested, "_ODIN_ThreadLeaveOdinContextNested@8", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnODIN_ThreadEnterOdinContextNested, "_ODIN_ThreadEnterOdinContextNested@12", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadContextSave,            "_ODIN_ThreadContextSave@8", "KERNEL32", NULLHANDLE},
+    {1, (void**)&pfnODIN_ThreadContextRestore,         "_ODIN_ThreadContextRestore@8", "KERNEL32", NULLHANDLE},
     {1, (void**)&pfnSetFreeTypeIntegration,            "SetFreeTypeIntegration", "GDI32", NULLHANDLE},
     {1, (void**)&pfnCreateFakeWindowEx,                "_CreateFakeWindowEx@8", "USER32", NULLHANDLE},
     {1, (void**)&pfnDestroyFakeWindow,                 "_DestroyFakeWindow@4", "USER32", NULLHANDLE},
