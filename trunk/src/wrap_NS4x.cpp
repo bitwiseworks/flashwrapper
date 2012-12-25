@@ -1617,7 +1617,6 @@ NPBool  NP_LOADDS np4xUp_GotFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
     static const char szFunction[] = "np4xUp_GotFocus";
     dprintf(("%s: enter - pWrapper=%p instance=%p directions=%p",
              szFunction, pWrapper, instance, direction));
-    //@todo See if any of this is right
     NP4XUP_INSTANCE(FALSE);
 
     NP4XUP_ENTER_ODIN(FALSE);
@@ -1631,9 +1630,8 @@ NPBool  NP_LOADDS np4xUp_GotFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller,
 void    NP_LOADDS np4xUp_LostFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance)
 {
     static const char szFunction[] = "np4xUp_LostFocus";
-    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p reaons=%d notifyData=%p",
+    dprintf(("%s: enter - pWrapper=%p instance=%p",
              szFunction, pWrapper, instance));
-    //@todo See if any of this is right
     NP4XUP_INSTANCE(FALSE);
 
     NP4XUP_ENTER_ODIN(FALSE);
@@ -1645,14 +1643,12 @@ void    NP_LOADDS np4xUp_LostFocus(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller
 }
 
 
-void    NP_LOADDS np4xUp_URLRedirectNotify(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url,
-                                   int32_t status, void* notifyData)
+void    NP_LOADDS np4xUp_URLRedirectNotify(PNPLUGINFUNCSWRAPPER pWrapper, void *pvCaller, NPP instance, const char* url, int32_t status, void* notifyData)
 {
     static const char szFunction[] = "np4xUp_URLRedirectNotify";
-    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p reaons=%d notifyData=%p",
+    dprintf(("%s: enter - pWrapper=%p instance=%p url=%p status=%x notifyData=%p",
              szFunction, pWrapper, instance, url, status, notifyData));
     DPRINTF_STR(url);
-    //@todo TEXT: url needs attention.
     NP4XUP_INSTANCE(FALSE);
 
     NP4XUP_ENTER_ODIN(FALSE);
