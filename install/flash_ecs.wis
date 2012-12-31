@@ -10,12 +10,12 @@
 	 /* validate existence and level of Odin32 */
 	 bldlevel. = ''
 	 rc = bldlevelx('kernel32.dll', 'bldlevel')
-         if normalize(bldlevel.!version) < 87 then do
+         if normalize(bldlevel.!version) < 88 then do
 	  _errors = _errors + 1
           _errmsg.1  = '** No valid installation of Odin found **'||crlf
-          if bldlevel.!filename = '' then 
+          if bldlevel.!filename = '' then
 	  _errmsg.1 = _errmsg.1 || 'Could not detect any version of Odin on your system.'; else
-          _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.7 is required.'
+          _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.8 is required.'
           _errmsg.1 = _errmsg.1 || crlf||'Please make sure you have the proper version of Odin installed.'||crlf||crlf
          end
 
@@ -42,12 +42,12 @@
 	  end
 
 	 /* one or more validations failed, abort installer */
-         if _errors > 0 then do 
-	   if _errors = 1 then _errmsg.title = 'A required component is missing from your system'; else 
+         if _errors > 0 then do
+	   if _errors = 1 then _errmsg.title = 'A required component is missing from your system'; else
 	   _errmsg.title = _errors||' required components missing from your system'
            _errmsg.txt =   'Refer to readme.txt for more information on how to obtain the required files.'||crlf||crlf,
 	                   '"'||_title||'" installer will now exit.'
-           rc = WirexxShowMessage(_errmsg.title, _errmsg.1||_errmsg.2||_errmsg.3||_errmsg.txt,'0001'x) 
+           rc = WirexxShowMessage(_errmsg.title, _errmsg.1||_errmsg.2||_errmsg.3||_errmsg.txt,'0001'x)
            call WirexxCancel;
 	 end
 	 else do
@@ -56,7 +56,7 @@
 			'Please note that it is recommended to de-install any previous Flash 10 Technology Preview package and ',
 			'close any running copy of Firefox or Mozilla prior to starting the installer.'||crlf||crlf,
 	                '"'||_title||'" installer will now continue.'
-           rc = WirexxShowMessage(_msg.title, _msg.txt,'0001'x) 
+           rc = WirexxShowMessage(_msg.title, _msg.txt,'0001'x)
 	 end
 
 	 /* end of REXX init procedure */
@@ -154,8 +154,8 @@
           /* normalize: procedure to make it possible to mathematically compare buildlevels */
           normalize: procedure
             parse arg version
-            parse var version versionH '.' versionT '.' versionD 
-            if datatype(versionH, 'N') = 1 & datatype(versionT, 'N') = 1 & datatype(versionD, 'N') = 1 then 
+            parse var version versionH '.' versionT '.' versionD
+            if datatype(versionH, 'N') = 1 & datatype(versionT, 'N') = 1 & datatype(versionD, 'N') = 1 then
               normalizedversion = 100 * versionH + 10 * versionT + versionD
             else normalizedversion = 0
           return normalizedversion
@@ -263,7 +263,7 @@
 	</VARPROMPT>
 
 		<PCK INDEX=12
-			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\4\0"
+			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\4\1"
 			TITLE="Flash Plugin Wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
