@@ -270,7 +270,7 @@
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
                         CREATEOBJECT="REPLACE WPFolder|Flash Plugin Wrapper for eComStation|<WP_DESKTOP>|ALWAYSSORT=YES;OBJECTID=<FLASH_FOR_ECS>;"
                         CREATEOBJECT="REPLACE WPProgram|Flash Plugin Wrapper for eComStation^readme|<FLASH_FOR_ECS>|EXENAME=E.EXE;STARTUPDIR=$(12);PARAMETERS=flash.txt;OBJECTID=<FLASH_FOR_ECS_README>;"
-		>Flash Plugin Wrapper 0.4.0 for eComStation
+		>Flash Plugin Wrapper 0.4.1 for eComStation
 		</PCK>
 
 		<PCK INDEX=13
