@@ -13,5 +13,5 @@
 
 wic_dir = Strip(SysIni('user','WarpIN','Path'),'t','00'x)
 old = SysSetExtLIBPATH(wic_dir,'b')
-Address cmd wic_dir||'\wic.exe -a -U flash_ecs_ga-release 12 -c12 -r * 13 -c13 -r * -s flash_ecs.wis'
+Address cmd wic_dir||'\wic.exe -a -U flash_ecs_041_ga-release 12 -c12 -r * 13 -c13 -r * -s flash_ecs.wis'
 old = SysSetExtLIBPATH(old,'b')

@@ -1,4 +1,4 @@
-[ Flash Plugin Wrapper for eComStation version 0.4.0 GA ]
+[ Flash Plugin Wrapper for eComStation version 0.4.1 GA ]
 
 This is the first GA release of Flash Plugin Wrapper
 for eComStation. It will enable you to use websites
@@ -52,10 +52,10 @@ Requirements
   deleted).
   See the section "How to uninstall Flash Plugin Wrapper" for more details.
 
-- This wrapper requires Odin build 0.8.7 or higher. This or a later version
+- This wrapper requires Odin build 0.8.8 or higher. This or a later version
   can be found at the same download location as this package, or at Netlabs:
   ftp://ftp.netlabs.org/pub/odin/
-  ftp://ftp.netlabs.org/pub/odin/0.8.7/odin-0.8.7.zip
+  ftp://ftp.netlabs.org/pub/odin/0.8.8/odin-0.8.8.zip
   If you use rpm installed Odin, please do a "yum update odin" to get the
   latest version.
 
@@ -268,6 +268,15 @@ Changelog
  - Bump reported Flash version to 11.5 r502.
  - Many Flash Plugin Warpper specific fixes are present in Odin 0.8.6 and
    0.8.7, please see the changelog file of Odin.
+
+31.12.2012
+ - Bump wrapper version to 0.4.1 GA.
+ - Fix crashing when clearing up the browser history (due to lacking wrappers
+   for ClearSiteData and GetSitesWithData callbacks).
+ - Fix crashes on some sites with specific Flash content (the FPU control word
+   was not set correctly when passing control to the plugin).
+ - More Flash Plugin Warpper specific fixes are present in Odin 0.8.8, please
+   see the changelog file of Odin.
 
 More information
 ================
