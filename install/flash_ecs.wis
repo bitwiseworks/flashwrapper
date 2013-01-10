@@ -10,23 +10,26 @@
 	 /* validate existence and level of Odin32 */
 	 bldlevel. = ''
 	 rc = bldlevelx('kernel32.dll', 'bldlevel')
-         if normalize(bldlevel.!version) < 88 then do
+         if rc <> 0 | normalize(bldlevel.!version) < 88 then do
+          rc = 2
 	  _errors = _errors + 1
           _errmsg.1  = '** No valid installation of Odin found **'||crlf
           if bldlevel.!filename = '' then
-	  _errmsg.1 = _errmsg.1 || 'Could not detect any version of Odin on your system.'; else
-          _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.8 is required.'
+	   _errmsg.1 = _errmsg.1 || 'Could not detect any version of Odin on your system.'
+          else
+           _errmsg.1 = _errmsg.1 || 'Your installed version is: '||bldlevel.!version||' but at least level 0.8.8 is required.'
           _errmsg.1 = _errmsg.1 || crlf||'Please make sure you have the proper version of Odin installed.'||crlf||crlf
          end
 
 	 /* validate existence of proper GCC core (gcc446.dll) */
 	 bldlevel. = ''
-	 rc = bldlevelx('gcc446.dll', 'bldlevel')
+	 rc1 = bldlevelx('gcc446.dll', 'bldlevel')
 	 gcc446 = bldlevel.!filename
 	 bldlevel. = ''
-	 rc = bldlevelx('ssp.dll', 'bldlevel')
+	 rc2 = bldlevelx('ssp.dll', 'bldlevel')
 	 ssp = bldlevel.!filename
-         if gcc446 = '' | ssp = '' then do
+         if rc1 <> 0 | rc2 <> 0 | gcc446 = '' | ssp = '' then do
+          rc = 2
           _errors = _errors + 1
           _errmsg.2 = '** GCC core not detected **'||crlf
           _errmsg.2 = _errmsg.2 || 'Please make sure you have the proper version of GCC (gcc446.dll) installed.'||crlf||crlf
@@ -35,7 +38,8 @@
 	 /* validate existence of proper LIBC core (libc065.dll) */
 	 bldlevel. = ''
 	 rc = bldlevelx('libc065.dll', 'bldlevel')
-          if bldlevel.!filename = '' then do
+          if rc <> 0 | bldlevel.!filename = '' then do
+           rc = 2
 	   _errors = _errors + 1
            _errmsg.3 = '** LIBC core not detected **'||crlf
            _errmsg.3 = _errmsg.3 || 'Please make sure you have the proper version of LIBC (libc065.dll) installed.'||crlf||crlf
@@ -43,12 +47,14 @@
 
 	 /* one or more validations failed, abort installer */
          if _errors > 0 then do
-	   if _errors = 1 then _errmsg.title = 'A required component is missing from your system'; else
-	   _errmsg.title = _errors||' required components missing from your system'
+	   if _errors = 1 then 
+            _errmsg.title = 'A required component is missing from your system'
+           else
+	    _errmsg.title = _errors||' required components missing from your system'
            _errmsg.txt =   'Refer to readme.txt for more information on how to obtain the required files.'||crlf||crlf,
 	                   '"'||_title||'" installer will now exit.'
            rc = WirexxShowMessage(_errmsg.title, _errmsg.1||_errmsg.2||_errmsg.3||_errmsg.txt,'0001'x)
-           call WirexxCancel;
+           call WirexxCancel
 	 end
 	 else do
 	   _msg.title = 'All required components present on your system'
@@ -89,9 +95,10 @@
                   call lineout config_sys
                   search_path = SysQueryExtLibPath('B')';'search_path';'SysQueryExtLibPath('E')
               end
-              else if (ext == '.EXE') then do
+              else
+               if (ext == '.EXE') then do
                   search_path = value('PATH',, 'OS2ENVIRONMENT')
-              end
+               end
 
               if (search_path \= '') then do
                   call value 'BLDLEVELX_SEARCH_PATH', search_path, 'OS2ENVIRONMENT'
@@ -164,8 +171,8 @@
 
 
 	<REXX NAME="GetPathAndRenameOldFlash">
-	  rc=rxFuncAdd('SysLoadFuncs','REXXUTIL','SysLoadFuncs')
-	  rc=SysLoadFuncs()
+	  rc = RxFuncAdd('SysLoadFuncs', 'REXXUTIL', 'SysLoadFuncs')
+	  rc = SysLoadFuncs()
 	  parse upper arg request .
 
 	  PluginPath=GetPluginPath()
@@ -181,77 +188,76 @@
 	   call FlashRename Browser
 	   returncode = 0
 	  end
-	  else returncode = PluginPath
+	  else
+           returncode = PluginPath
 
 	  return PluginPath
 
 	FlashRename: procedure
 	  parse arg Brws
-	  filetorenamefrom=Brws||'\npswf2.dll'
+	  filetorenamefrom = Brws'\npswf2.dll'
 	  /* check for flash version */
-	  flash7dll=Brws||'\flashwin.dll'
-	  rc=sysfiletree(flash7dll,'flist','FT')
-	  if flist.0=0 then
-	  do
-	    filetorenameto='npswf2.dll.flash5'
-	    ren filetorenamefrom filetorenameto
+	  flash7dll = Brws'\flashwin.dll'
+	  rc = SysFileTree(flash7dll, 'flist', 'FT')
+	  if flist.0 = 0 then do
+	    filetorenameto = 'npswf2.dll.flash5'
+	    'ren' filetorenamefrom filetorenameto
 	  end
 	  else do
-	    filetorenameto='npswf2.dll.flash7'
-	    ren filetorenamefrom filetorenameto
-	    filetorenamefrom=Brws||'\NPSWF32.dll'
-	    filetorenameto='NPSWF32.dll.flash7'
-	    ren filetorenamefrom filetorenameto
-	    filetorenamefrom=Brws||'\flashwin.dll'
-	    filetorenameto='flashwin.dll.flash7'
-	    ren filetorenamefrom filetorenameto
+	    filetorenameto = 'npswf2.dll.flash7'
+	    'ren' filetorenamefrom filetorenameto
+	    filetorenamefrom = Brws'\NPSWF32.dll'
+	    filetorenameto = 'NPSWF32.dll.flash7'
+	    'ren' filetorenamefrom filetorenameto
+	    filetorenamefrom = Brws'\flashwin.dll'
+	    filetorenameto = 'flashwin.dll.flash7'
+	    'ren' filetorenamefrom filetorenameto
 	  end
 	return
 
 	GetPluginPath: procedure
-	  PluginPath=WirexxGetEnv('MOZ_PLUGIN_PATH')
-	  if PluginPath='' then do
-	  Browser=GetBrowserPath()
-	  PluginPath=Browser||'\plugins'
-	  /* find possible .env setting file used for RUN!.EXE */
-	  rc=sysfiletree(Browser'\*.env','flist','FO')
-	  if flist.0 > 0 then
-	  do
-	  k = 0
-	  do i = 1 to flist.0
-	    rc = sysfilesearch('MOZ_PLUGIN_PATH', flist.i, 'result.')
-	    do j = 1 to result.0
-	     if pos('SET', translate(result.j)) = 1 then do
-	      k = k + 1
-	      parse var result.j . '=' PluginDir.k
+	  PluginPath = WirexxGetEnv('MOZ_PLUGIN_PATH')
+	  if PluginPath = '' then do
+	   Browser = GetBrowserPath()
+	   PluginPath = Browser'\plugins'
+	   /* find possible .env setting file used for RUN!.EXE */
+	   rc = SysFileTree(Browser'\*.env', 'flist', 'FO')
+	   if flist.0 > 0 then do
+	    k = 0
+	    do i = 1 to flist.0
+	     rc = SysFileSearch('MOZ_PLUGIN_PATH', flist.i, 'result.')
+	     do j = 1 to result.0
+	      if pos('SET', translate(result.j)) = 1 then do
+	       k = k + 1
+	       parse var result.j . '=' PluginDir.k
 	      end
-	    end
-	  if k > 0 then PluginPath = strip(PluginDir.k)
-	  end /* check all .env files in browser dir */
-	  end /* one or more .env files found */
+	     end
+	    if k > 0 then
+             PluginPath = strip(PluginDir.k)
+	    end /* check all .env files in browser dir */
+	   end /* one or more .env files found */
 	  end /* MOZ_PLUGIN_PATH env was empty */
 	  return PluginPath
 
 	GetBrowserPath: procedure
 	  Browser=SysIni('USER','WPURLDEFAULTSETTINGS','DefaultBrowserExe')
-	  if Browser><'ERROR:' then do
+	  if Browser >< 'ERROR:' then do
 	    exepos=lastpos('\',Browser)
-	    if exepos>0 then do
-	      Browser=left(Browser,exepos-1)
-	    end
-	    Browser=strip(Browser,'T','\')
+	    if exepos > 0 then
+	      Browser = left(Browser,exepos-1)
+	    Browser = strip(Browser,'T','\')
 	  end
 	  else do
- 	   Browser=WirexxGetEnv('MOZILLA_HOME')
-	  if Browser='' then
-	   Browser=SysIni('USER','Mozilla','Home')
-	  if Browser='ERROR:' then do
+ 	   Browser = WirexxGetEnv('MOZILLA_HOME')
+	  if Browser = '' then
+	   Browser = SysIni('USER','Mozilla','Home')
+	  if Browser = 'ERROR:' then do
 	        rc=WirexxShowMessage('Browser lookup',,
 	        'The Mozilla/Firefox browser could not be found!')
 	        return 1
 	  end
-	  Browser=strip(Browser,'T','\')
-	  Browser=Browser||'\Mozilla'
+	  Browser = strip(Browser,'T','\')
+	  Browser = Browser'\Mozilla'
 	  end /* Browser directory not found in wpurldefaultsettings */
 	  return Browser
 
