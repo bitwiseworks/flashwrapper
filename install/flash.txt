@@ -151,9 +151,9 @@ rendering problems with the Panorama video driver, like:
 
 * Registry:
 
-  This release of the Flash Plugin Wrapper no longer uses the registry to
-  find it's location. You can check with regedit2.exe if the key
-  "Flash10_plugin" exists, but it should be removed by the installer.
+  This release of the Flash Plugin Wrapper no longer uses the OS/2 Profile
+  registry OS2.INI to find its location. You can check with regedit2.exe 
+  if the key "Flash10_plugin" exists, but it should be removed by the installer.
   If it exists this is not a problem though.
 
 
