@@ -174,7 +174,7 @@ BOOL isDllInThisProcess(const char *pszDll)
             dprintf(("%s: hmod=%#x has no object info! (return FALSE)", szFunction, pLrec->hmte));
     }
     else
-        dprintf(("%s: hmod=%#x not found! (return FALSE)", szFunction, pLrec->hmte));
+        dprintf(("%s: %s not found! (return FALSE)", szFunction, pszDll));
 
     DosFreeMem(pv);
     return fRc;
