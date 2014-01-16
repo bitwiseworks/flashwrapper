@@ -8,7 +8,6 @@ include $(KBUILD_PATH)/subheader.kmk
 DLLS               += npflos2
 npflos2_TEMPLATE    = Base
 npflos2_SOURCES     = \
-    apis_mozilla.cpp \
     apis_odin.cpp \
     npflos2.cpp \
     odin_windowing.cpp \
@@ -23,6 +22,13 @@ npflos2_SOURCES     = \
     npflos2.def
 
 firefoxfakeres.orc_WRCFLAGS = -p _firefoxfake
+
+# Mozilla APIs are not currently needed
+ifdef 0
+npflos2_DEFS       +=INCL_MOZAPIS
+npflos2_SOURCES    += \
+    apis_mozilla.cpp
+endif
 
 # build an include resource file with the verision information
 npflos2.rc_DEPS = $(npflos2_0_OUTDIR)/npflos2-bld.rc

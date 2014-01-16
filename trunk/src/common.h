@@ -403,12 +403,12 @@ void                mozPR_DetachThread(void);
 PRThread *          mozPR_GetCurrentThread(void);
 PRThread *          moz_PRI_AttachThread(PRThreadType type, PRThreadPriority priority, PRThreadStack *stack, PRUint32 flags);
 void                moz_PRI_DetachThread(void);
+BOOL                npResolveMozAPIs(void);
 #endif
 
 /* Misc Internal */
 BOOL                npInitTerm_Lazy(void);
 BOOL                npResolveOdinAPIs(void);
-BOOL                npResolveMozAPIs(void);
 void *              NPJNICreateUpWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 void *              NPJNICreateDownWrapper(HINSTANCE hInstance, unsigned fType, void *pv);
 BOOL _Optlink       NPJNIEqual(unsigned *pu, unsigned uSet, unsigned uCurrent);
