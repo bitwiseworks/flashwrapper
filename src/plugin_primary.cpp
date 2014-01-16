@@ -34,7 +34,6 @@
 #include "plugin_primary.h"
 
 #define INCL_NS4X
-#define INCL_MOZAPIS
 #include "common.h"
 
 #include "security\Securit2.h"
@@ -381,11 +380,13 @@ BOOL    npInitTerm_Lazy(void)
         return FALSE;
     }
 
+#ifdef INCL_MOZAPIS
     // Resolve mozilla APIs
     if (!npResolveMozAPIs()) {
         dprintf(("npInitTerm_Lazy: ResolveMozAPIs failed!"));
         return FALSE;
     }
+#endif
 
     // Register ourself as an LxDll so we can catch CreateThread() events
     gfHandleDllEvents = FALSE;
@@ -418,7 +419,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
 
         // Attaching to Win32 threads should be not needed for Flash since Netscape
         // only calls it on Thread 1.
-#if 0
+#if defined(INCL_MOZAPIS) && 0
             dprintf(("%s: DLL_THREAD_ATTACH. Instance: 0x%X", szFunction, hInstance));
             if (gfHandleDllEvents) {
 
@@ -450,7 +451,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
 
         // Attaching to Win32 threads should be not needed for Flash since Netscape
         // only calls it on Thread 1.
-#if 0
+#if defined(INCL_MOZAPIS) && 0
             dprintf(("%s: DLL_THREAD_DETACH. Instance: 0x%X", szFunction, hInstance));
             if (gfHandleDllEvents) {
 

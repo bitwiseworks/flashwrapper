@@ -23,7 +23,10 @@
 #define  INCL_BASE
 #include <os2.h>
 
-#define INCL_MOZAPIS
+#ifndef INCL_MOZAPIS
+#error This file must only be used when INCL_MOZAPIS is defined!
+#endif
+
 #include "common.h"
 
 
