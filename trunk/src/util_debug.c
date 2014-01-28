@@ -72,12 +72,17 @@ int     npdprintf(const char *pszFormat, ...)
 #ifndef ODIN_LOG
     if (!fInited)
     {
+        DATETIME dt;
+        char fname[64];
+
         fInited = 1;
-        phFile = fopen("npflos2.log", "w");
+        DosGetDateTime(&dt);
+        sprintf(fname, "npflos2_%04d%02d%02d%02d%02d%02d_%04X.log",
+                dt.year, dt.month, dt.day, dt.hours, dt.minutes, dt.seconds, getpid());
+
+        phFile = fopen(fname, "w");
         if (phFile)
         {
-            DATETIME dt;
-            DosGetDateTime(&dt);
             fprintf(phFile, "*** Log Opened on %04d-%02d-%02d %02d:%02d:%02d ***\n",
                     dt.year, dt.month, dt.day, dt.hours, dt.minutes, dt.seconds);
             fprintf(phFile, "*** Build Date: " __DATE__ " " __TIME__ " ***\n");
