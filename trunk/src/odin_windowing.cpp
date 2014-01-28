@@ -173,7 +173,7 @@ BOOL npWinInit()
         gWCLevel0 = odinRegisterClass(&WndClass);
         if (gWCLevel0)
         {
-            dprintf(("npWinInit: registered level0 atom=%x", gWCLevel0));
+            dprintf("npWinInit: registered level0 atom=%x", gWCLevel0);
             memset(&WndClass, 0, sizeof(WndClass));
             WndClass.lpfnWndProc   = npWinLevel1WndProc;
             WndClass.lpszClassName = WC_NPWIN_LEVEL1;
@@ -181,7 +181,7 @@ BOOL npWinInit()
             gWCLevel1 = odinRegisterClass(&WndClass);
             if (gWCLevel1)
             {
-                dprintf(("npWinInit: registerd level1 atom=%x", gWCLevel1));
+                dprintf("npWinInit: registerd level1 atom=%x", gWCLevel1);
                 memset(&WndClass, 0, sizeof(WndClass));
                 WndClass.lpfnWndProc   = npWinLevelMinusWndProc;
                 WndClass.lpszClassName = WC_NPWIN_LEVEL_MINUS;
@@ -189,17 +189,17 @@ BOOL npWinInit()
                 gWCLevelMinus = odinRegisterClass(&WndClass);
                 if (gWCLevelMinus)
                 {
-                    dprintf(("npWinInit: registerd level -1 atom=%x", gWCLevelMinus));
+                    dprintf("npWinInit: registerd level -1 atom=%x", gWCLevelMinus);
                     gfInited = TRUE;
                 }
                 else
-                    dprintf(("npWinInit: failed to register %s.", WC_NPWIN_LEVEL1));
+                    dprintf("npWinInit: failed to register %s.", WC_NPWIN_LEVEL1);
             }
             else
-                dprintf(("npWinInit: failed to register %s.", WC_NPWIN_LEVEL1));
+                dprintf("npWinInit: failed to register %s.", WC_NPWIN_LEVEL1);
         }
         else
-            dprintf(("npWinInit: failed to register %s.", WC_NPWIN_LEVEL0));
+            dprintf("npWinInit: failed to register %s.", WC_NPWIN_LEVEL0);
     }
     VERIFY_EXCEPTION_CHAIN();
     return gfInited;
@@ -223,7 +223,6 @@ BOOL npWinInit()
  */
 void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSavedPS, HWND hwndDocOS2, HWND hwndDocOdin)
 {
-    static const char szFunction[] = "npWinSetWindowBegin";
     VERIFY_EXCEPTION_CHAIN();
 
 #define GETMEMB_WND(ptr, memb, type) (fNS4x ? (type)(((NPWindow*)(ptr))->memb) : (type)(((NPWindow*)(ptr))->memb))
@@ -243,7 +242,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         unsigned    type = GETMEMB_WND(pvWindow, type, unsigned);
         unsigned    cb   = fNS4x ? sizeof(NPWindow) : sizeof(NPWindow);
 
-        dprintf(("%s: hwnd=%x  x,y=(%d,%d) cx,cy=(%d,%d)  type=%d  fNS4x=%d", szFunction, hwnd, x, y, cx, cy, type, fNS4x));
+        dprintff("hwnd=%x  x,y=(%d,%d) cx,cy=(%d,%d)  type=%d  fNS4x=%d", hwnd, x, y, cx, cy, type, fNS4x);
 
         /*
          * Try find the associated window data.
@@ -261,13 +260,13 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         switch (type)
         {
             case NPWindowTypeWindow:
-                dprintf(("%s: NPWindowTypeWindow: hwnd=%#x", szFunction, hwnd));
+                dprintff("NPWindowTypeWindow: hwnd=%#x", hwnd);
                 if (!pWndData)
                 {
                     /*
                      * We can and must try a create wrapper window.
                      */
-                    dprintf(("%s: Creating Window Wrapper....", szFunction));
+                    dprintff("Creating Window Wrapper....");
                     pWndData = (PNPWINDATA)calloc(sizeof(NPWINDATA), 1);
                     if (pWndData)
                     {
@@ -285,19 +284,19 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
 
                                 if (WinSetWindowULong(hwnd, QWL_USER, (ULONG)pWndData))
                                 {
-                                    dprintf(("%s: Created wrapper pvOdinWnd->window=%x for  aWindow->window=%x.",
-                                             szFunction, pWndData->hwndOdin, pWndData->hwndOS2));
+                                    dprintff("Created wrapper pvOdinWnd->window=%x for  aWindow->window=%x.",
+                                             pWndData->hwndOdin, pWndData->hwndOS2);
                                     npWinFlipY(pvOdinWnd, hwnd, y, cy, fNS4x);
                                     #ifdef EXPERIMENTAL
                                     pWndData->pfnwpOrg = WinSubclassWindow(pWndData->hwndOS2, npWinPluginSubClassWndProc);
-                                    dprintf(("%s: pWndData->pfnwpOrg=%x", szFunction, pWndData->pfnwpOrg));
+                                    dprintff("pWndData->pfnwpOrg=%x", pWndData->pfnwpOrg);
                                     #endif
                                     if (ppWndData)
                                         *ppWndData = pWndData;
                                 }
                                 else
                                 {
-                                    dprintf(("%s: arg!!! WinSetWindowULong failed %#x !!!", szFunction, hwnd));
+                                    dprintff("arg!!! WinSetWindowULong failed %#x !!!", hwnd);
                                     free(pvOdinWnd);
                                     free(pWndData);
                                     pWndData = NULL;
@@ -305,7 +304,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                             }
                             else
                             {
-                                dprintf(("%s: arg!!! failed to create wrapper window !!!", szFunction));
+                                dprintff("arg!!! failed to create wrapper window !!!");
                                 free(pvOdinWnd);
                                 free(pWndData);
                                 pWndData = NULL;
@@ -315,18 +314,18 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                         {
                             free(pWndData);
                             pWndData = NULL;
-                            dprintf(("%s: !!!!! Out Of memory !!!!!!", szFunction));
+                            dprintff("!!!!! Out Of memory !!!!!!");
                         }
                     }
                     else
-                        dprintf(("%s: !!!!! Out Of memory !!!!!!", szFunction));
+                        dprintff("!!!!! Out Of memory !!!!!!");
                 }
                 else
                 {
                     /*
                      * Must notify size/pos change.
                      */
-                    dprintf(("%s: Size/pos change....", szFunction));
+                    dprintff("Size/pos change....");
                     pvOdinWnd = pWndData->pvOdinWnd;
 
                     #ifdef DEBUG
@@ -334,19 +333,19 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                      * Wonder if any properties have changed?
                      */
                     if (aWindow != pWndData->pvMozWnd)
-                        dprintf(("%s: aWindow != pOrgWnd", szFunction));
+                        dprintff("aWindow != pOrgWnd");
                     if (hwnd != pWndData->hwndOS2)
-                        dprintf(("%s: hwnd changed !!!", szFunction));
+                        dprintff("hwnd changed !!!");
                     if (x != GETMEMB_WND(pvOdinWnd, x, int))
-                        dprintf(("%s: x changed", szFunction));
+                        dprintff("x changed");
                     if (y != GETMEMB_WND(pvOdinWnd, y, int))
-                        dprintf(("%s: y changed", szFunction));
+                        dprintff("y changed");
                     if (cx != GETMEMB_WND(pvOdinWnd, width, unsigned))
-                        dprintf(("%s: width changed", szFunction));
+                        dprintff("width changed");
                     if (cy != GETMEMB_WND(pvOdinWnd, height, unsigned))
-                        dprintf(("%s: height changed", szFunction));
+                        dprintff("height changed");
                     if (type != GETMEMB_WND(pvOdinWnd, type, unsigned))
-                        dprintf(("%s: height changed", szFunction));
+                        dprintff("height changed");
                     #endif
 
                     /*
@@ -365,13 +364,13 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
 
 
             case NPWindowTypeDrawable:
-                dprintf(("%s: NPWindowTypeDrawable: hps=%#x hwndOS2=%#x hwndOdin=%#x", szFunction, hwnd, hwndDocOS2, hwndDocOdin));
+                dprintff("NPWindowTypeDrawable: hps=%#x hwndOS2=%#x hwndOdin=%#x", hwnd, hwndDocOS2, hwndDocOdin);
                 if (!pWndData)
                 {
                     /*
                      * Create wrapper from OS/2 HPS to Odin HDC.
                      */
-                    dprintf(("%s: Creating Presentation Space Wrapper....", szFunction));
+                    dprintff("Creating Presentation Space Wrapper....");
                     pWndData = (PNPWINDATA)calloc(sizeof(NPWINDATA), 1);
                     if (pWndData)
                     {
@@ -389,11 +388,11 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                         {
                             free(pWndData);
                             pWndData = NULL;
-                            dprintf(("%s: !!!!! Out Of memory !!!!!!", szFunction));
+                            dprintff("!!!!! Out Of memory !!!!!!");
                         }
                     }
                     else
-                        dprintf(("%s: !!!!! Out Of memory !!!!!!", szFunction));
+                        dprintff("!!!!! Out Of memory !!!!!!");
                 }
 
                 if (pWndData && pSavedPS)
@@ -401,7 +400,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                     /*
                      * Paint operation - ASSUMES nothing failes!
                      */
-                    dprintf(("%s: Paint", szFunction));
+                    dprintff("Paint");
                     pvOdinWnd = pWndData->pvOdinWnd;
 
                     /*
@@ -441,8 +440,8 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                     /* flip y ??? */
                     #if 0
                     int yOdin = pSavedPS->sizlPS.cy - y - cy;
-                    dprintf(("%s: os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
-                             szFunction, y, yOdin, cy, pSavedPS->sizlPS.cy));
+                    dprintff("os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
+                             y, yOdin, cy, pSavedPS->sizlPS.cy);
                     if (fNS4x)
                         ((NPWindow*)pvOdinWnd)->y       = yOdin;
                     else
@@ -452,7 +451,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                 break;
 
             default:
-                dprintf(("%s: Invalid window type %d!!!", szFunction, type));
+                dprintff("Invalid window type %d!!!", type);
                 DebugInt3();
                 break;
         }
@@ -464,7 +463,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         pvWindow = pvOdinWnd;
     }
     else
-        dprintf(("%s: invalid ptr aWindow(=%x)", szFunction, aWindow));
+        dprintff("invalid ptr aWindow(=%x)", aWindow);
 
     VERIFY_EXCEPTION_CHAIN();
     return pvWindow;
@@ -485,9 +484,8 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
  */
 void npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSavedPS)
 {
-    static const char szFunction[] = "npWinSetWindowEnd";
     VERIFY_EXCEPTION_CHAIN();
-    dprintf(("%s: enter", szFunction));
+    dprintff("enter");
 
     void * pvWindow = aWindow;
     if (VALID_PTR(pvWindow))
@@ -498,7 +496,7 @@ void npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAV
         switch (type)
         {
             case NPWindowTypeDrawable:
-                dprintf(("%s: NPWindowTypeDrawable: hps=%#x", szFunction, hps));
+                dprintff("NPWindowTypeDrawable: hps=%#x", hps);
                 if (ppWndData && VALID_PTR(*ppWndData) && !pSavedPS)
                 {
                     /*
@@ -510,7 +508,7 @@ void npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAV
         }
     }
 
-    dprintf(("%s: leave", szFunction));
+    dprintff("leave");
 }
 
 
@@ -519,9 +517,8 @@ void npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAV
  */
 PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
 {
-    static const char szFunction[] = "npPrintBegin";
     VERIFY_EXCEPTION_CHAIN();
-    dprintf(("%s: enter", szFunction));
+    dprintff("enter");
 
     NPPrint *pPrint = (NPPrint *)aPlatformPrint;
 
@@ -535,12 +532,12 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
     if (    pPrint->mode == NP_EMBED
         &&  pPrint->print.embedPrint.window.window)
     {
-        dprintf(("%s: window handle ASSUMPTION failed\n"));
+        dprintff("window handle ASSUMPTION failed\n");
         DebugInt3();
     }
     if (pPrint->mode != NP_EMBED && pPrint->mode != NP_FULL)
     {
-        dprintf(("%s: mode ASSUMPTION failed\n"));
+        dprintff("mode ASSUMPTION failed\n");
         DebugInt3();
     }
     #if 0 /** @todo fix wrong assumption for netscape!!! */
@@ -552,13 +549,13 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
         ||  offsetof(nsPluginPrint, print.embedPrint.window.type)    != offsetof(NPPrint, print.embedPrint.window.type)
         )
     {
-        dprintf(("%s: bad offsets New vs. Old\n", szFunction));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, mode),                          offsetof(NPPrint, mode)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, print),                         offsetof(NPPrint, print)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.platformPrint),offsetof(NPPrint, print.embedPrint.platformPrint)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window),       offsetof(NPPrint, print.embedPrint.window)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window.x),     offsetof(NPPrint, print.embedPrint.window.x)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window.type),  offsetof(NPPrint, print.embedPrint.window.type)));
+        dprintff("bad offsets New vs. Old\n");
+        dprintf("%d %d\n", offsetof(nsPluginPrint, mode),                          offsetof(NPPrint, mode));
+        dprintf("%d %d\n", offsetof(nsPluginPrint, print),                         offsetof(NPPrint, print));
+        dprintf("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.platformPrint),offsetof(NPPrint, print.embedPrint.platformPrint));
+        dprintf("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window),       offsetof(NPPrint, print.embedPrint.window));
+        dprintf("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window.x),     offsetof(NPPrint, print.embedPrint.window.x));
+        dprintf("%d %d\n", offsetof(nsPluginPrint, print.embedPrint.window.type),  offsetof(NPPrint, print.embedPrint.window.type));
         /*DebugInt3(); @todo fix this! */
     }
     #endif
@@ -571,13 +568,13 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
         ||  offsetof(nsPluginPrintW32, print.embedPrint.window.type)    != offsetof(nsPluginPrint, print.embedPrint.window.type) + 2
         )
     {
-        dprintf(("%s: bad W32 vs. OS/2 (new) offsets\n", szFunction));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, mode),                          offsetof(nsPluginPrint, mode)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, print),                         offsetof(nsPluginPrint, print)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.platformPrint),offsetof(nsPluginPrint, print.embedPrint.platformPrint)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window),       offsetof(nsPluginPrint, print.embedPrint.window)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window.x),     offsetof(nsPluginPrint, print.embedPrint.window.x)));
-        dprintf(("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window.type),  offsetof(nsPluginPrint, print.embedPrint.window.type)));
+        dprintff("bad W32 vs. OS/2 (new) offsets\n");
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, mode),                          offsetof(nsPluginPrint, mode));
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, print),                         offsetof(nsPluginPrint, print));
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.platformPrint),offsetof(nsPluginPrint, print.embedPrint.platformPrint));
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window),       offsetof(nsPluginPrint, print.embedPrint.window));
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window.x),     offsetof(nsPluginPrint, print.embedPrint.window.x));
+        dprintf("%d %d\n", offsetof(nsPluginPrintW32, print.embedPrint.window.type),  offsetof(nsPluginPrint, print.embedPrint.window.type));
     }
     #endif
 #endif
@@ -589,14 +586,14 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
     pPrtData = (PNPPRINTDATA)calloc(sizeof(*pPrtData), 1);
     if (!pPrtData)
     {
-        dprintf(("%s: Out of memory!!!\n"));
+        dprintff("Out of memory!!!\n");
         DebugInt3();
         return NULL;
     }
     pPrtData->pvOdinPrt = calloc(sizeof(NPPrintW32), 1);
     if (!pPrtData->pvOdinPrt)
     {
-        dprintf(("%s: Out of memory !!!\n"));
+        dprintff("Out of memory !!!\n");
         DebugInt3();
         free(pPrtData);
         return NULL;
@@ -628,11 +625,10 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
             pOdinPrint->print.fullPrint.platformPrint   = (void*)pPrtData->hdcOdin;
             pOdinPrint->print.fullPrint.pluginPrinted   = pPrint->print.fullPrint.pluginPrinted;
             pOdinPrint->print.fullPrint.printOne        = pPrint->print.fullPrint.printOne;
-            dprintf(("%s: Odin Full: platformPrint=%08x pluginPrinted=%d printOne=%d",
-                     szFunction,
+            dprintff("Odin Full: platformPrint=%08x pluginPrinted=%d printOne=%d",
                      pOdinPrint->print.fullPrint.platformPrint,
                      pOdinPrint->print.fullPrint.pluginPrinted,
-                     pOdinPrint->print.fullPrint.printOne));
+                     pOdinPrint->print.fullPrint.printOne);
             break;
 
         case NP_EMBED:
@@ -647,24 +643,23 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
             int yOdin = pPrtData->SavedPS.sizlPS.cy
                 - pOdinPrint->print.embedPrint.window.y
                 - pOdinPrint->print.embedPrint.window.height;
-            dprintf(("%s: os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
-                     szFunction, pOdinPrint->print.embedPrint.window.y, yOdin,
+            dprintff("os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
+                     pOdinPrint->print.embedPrint.window.y, yOdin,
                      pOdinPrint->print.embedPrint.window.height,
-                     pPrtData->SavedPS.sizlPS.cy));
+                     pPrtData->SavedPS.sizlPS.cy);
             pOdinPrint->print.embedPrint.window.y      = yOdin;
-            dprintf(("%s: Odin Embed: platformPrint=%08x windows: windows=%08x, (x,y,width,height)=(%d,%d,%d,%d) type=%d",
-                     szFunction,
+            dprintff("Odin Embed: platformPrint=%08x windows: windows=%08x, (x,y,width,height)=(%d,%d,%d,%d) type=%d",
                      pOdinPrint->print.embedPrint.platformPrint,
                      pOdinPrint->print.embedPrint.window.window,
                      pOdinPrint->print.embedPrint.window.x,
                      pOdinPrint->print.embedPrint.window.y,
                      pOdinPrint->print.embedPrint.window.width,
                      pOdinPrint->print.embedPrint.window.height,
-                     pOdinPrint->print.embedPrint.window.type));
+                     pOdinPrint->print.embedPrint.window.type);
             break;
     }
 
-    dprintf(("%s: leave", szFunction));
+    dprintff("leave");
     VERIFY_EXCEPTION_CHAIN();
     return pPrtData;
 }
@@ -679,9 +674,8 @@ PNPPRINTDATA        npWinPrintBegin(void * aPlatformPrint, BOOL fNS4x)
  */
 void                npWinPrintEnd(PNPPRINTDATA pPrintData)
 {
-    static const char szFunction[] = "npPrintEnd";
     VERIFY_EXCEPTION_CHAIN();
-    dprintf(("%s: enter", szFunction));
+    dprintff("enter");
 
     /*
      * Restore any saved PS.
@@ -700,7 +694,7 @@ void                npWinPrintEnd(PNPPRINTDATA pPrintData)
         free(pPrintData);
     }
 
-    dprintf(("%s: leave", szFunction));
+    dprintff("leave");
 }
 
 
@@ -726,8 +720,7 @@ void                npWinDestroyInstance(PNPWINDATA pWndData)
  */
 HWND                npWinDownNetscapeWindow(HWND hwndOS2)
 {
-    static const char szFunction[] = "npWinDownNetscapeWindow";
-    dprintf(("%s: enter hwndOS2=%#x", szFunction, hwndOS2));
+    dprintff("enter hwndOS2=%#x", hwndOS2);
     HWND hwndFake = NULLHANDLE;
 
     if (!gfInited)
@@ -757,7 +750,7 @@ HWND                npWinDownNetscapeWindow(HWND hwndOS2)
     #ifdef DEBUG
     HPS hps = WinGetPS(hwndOS2);
     HPS hps2 = WinGetPS(hwndOS2);
-    dprintf(("%s: leave returning hwndFake=%#x for %#x hps=%#x hps2=%#x", szFunction, hwndFake, hwndOS2, hps, hps2));
+    dprintff("leave returning hwndFake=%#x for %#x hps=%#x hps2=%#x", hwndFake, hwndOS2, hps, hps2);
     WinReleasePS(hps);
     WinReleasePS(hps2);
     #endif
@@ -782,10 +775,10 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
         gWCFlashFS = odinFindAtom(WC_NPWIN_FLASH_FS);
         if (!gWCFlashFS)
         {
-            dprintf(("npWinInit: failed to register %s.", WC_NPWIN_FLASH_FS));
+            dprintf("npWinInit: failed to register %s.", WC_NPWIN_FLASH_FS);
         } else
         {
-            dprintf(("npWinInit: Atom [%s] found %x.", WC_NPWIN_FLASH_FS, gWCFlashFS));
+            dprintf("npWinInit: Atom [%s] found %x.", WC_NPWIN_FLASH_FS, gWCFlashFS);
         }
 
         /*
@@ -823,7 +816,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
             HWND hwndFake = odinCreateFakeWindowEx(ahwndParents[cParents], gWCLevelMinus);
             if (hwndFake)
             {
-                dprintf(("npWinCreateWindowWrapper: created fake window %X", hwndFake));
+                dprintf("npWinCreateWindowWrapper: created fake window %X", hwndFake);
                 odinSetWindowLong(hwndFake, LMINUS1_GWL_OS2HWND, (LONG)ahwndParents[cParents]);
                 if (!WinQueryWindowULong(ahwndParents[cParents], QWL_USER))
                     WinSetWindowULong(ahwndParents[cParents], QWL_USER, (ULONG)hwndFake);
@@ -836,7 +829,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
         HWND hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevel0);
         if (hwndFake)
         {
-            dprintf(("npWinCreateWindowWrapper: fake window level 0 created: %08x", hwndFake));
+            dprintf("npWinCreateWindowWrapper: fake window level 0 created: %08x", hwndFake);
             hwndRc = odinCreateWindowEx(0 /*??*/,
                                         WC_NPWIN_LEVEL1,
                                         NULL, /* name */
@@ -849,7 +842,7 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
                                         (LPVOID)hwndOS2);
             if (hwndRc)
             {
-                dprintf(("npWinCreateWindowWrapper: window level 1 created: %08x", hwndRc));
+                dprintf("npWinCreateWindowWrapper: window level 1 created: %08x", hwndRc);
                 odinSetWindowLong(hwndFake, L0_GWL_OS2PLUGINWINDOW, (LONG)hwndOS2);
                 odinSetWindowLong(hwndFake, L0_GWL_LEVEL1_ODINHWND, (LONG)hwndRc);
                 odinSetWindowLong(hwndRc,   L1_GWL_OS2PLUGINWINDOW, (LONG)hwndOS2);
@@ -857,15 +850,15 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
             }
             else
             {
-                dprintf(("npWinCreateWindowWrapper: failed to create window. Returning fake window since that's better than nothing."));
+                dprintf("npWinCreateWindowWrapper: failed to create window. Returning fake window since that's better than nothing.");
                 hwndRc = hwndFake;
             }
         }
         else
-            dprintf(("npWinCreateWindowWrapper: failed to create fake window. lasterr=@todo"));
+            dprintf("npWinCreateWindowWrapper: failed to create fake window. lasterr=@todo");
     }
 
-    dprintf(("npWinCreateWindowWrapper: hwndRc=%x", hwndRc));
+    dprintf("npWinCreateWindowWrapper: hwndRc=%x", hwndRc);
     VERIFY_EXCEPTION_CHAIN();
     return hwndRc;
 }
@@ -884,8 +877,6 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
  */
 void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
 {
-    static const char szFunction[] = "npWinFlipY";
-
     HWND hwndParent = WinQueryWindow(hwnd, QW_PARENT);
     if (hwndParent != NULL)
     {
@@ -893,8 +884,8 @@ void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
         if (WinQueryWindowPos(hwndParent, &swp))
         {
             int yOdin = swp.cy - y - cy;
-            dprintf(("%s: os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
-                     szFunction, y, yOdin, cy, swp.cy));
+            dprintff("os2y=%d  ->  odiny=%d;  height=%d  parent height=%d!",
+                     y, yOdin, cy, swp.cy);
             if (fNS4x)
                 ((NPWindow*)pvOdinWnd)->y       = yOdin;
             else
@@ -902,13 +893,13 @@ void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
         }
         else
         {
-            dprintf(("%s: WinQueryWindowPos(%x, QW_PARENT) failed!", szFunction, hwndParent));
+            dprintff("WinQueryWindowPos(%x, QW_PARENT) failed!", hwndParent);
             DebugInt3();
         }
     }
     else
     {
-        dprintf(("%s: WinQueryWindow(%x, QW_PARENT) failed!", szFunction, hwnd));
+        dprintff("WinQueryWindow(%x, QW_PARENT) failed!", hwnd);
         DebugInt3();
     }
 }
@@ -919,7 +910,6 @@ void npWinFlipY(void *pvOdinWnd, HWND hwnd, int y, unsigned cy, BOOL fNS4x)
  */
 void                npWinFakeWindowPosSize(HWND hwndOdin, HWND hwndOS2, int x, int y, int cx, int cy)
 {
-    static const char szFunction[] = "npWinFakeWindowPosSize";
     VERIFY_EXCEPTION_CHAIN();
 
     HWND hwndOS2L0 = (HWND)odinGetWindowLong(hwndOdin, L1_GWL_OS2PLUGINWINDOW);
@@ -931,22 +921,22 @@ void                npWinFakeWindowPosSize(HWND hwndOdin, HWND hwndOS2, int x, i
          * SetWindowPos as change notification, not an order.
          */
         if (odinSetWindowPos(hwndOdinL0, NULL, 0, 0, cx, cy, SWP_NOZORDER))
-            dprintf(("%s: successfully notified the pos/size of the fake window", szFunction));
+            dprintff("successfully notified the pos/size of the fake window");
         else
-            dprintf(("%s: odinSetWindowPos failed on L0 !!!", szFunction));
+            dprintff("odinSetWindowPos failed on L0 !!!");
 
         /*
          * Resize the L1 odin window.
          *  The window should exactly cover the real plugin window.
          */
         if (odinSetWindowPos(hwndOdin, NULL, 0, 0, cx, cy, SWP_NOZORDER))
-            dprintf(("%s: Successfully changed the pos/size of the L1 wrapper window.", szFunction));
+            dprintff("Successfully changed the pos/size of the L1 wrapper window.");
         else
-            dprintf(("%s: odinSetWindowPos failed on L1 !!!", szFunction));
+            dprintff("odinSetWindowPos failed on L1 !!!");
 
     }
     else
-        dprintf(("%s: hoom! didn't find hwndOdinL0/hwndOS2L0!!!!", szFunction));
+        dprintff("hoom! didn't find hwndOdinL0/hwndOS2L0!!!!");
     VERIFY_EXCEPTION_CHAIN();
 }
 
@@ -956,16 +946,15 @@ void                npWinFakeWindowPosSize(HWND hwndOdin, HWND hwndOS2, int x, i
  */
 LRESULT npWinLevelMinusWndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
 {
-    static const char szFunction[] = "npWinLevelMinusWndProc";
     VERIFY_EXCEPTION_CHAIN();
-    dprintf(("%s: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!", szFunction,
-             hwnd, msg, mp1, mp2));
+    dprintff("hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!",
+             hwnd, msg, mp1, mp2);
 
     switch (msg)
     {
         case WM_NCDESTROY:
         {
-            dprintf(("%s: WM_NCDESTROY - cleaning up memory associated with this window.", szFunction));
+            dprintff("WM_NCDESTROY - cleaning up memory associated with this window.");
             break;
         }
     }
@@ -990,7 +979,7 @@ MRESULT _System npWinPluginSubClassWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPA
         {
             if (LOWORD(mp1) == /* */ 5)
             {
-                dprintf(("npWinPluginSubClassWndProc: WM_QUERYFOCUSCHAIN: %x %x %x -> TRUE", hwnd, mp1, mp2));
+                dprintf("npWinPluginSubClassWndProc: WM_QUERYFOCUSCHAIN: %x %x %x -> TRUE", hwnd, mp1, mp2);
                 return (MRESULT)TRUE;
             }
             break;
@@ -1005,7 +994,7 @@ MRESULT _System npWinPluginSubClassWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPA
         case /*WM_QUERYFOCUSCHAIN*/ 0x0051:
         {
 
-            dprintf(("npWinPluginSubClassWndProc: WM_QUERYFOCUSCHAIN: %x %x %x -> %x", hwnd, mp1, mp2, mres));
+            dprintf("npWinPluginSubClassWndProc: WM_QUERYFOCUSCHAIN: %x %x %x -> %x", hwnd, mp1, mp2, mres);
             break;
         }
     }
@@ -1019,10 +1008,9 @@ MRESULT _System npWinPluginSubClassWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPA
  */
 LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
 {
-    static const char szFunction[] = "npWinLevel0WndProc";
     VERIFY_EXCEPTION_CHAIN();
-    dprintf(("%s: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!", szFunction,
-             hwnd, msg, mp1, mp2));
+    dprintff("hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!",
+             hwnd, msg, mp1, mp2);
 
     //    odinSendMessageA(0x68000005, msg, mp1, mp2);
 
@@ -1038,7 +1026,7 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
 #endif
         case WM_NCDESTROY:
         {
-            dprintf(("%s: WM_NCDESTROY - cleaning up memory associated with this window.", szFunction));
+            dprintff("WM_NCDESTROY - cleaning up memory associated with this window.");
             /** @sketch Cleanup:
              * Get the OS/2 plugin window handle (Level 0).
              * Get the OS/2 QWL_USER for the handle. This should point to a
@@ -1075,8 +1063,8 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
                     }
                     else
                     {
-                        dprintf(("%s: invalid pWndData=%p associated with hwndOS2=%x hwndOdin=%x !!!",
-                                 szFunction, pWndData, hwndOS2, hwnd));
+                        dprintff("invalid pWndData=%p associated with hwndOS2=%x hwndOdin=%x !!!",
+                                 pWndData, hwndOS2, hwnd);
                         DebugInt3();
                     }
                 }
@@ -1096,11 +1084,11 @@ LRESULT npWinLevel1WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
 {
     VERIFY_EXCEPTION_CHAIN();
     if (msg != WM_DESTROY)
-        dprintf(("npWinLevel1WndProc: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!",
-                 hwnd, msg, mp1, mp2));
+        dprintf("npWinLevel1WndProc: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x !!",
+                hwnd, msg, mp1, mp2);
     else
-        dprintf(("npWinLevel1WndProc: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x WM_DESTROY !!",
-                 hwnd, msg, mp1, mp2));
+        dprintf("npWinLevel1WndProc: hwnd=%08x  msg=%08x  mp1=%08x  mp2=%08x WM_DESTROY !!",
+                hwnd, msg, mp1, mp2);
 
     return odinDefWindowProc(hwnd, msg, mp1, mp2);
 }

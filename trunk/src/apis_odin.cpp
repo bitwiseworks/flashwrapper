@@ -25,7 +25,7 @@
     USHORT usFSOld = pfnODIN_ThreadEnterOdinContext(pExceptionRegRec, TRUE);    \
     if (usFSOld != (USHORT)(unsigned)&DOS32TIB)                                 \
     {                                                                           \
-        dprintf(("%s: usFSOld != DOS32TIB !!!", __FUNCTION__));                 \
+        dprintff("usFSOld != DOS32TIB !!!");                                    \
         DebugInt3();                                                            \
     }//
 #else
@@ -203,14 +203,14 @@ BOOL    npResolveOdinAPIs(void)
     ULONG ulSavedCodePage;
 #endif
 
-    dprintf(("Resolving Odin APIs..."));
+    dprintf("Resolving Odin APIs...");
 
     const char *szOdinPath = getenv("NPFLOS2_ODINDLLPATH");
 #ifdef DEBUG
     if (szOdinPath)
-        dprintf(("NPFLOS2_ODINDLLPATH is '%s', will use it", szOdinPath));
+        dprintf("NPFLOS2_ODINDLLPATH is '%s', will use it", szOdinPath);
     else
-        dprintf(("NPFLOS2_ODINDLLPATH is not set, will rely on [BEGIN]LIBPATH"));
+        dprintf("NPFLOS2_ODINDLLPATH is not set, will rely on [BEGIN]LIBPATH");
 
 #endif
 
@@ -234,16 +234,16 @@ BOOL    npResolveOdinAPIs(void)
      * init code will change this.
      */
     ulSavedCodePage = WinQueryCp (HMQ_CURRENT);
-    dprintf(("Codepage: %i", ulSavedCodePage));
+    dprintf("Codepage: %i", ulSavedCodePage);
 #endif
 
 #ifdef DEBUG
     // CPREF says the length of Dos*ExtLIBPATH() (after expansion) is 1024 max
     char szBigBuf[1024];
     if (DosQueryExtLIBPATH(szBigBuf, BEGIN_LIBPATH) == NO_ERROR)
-        dprintf(("BEGINLIBPATH=%s", szBigBuf));
+        dprintf("BEGINLIBPATH=%s", szBigBuf);
     if (DosQueryExtLIBPATH(szBigBuf, 3) == NO_ERROR)
-        dprintf(("LIBPATHSTRICT=%c", szBigBuf[0]));
+        dprintf("LIBPATHSTRICT=%c", szBigBuf[0]);
 #endif
 
     /*
@@ -272,14 +272,14 @@ BOOL    npResolveOdinAPIs(void)
         rc = DosLoadModule(szBuf, sizeof(szBuf), szPath, &aAPIs[i].modInst);
         if (rc && aAPIs[i].modInst == 0)
         {
-            dprintf(("ERROR: DosLoadModule(%s) returned %d (reason '%s')",
-                    szPath, rc, szBuf));
+            dprintf("ERROR: DosLoadModule(%s) returned %d (reason '%s')",
+                    szPath, rc, szBuf);
             return FALSE;
         }
 #ifdef DEBUG
         if (rc)
-            dprintf(("WARNING: DosLoadModule(%s) returned rc %d and HMOD %x",
-                     szPath, rc, aAPIs[i].modInst));
+            dprintf("WARNING: DosLoadModule(%s) returned rc %d and HMOD %x",
+                    szPath, rc, aAPIs[i].modInst);
 #endif
 
         rc = DosQueryProcAddr(aAPIs[i].modInst, 0, aAPIs[i].pszName, (PFN*)aAPIs[i].ppfn);
@@ -287,26 +287,26 @@ BOOL    npResolveOdinAPIs(void)
         {
             if (!aAPIs[i].fMandatory)
             {
-                dprintf(("WARNING: DosQueryProcAddr(%s,%s) returned %d (not mandatory)",
-                         aAPIs[i].pszModName, aAPIs[i].pszName, rc));
+                dprintf("WARNING: DosQueryProcAddr(%s,%s) returned %d (not mandatory)",
+                        aAPIs[i].pszModName, aAPIs[i].pszName, rc);
                 *aAPIs[i].ppfn = NULL;
                 continue;
             }
-            dprintf(("ERROR: DosQueryProcAddr(%s,%s) returned %d (mandatory)",
-                     aAPIs[i].pszModName, aAPIs[i].pszName, rc));
+            dprintf("ERROR: DosQueryProcAddr(%s,%s) returned %d (mandatory)",
+                    aAPIs[i].pszModName, aAPIs[i].pszName, rc);
             //ReleaseInt3(0xdeaddead, 0xdeadf001, i);
             return FALSE;
         }
 
 #ifdef DEBUG
         DosQueryModuleName(aAPIs[i].modInst, sizeof(szBuf), szBuf);
-        dprintf(("Loaded '%s' from '%s'", aAPIs[i].pszName, szBuf));
+        dprintf("Loaded '%s' from '%s'", aAPIs[i].pszName, szBuf);
 #endif
     }
 
     registered_apis = i + 1;
 
-    dprintf(("Successfully resolved all Odin APIs"));
+    dprintf("Successfully resolved all Odin APIs");
     return TRUE;
 }
 

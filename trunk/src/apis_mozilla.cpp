@@ -58,7 +58,6 @@ void (*PRICALL                  pfn_PRI_DetachThread)(void);
  */
 BOOL isDllInThisProcess(const char *pszDll)
 {
-    static const char szFunction[] = "isDllInThisProcess";
     PVOID   pv;
     int     rc;
     ULONG   cb = 1024*1024;
@@ -71,7 +70,7 @@ BOOL isDllInThisProcess(const char *pszDll)
         cb = 1024*256;
         if (DosAllocMem(&pv, cb, PAG_READ | PAG_WRITE | PAG_COMMIT))
         {
-            dprintf(("%s: DosAllocMem fails! (256KB)", szFunction));
+            dprintff("DosAllocMem fails! (256KB)");
             return TRUE; //assume presence.
         }
     }
@@ -91,7 +90,7 @@ BOOL isDllInThisProcess(const char *pszDll)
     if (rc != NO_ERROR)
     {
         DosFreeMem(pv);
-        dprintf(("%s: DosQuerySysState failed with rc=%d.", szFunction, rc));
+        dprintff("DosQuerySysState failed with rc=%d.", rc);
         DebugInt3();
         return FALSE;
     }
@@ -146,8 +145,8 @@ BOOL isDllInThisProcess(const char *pszDll)
     {
         if (pLrec->ctObj && pLrec->pObjInfo)
         {
-            dprintf(("%s: hmod=%#x: first object at %#x %#x bytes", szFunction, pLrec->hmte,
-                     pLrec->pObjInfo[0].oaddr, pLrec->pObjInfo[0].osize));
+            dprintff("%s: hmod=%#x: first object at %#x %#x bytes", pLrec->hmte,
+                     pLrec->pObjInfo[0].oaddr, pLrec->pObjInfo[0].osize);
 
             /*
              * Now check if the first object is physically present in this process.
@@ -161,23 +160,23 @@ BOOL isDllInThisProcess(const char *pszDll)
             if (    !(rc = DosQueryMem((PVOID)pLrec->pObjInfo[0].oaddr, &cb, &fFlags))
                 ||  !(rc = DosQueryMem((PVOID)pLrec->pObjInfo[0].oaddr, &cb, &fFlags)))
             {
-                dprintf(("%s: hmod=%#x DosQueryMem returns cb=%#x and fFlags=%#x", szFunction, pLrec->hmte, cb, fFlags));
+                dprintff("hmod=%#x DosQueryMem returns cb=%#x and fFlags=%#x", pLrec->hmte, cb, fFlags);
                 if (fFlags & (PAG_READ | PAG_WRITE | PAG_EXECUTE))
                 {
-                    dprintf(("%s: the object is accessible. (return TRUE)", szFunction));
+                    dprintff("the object is accessible. (return TRUE)");
                     fRc = TRUE;
                 }
                 else
-                    dprintf(("%s: object isn't accessible. (return FALSE)", szFunction));
+                    dprintff("object isn't accessible. (return FALSE)");
             }
             else
-                dprintf(("%s: hmod=%#x DosQueryMem failed rc=%d (return FALSE)", szFunction, pLrec->hmte, rc));
+                dprintff("hmod=%#x DosQueryMem failed rc=%d (return FALSE)", pLrec->hmte, rc);
         }
         else
-            dprintf(("%s: hmod=%#x has no object info! (return FALSE)", szFunction, pLrec->hmte));
+            dprintff("hmod=%#x has no object info! (return FALSE)", pLrec->hmte);
     }
     else
-        dprintf(("%s: %s not found! (return FALSE)", szFunction, pszDll));
+        dprintff("%s not found! (return FALSE)", pszDll);
 
     DosFreeMem(pv);
     return fRc;
@@ -223,7 +222,6 @@ static char *GetBasename(char *pszPath)
  */
 BOOL    npResolveMozAPIs(void)
 {
-    static const char szFunction[] = "npResolveMozAPIs";
     int     i;
     int     rc;
     BOOL    fRc = TRUE;
@@ -269,12 +267,12 @@ BOOL    npResolveMozAPIs(void)
             if (isDllInThisProcess(&szExeName[0]))
             {
                 /* If we get here it's netscape. */
-                dprintf(("%s: Netscape process! %s proves so.", szFunction, apszDlls[i]));
+                dprintff("Netscape process! %s proves so.", apszDlls[i]);
                 return TRUE;
             }
         }
     }
-    dprintf(("%s: Not netscape process, so it must be mozilla.", szFunction));
+    dprintff("Not netscape process, so it must be mozilla.");
 
 
     /* Check of NSPR4.DLL - which proves mozilla. */
@@ -282,7 +280,7 @@ BOOL    npResolveMozAPIs(void)
     rc = DosQueryPathInfo(&szExeName[0], FIL_STANDARD, &fsts3, sizeof(fsts3));
     if (rc)
     {
-        dprintf(("%s: No NSPR4.DLL in executable directory!", szFunction));
+        dprintff("No NSPR4.DLL in executable directory!");
         /*
          * Last resort. We know we're in "\plugins", which means we take our name
          * and goes up one level.
@@ -311,7 +309,7 @@ BOOL    npResolveMozAPIs(void)
     if (    rc
         ||  !isDllInThisProcess(&szExeName[0]))
     {
-        dprintf(("%s: Shit! can't figure out where NSPR4.DLL is!", szFunction));
+        dprintff("Shit! can't figure out where NSPR4.DLL is!");
         npGenericErrorBox("Counldn't find NSPR4.DLL. Probably unsupported browser.", FALSE);
         return FALSE;
     }
@@ -343,7 +341,7 @@ BOOL    npResolveMozAPIs(void)
         rc = DosLoadModule(NULL, 0, &szExeName[0], &aMods[i].hmod);
         if (rc)
         {
-            dprintf(("%s: DosLoadModule(0,0,%s,) -> %d", szFunction, &szExeName[0], rc));
+            dprintff("DosLoadModule(0,0,%s,) -> %d", &szExeName[0], rc);
             fRc = FALSE;
             break;
         }
@@ -374,13 +372,13 @@ BOOL    npResolveMozAPIs(void)
             {
                 if (!aAPIs[i].fMandatory)
                 {
-                    dprintf(("%s: DosQueryProcAddr('%s',0,'%s',) -> %d (not mandatory)",
-                             szFunction, aMods[aAPIs[i].iMod].pszDll, aAPIs[i].pszName, rc));
+                    dprintff("DosQueryProcAddr('%s',0,'%s',) -> %d (not mandatory)",
+                             aMods[aAPIs[i].iMod].pszDll, aAPIs[i].pszName, rc);
                     *aAPIs[i].ppfn = NULL;
                     continue;
                 }
-                dprintf(("%s: DosQueryProcAddr('%s',0,'%s',) -> %d !!!",
-                         szFunction, aMods[aAPIs[i].iMod].pszDll, aAPIs[i].pszName, rc));
+                dprintff("DosQueryProcAddr('%s',0,'%s',) -> %d !!!",
+                         aMods[aAPIs[i].iMod].pszDll, aAPIs[i].pszName, rc);
                 ReleaseInt3(0xdeaddead, 0xdeadf003, i);
                 fRc = FALSE;
                 break;
@@ -393,7 +391,7 @@ BOOL    npResolveMozAPIs(void)
         if (aMods[i].hmod != NULLHANDLE)
             DosFreeModule(aMods[i].hmod);
 
-    dprintf(("%s: Successfully resolved all Mozilla APIs", szFunction));
+    dprintff("Successfully resolved all Mozilla APIs");
     return fRc;
 }
 
