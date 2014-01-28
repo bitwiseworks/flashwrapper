@@ -53,8 +53,6 @@ extern int Registered;
  */
 BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 {
-    static const char szFunction[] = "npGenericInit";
-
     if (!Registered) {
         npGenericErrorBox("You may not use the Flash plugin with an unregistered copy of eComStation", FALSE);
         return FALSE;
@@ -63,7 +61,7 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
     // Validate input.
     if (!VALID_PTR(pPlugin) || pPlugin->cb != sizeof(*pPlugin) ||
         !pPlugin->szPluginDllName[0]) {
-        dprintf(("%s: pPlugin is invalid !!!", szFunction));
+        dprintff("pPlugin is invalid !!!");
         //DebugInt3();
         return FALSE;
     }
@@ -73,7 +71,7 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
     if (DosQueryPathInfo(pPlugin->szPluginDllName, FIL_STANDARD,
                          &fst3, sizeof(fst3)) ||
         (fst3.attrFile & FILE_DIRECTORY) || fst3.cbFile < 1024) {
-        dprintf(("%s: Bad plugin file [%s]", szFunction, pPlugin->szPluginDllName));
+        dprintff("Bad plugin file [%s]", pPlugin->szPluginDllName);
         //DebugInt3();
         return FALSE;
     }
@@ -85,7 +83,7 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
     pPlugin->pfnNP_GetValue           = npGenericNP_GetValue;
     pPlugin->pfnNP_GetMIMEDescription = npGenericNP_GetMIMEDescription;
 
-    dprintf(("%s: Successfully initialized '%s'", szFunction, pPlugin->szPluginDllName));
+    dprintff("Successfully initialized '%s'", pPlugin->szPluginDllName);
     return TRUE;
 }
 
@@ -101,8 +99,6 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
  */
 BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
 {
-    static const char szFunction[] = "npGenericLazyInit";
-
     // No use to pretend plugins load when we didn't init correctly ourselves.
     if (!gfInitSuccessful) {
         //DebugInt3();
@@ -124,7 +120,7 @@ BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
     // Load the Wrapped Plugin DLL.
     pPlugin->hmodPlugin = odinLoadLibrary(pPlugin->szPluginDllName);
     if (!pPlugin->hmodPlugin) {
-        dprintf(("%s: odinLoadLibrary(%s) failed !!!", szFunction, pPlugin->szPluginDllName));
+        dprintff("odinLoadLibrary(%s) failed !!!", pPlugin->szPluginDllName);
         //DebugInt3();
         npGenericErrorBox("Failed to load Flash Win32 plugin.", FALSE);
         return FALSE;
@@ -147,19 +143,19 @@ BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
 
     for (int i = 0; i < sizeof(aExports) / sizeof(aExports[0]); i++) {
         *aExports[i].ppfn = odinGetProcAddress(pPlugin->hmodPlugin, aExports[i].psz);
-        dprintf(("%s: %s -> 0x%08x", __FUNCTION__, aExports[i].psz, *aExports[i].ppfn));
+        dprintff("%s -> 0x%08x", aExports[i].psz, *aExports[i].ppfn);
     }
 
     // Minimum requirement is NP_GetEntryPoints support
     if (!pPlugin->pfnW32NP_GetEntryPoints) {
-        dprintf(("%s: no NP_GetEntryPoints export!", szFunction));
+        dprintff("no NP_GetEntryPoints export!");
         odinFreeLibrary(pPlugin->hmodPlugin);
         //DebugInt3();
         npGenericErrorBox("Invalid Flash Win32 plugin.", FALSE);
         return FALSE;
     }
 
-    dprintf(("%s: Successfully initialized '%s'", szFunction, pPlugin->szPluginDllName));
+    dprintff("Successfully initialized '%s'", pPlugin->szPluginDllName);
     return TRUE;
 }
 

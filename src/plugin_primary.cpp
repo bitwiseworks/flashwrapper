@@ -159,7 +159,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
         // Init CRT and do C++ static initializations.
         int rc = _CRT_init();
         if (rc) {
-            //dprintf(("CRT_init rc: %d", rc));
+            //dprintf("CRT_init rc: %d", rc);
             return 0;
         }
 
@@ -173,7 +173,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
         SetThreadAffinity();
 #endif
 
-        //dprintf(("Flash plugin init term"));
+        //dprintf("Flash plugin init term");
 
 #if defined(DEBUG)
         Registered = TRUE;
@@ -195,54 +195,54 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
 
         // must be always set after KeySetup
         if (!KeySetNamePswIni(pszRegName, (PCHAR)"eComStationRegistration")) {
-            dprintf(("ECSREG11.INI not found\n"));
+            dprintf("ECSREG11.INI not found\n");
             Registered = FALSE;
         } else if (!KeyCheck(TRUE)) {
 
             // Check why KeyCheck failed
             switch (KeyGetSerialNumberStatus()) {
             case snExpired:
-                dprintf(("Serial number expired"));
+                dprintf("Serial number expired");
                 break;
             case snLocked:
-                dprintf(("Key is locked"));
+                dprintf("Key is locked");
                 break;
             default:
-                dprintf(("Unregistered"));
+                dprintf("Unregistered");
                 break;
             }
             Registered = FALSE;
         } else {
-            dprintf(("Test 1.2: registered"));
+            dprintf("Test 1.2: registered");
             Registered = TRUE;
         }
 
         if (Registered == FALSE) {
             // test 2.0 key
-            dprintf(("Testing 2.0 key\n"));
+            dprintf("Testing 2.0 key\n");
             KeySetup(TRUE, FALSE, TRUE, 0x010121, &SIBlob20, SIBlobLen20);
 
             // must be always set after KeySetup
             if (!KeySetNamePswIni(pszRegName, (PCHAR)"eComStationRegistration")) {
-                dprintf(("ECSREG11.INI not found\n"));
+                dprintf("ECSREG11.INI not found\n");
                 Registered = FALSE;
             } else if (!KeyCheck(TRUE)) {
 
                 // Check why KeyCheck failed
                 switch (KeyGetSerialNumberStatus()) {
                 case snExpired:
-                    dprintf(("Serial number expired"));
+                    dprintf("Serial number expired");
                     break;
                 case snLocked:
-                    dprintf(("Key is locked"));
+                    dprintf("Key is locked");
                     break;
                 default:
-                    dprintf(("Unregistered"));
+                    dprintf("Unregistered");
                     break;
                 }
                 Registered = FALSE;
             } else {
-                dprintf(("Test 2.0: registered"));
+                dprintf("Test 2.0: registered");
                 Registered = TRUE;
             }
 
@@ -255,23 +255,23 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
         // Get the plugin names.
         if (!npprimaryGetPluginNames(hmod, gPlugin.szPluginDllName,
                                      sizeof(gPlugin.szPluginDllName))) {
-            dprintf(("Flash plugin init failed in npprimaryGetPluginNames [%s]",
-                     gPlugin.szPluginDllName));
+            dprintf("Flash plugin init failed in npprimaryGetPluginNames [%s]",
+                    gPlugin.szPluginDllName);
             return 0;
         }
 
         if (!npInitTerm_Lazy()) {
-            dprintf(("Flash plugin init failed in npInitTerm_Lazy"));
+            dprintf("Flash plugin init failed in npInitTerm_Lazy");
             return 0;
         }
 
         if (!npGenericInit(&gPlugin)) {
-            dprintf(("Flash plugin init failed in npGenericInit"));
+            dprintf("Flash plugin init failed in npGenericInit");
             return 0;
         }
 
         gfInitSuccessful = TRUE;
-        dprintf(("Flash plugin inited successfully"));
+        dprintf("Flash plugin inited successfully");
         return 1;
     }
 
@@ -292,24 +292,24 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
         unsigned long cFrees;
         unsigned long cbCurAllocated;
         getcrtstat(&cAllocs, &cFrees, &cbCurAllocated);
-        dprintf(("#####OS/2######### Heap statistics (initterm) #####OS/2########"));
-        dprintf((" cAllocs        = %d (%#x)", cAllocs, cAllocs));
-        dprintf((" cFrees         = %d (%#x)", cFrees,  cFrees));
-        dprintf((" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated));
-        dprintf(("#####OS/2######### Heap statistics (initterm) #####OS/2########"));
+        dprintf("#####OS/2######### Heap statistics (initterm) #####OS/2########");
+        dprintf(" cAllocs        = %d (%#x)", cAllocs, cAllocs);
+        dprintf(" cFrees         = %d (%#x)", cFrees,  cFrees);
+        dprintf(" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated);
+        dprintf("#####OS/2######### Heap statistics (initterm) #####OS/2########");
 #endif
 
         unsigned long oldmod = 0;
 
         // Deregister ourselfs.
-        dprintf(("starting unload procedure"));
+        dprintf("starting unload procedure");
         gfHandleDllEvents = FALSE;
 
         if (ghInstanceOurSelf) {
             odinUnregisterLxDll(ghInstanceOurSelf);
             ghInstanceOurSelf = NULLHANDLE;
         }
-        dprintf(("DLL unregistered"));
+        dprintf("DLL unregistered");
 
         // Unload the ODIN dlls.
         for (int i = registered_apis-1; i >= 0; i--) {
@@ -320,7 +320,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hmod, unsigned long
             }
         }
         registered_apis = 0;
-        dprintf(("DLLs unloaded"));
+        dprintf("DLLs unloaded");
 
         // Do C++ static terminations and terminate the CRT.
 #ifdef __EMX__
@@ -373,17 +373,17 @@ BOOL    npInitTerm_Lazy(void)
         DosQueryModuleName(ppib->pib_hmte, sizeof(szFakeName), szFakeName))
         strcpy(&szFakeName[0], "c:\\mozilla\\mozilla.exe");
 
-    dprintf(("npInitTerm_Lazy: register fake exe [%s]", szFakeName));
+    dprintf("npInitTerm_Lazy: register fake exe [%s]", szFakeName);
     //odinSetFreeTypeIntegration(TRUE);
     if (!odinRegisterDummyExeEx(szFakeName, &firefoxfake_PEResTab)) {
-        dprintf(("npInitTerm_Lazy: odinRegisterDummyExeEx failed!"));
+        dprintf("npInitTerm_Lazy: odinRegisterDummyExeEx failed!");
         return FALSE;
     }
 
 #ifdef INCL_MOZAPIS
     // Resolve mozilla APIs
     if (!npResolveMozAPIs()) {
-        dprintf(("npInitTerm_Lazy: ResolveMozAPIs failed!"));
+        dprintf("npInitTerm_Lazy: ResolveMozAPIs failed!");
         return FALSE;
     }
 #endif
@@ -392,13 +392,13 @@ BOOL    npInitTerm_Lazy(void)
     gfHandleDllEvents = FALSE;
     ghInstanceOurSelf = odinRegisterLxDll(ghmodOurSelf, npOdinInitTerm, NULL, 0, 0, 0);
     if (!ghInstanceOurSelf) {
-        dprintf(("npInitTerm_Lazy: odinRegisterLxDll failed!"));
+        dprintf("npInitTerm_Lazy: odinRegisterLxDll failed!");
         return FALSE;
     }
 
     gfHandleDllEvents = TRUE;
     gfLazyInitSuccessful = TRUE;
-    dprintf(("npInitTerm_Lazy: ghInstanceOurSelf=%x", ghInstanceOurSelf));
+    dprintf("npInitTerm_Lazy: ghInstanceOurSelf=%x", ghInstanceOurSelf);
     return TRUE;
 }
 
@@ -411,8 +411,6 @@ BOOL    npInitTerm_Lazy(void)
  */
 ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
 {
-    static const char szFunction[] = "npOdinInitTerm";
-
     switch (fReason) {
 
         case DLL_THREAD_ATTACH: {
@@ -420,7 +418,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
         // Attaching to Win32 threads should be not needed for Flash since Netscape
         // only calls it on Thread 1.
 #if defined(INCL_MOZAPIS) && 0
-            dprintf(("%s: DLL_THREAD_ATTACH. Instance: 0x%X", szFunction, hInstance));
+            dprintff("DLL_THREAD_ATTACH. Instance: 0x%X", hInstance);
             if (gfHandleDllEvents) {
 
                 USHORT selFSOld = pfnODIN_ThreadLeaveOdinContextNested(NULL, FALSE);
@@ -433,16 +431,16 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
                 PRThread * pThread = mozPR_GetCurrentThread();
                 if (!pThread) {
                     if (pfn_PRI_AttachThread) {
-                        dprintf(("%s: calling moz_PRI_AttachThread", szFunction));
+                        dprintff("calling moz_PRI_AttachThread");
                         pThread = moz_PRI_AttachThread(PR_USER_THREAD, PR_PRIORITY_NORMAL, NULL, 0);
                     }
                     else
-                        dprintf(("%s: DLL_THREAD_ATTACH we're f**ked mozilla 1.3b or final !!!!", szFunction));
+                        dprintff("DLL_THREAD_ATTACH we're f**ked mozilla 1.3b or final !!!!");
                 }
                 pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld);
             }
 
-            dprintf(("%s: DLL_THREAD_ATTACHED", szFunction));
+            dprintff("DLL_THREAD_ATTACHED");
 #endif
             return TRUE;
         }
@@ -452,7 +450,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
         // Attaching to Win32 threads should be not needed for Flash since Netscape
         // only calls it on Thread 1.
 #if defined(INCL_MOZAPIS) && 0
-            dprintf(("%s: DLL_THREAD_DETACH. Instance: 0x%X", szFunction, hInstance));
+            dprintff("DLL_THREAD_DETACH. Instance: 0x%X", hInstance);
             if (gfHandleDllEvents) {
 
                 USHORT selFSOld = pfnODIN_ThreadLeaveOdinContextNested(NULL, FALSE);
@@ -464,18 +462,18 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
                 //@todo should test on these flags!
                 if (pThread/* && pThread->flags & _PR_ATTACHED */) {
                     if (pfn_PRI_DetachThread) {
-                        dprintf(("%s: calling moz_PRI_DetachThread", szFunction));
+                        dprintff("calling moz_PRI_DetachThread");
                         moz_PRI_DetachThread();
                     }
                     else {
-                        dprintf(("%s: calling mozPR_DetachThread", szFunction));
+                        dprintff("calling mozPR_DetachThread");
                         mozPR_DetachThread();
                     }
                 }
                 pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld);
             }
 
-            dprintf(("%s: DLL_THREAD_DETACHED", szFunction));
+            dprintff("DLL_THREAD_DETACHED");
 
             // Get memory stats if debug build.
 #if defined(DEBUG) && 0
@@ -484,11 +482,11 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
             unsigned long cFrees;
             unsigned long cbCurAllocated;
             getcrtstat(&cAllocs, &cFrees, &cbCurAllocated);
-            dprintf(("#####ODIN######### npj2 Heap statistics ######ODIN#######"));
-            dprintf((" cAllocs        = %d (%#x)", cAllocs, cAllocs));
-            dprintf((" cFrees         = %d (%#x)", cFrees,  cFrees));
-            dprintf((" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated));
-            dprintf(("####InitTerm###### npj2 Heap statistics ####InitTerm#####"));
+            dprintf("#####ODIN######### npj2 Heap statistics ######ODIN#######");
+            dprintf(" cAllocs        = %d (%#x)", cAllocs, cAllocs);
+            dprintf(" cFrees         = %d (%#x)", cFrees,  cFrees);
+            dprintf(" cbCurAllocated = %d (%#x)", cbCurAllocated, cbCurAllocated);
+            dprintf("####InitTerm###### npj2 Heap statistics ####InitTerm#####");
 #endif
 #endif
             return TRUE;
@@ -497,7 +495,7 @@ ULONG WIN32API npOdinInitTerm(ULONG hInstance, ULONG fReason, LPVOID reserved)
         // Ignore these
         case DLL_PROCESS_DETACH:
         case DLL_PROCESS_ATTACH:
-            dprintf(("%s: DLL_PROCESS_ATTACH/DETACH", szFunction));
+            dprintff("DLL_PROCESS_ATTACH/DETACH");
             return TRUE;
     }
 

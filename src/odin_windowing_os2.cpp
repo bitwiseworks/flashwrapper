@@ -76,7 +76,7 @@ BOOL              npWinSavePS(HPS hps, PNPSAVEDPS pSet)
     pSet->lSaveId = GpiSavePS(hps);
     if (pSet->lSaveId == GPI_ERROR)
     {
-        dprintf(("npWinSavePS: GpiSavePS failed. lastterr=%#x hps=%#x", WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinSavePS: GpiSavePS failed. lastterr=%#x hps=%#x", WinGetLastError(NULLHANDLE), hps);
         return FALSE;
     }
     pSet->lOptions = GpiQueryPS(hps, &pSet->sizlPS);
@@ -120,32 +120,32 @@ BOOL              npWinRestorePS(HPS hps, PNPSAVEDPS  pSet)
     if (!GpiRestorePS(hps, pSet->lSaveId))
     {
         fRc = FALSE;
-        dprintf(("npWinRestorePS: GpiRestorePS failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: GpiRestorePS failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps);
         DebugInt3();
     }
     if (!GpiSetPS(hps, &pSet->sizlPS, pSet->lOptions))
     {
         fRc = FALSE;
-        dprintf(("npWinRestorePS: GpiSetPS failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: GpiSetPS failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps);
         DebugInt3();
     }
     if (!GpiEnableYInversion(hps, pSet->lYInversion))
     {
         fRc = FALSE;
-        dprintf(("npWinRestorePS: GpiEnableYInversion failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: GpiEnableYInversion failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps);
         DebugInt3();
     }
     if (!GpiSetDefaultViewMatrix(hps, 9, &pSet->matlfDefault, TRANSFORM_REPLACE))
     {
         fRc = FALSE;
-        dprintf(("npWinRestorePS: GpiSetDefaultViewMatrix failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: GpiSetDefaultViewMatrix failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps);
         DebugInt3();
     }
     #if 0 /* PMERR_INV_MICROPS_FUNCTION */
     if (!GpiSetViewingTransformMatrix(hps, 9, &pSet->matlfViewing, TRANSFORM_REPLACE))
     {
         fRc = FALSE;
-        dprintf(("npWinRestorePS: GpiSetViewingTransformMatrix failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: GpiSetViewingTransformMatrix failed. lastterr=%#x hps=%#x", errid = WinGetLastError(NULLHANDLE), hps);
         DebugInt3();
     }
 
@@ -155,14 +155,14 @@ BOOL              npWinRestorePS(HPS hps, PNPSAVEDPS  pSet)
        if (!GpiSetAttrs(hps, iPrimType, afAttrMasks[iPrimType], pSet->aDefMasks[iPrimType], pBundle))
        {
            fRc = FALSE;
-           dprintf(("npWinRestorePS: GpiSetAttrs %i failed. lastterr=%#x hps=%#x", iPrimType, errid = WinGetLastError(NULLHANDLE), hps));
+           dprintf("npWinRestorePS: GpiSetAttrs %i failed. lastterr=%#x hps=%#x", iPrimType, errid = WinGetLastError(NULLHANDLE), hps);
            //DebugInt3();
        }
        pBundle += acbBundles[iPrimType];
     }
     #endif
     if (!fRc)
-        dprintf(("npWinRestorePS: one or more operations failed. lastterr=%#x hps=%#x", WinGetLastError(NULLHANDLE), hps));
+        dprintf("npWinRestorePS: one or more operations failed. lastterr=%#x hps=%#x", WinGetLastError(NULLHANDLE), hps);
     return fRc;
 }
 

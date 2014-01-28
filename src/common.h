@@ -30,17 +30,20 @@
 
 /** Debug printf */
 #undef dprintf
+#undef dprintff
 #ifdef DEBUG
-    #define dprintf(a)      npdprintf a
+    #define dprintf(msg, ...)   npdprintf(msg, ##__VA_ARGS__)
+    #define dprintff(msg, ...)  npdprintf("%s: " msg, __FUNCTION__, ##__VA_ARGS__)
 #else
-    #define dprintf(a)      (void)0
+    #define dprintf(msg, ...)   do {} while(0)
+    #define dprintff(msg, ...)  do {} while(0)
 #endif
 
 /** Debug Interrupt. */
 #ifdef DEBUG
-    #define DebugInt3()     (void)0//_interrupt(3)
+    #define DebugInt3()     do {} while(0) /*_interrupt(3)*/
 #else
-    #define DebugInt3()     (void)0
+    #define DebugInt3()     do {} while(0)
 #endif
 
 /** Exception chain verify - debug only. */
