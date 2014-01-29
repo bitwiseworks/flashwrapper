@@ -243,6 +243,8 @@ typedef NPError (*W32OSCALL    PFNW32_NP_Shutdown)(void);
 typedef NPError (*W32OSCALL    PFNW32_NP_GetValue)(NPP future, NPPVariable variable, void *value);
 typedef char * (*W32OSCALL     PFNW32_NP_GetMIMEDescription)(void);
 
+struct NPOdinPluginWrapperData;
+
 /**
  * Per Plugin Structure.
  *
@@ -290,6 +292,9 @@ typedef struct NPOdinPluginWrapper
     PFNW32_NP_GetValue              pfnW32NP_GetValue;
     PFNW32_NP_GetMIMEDescription    pfnW32NP_GetMIMEDescription;
     //@}
+
+    /** Auxiliary pluigin wrapper data */
+    NPOdinPluginWrapperData        *pData;
 
 } NPODINWRAPPER;
 

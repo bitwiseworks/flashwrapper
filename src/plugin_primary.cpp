@@ -91,7 +91,8 @@ NPODINWRAPPER   gPlugin =
     NULL,                   // pfnW32NP_Initialize
     NULL,                   // pfnW32NP_Shutdown
     NULL,                   // pfnW32NP_GetValue
-    NULL                    // pfnW32NP_GetMIMEDescription
+    NULL,                   // pfnW32NP_GetMIMEDescription
+    NULL                    // pData
 };
 
 // used to unload the Odin dlls at termination
