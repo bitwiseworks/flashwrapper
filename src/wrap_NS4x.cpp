@@ -453,65 +453,6 @@ struct WrapperStub
     char            achMagic[4];    /* 0xcccccccc */
 };
 
-#if 0
-/**
- * Plugin Entrypoints wrapper.
- */
-typedef struct _PluginFuncsWrapper
-{
-//    /** Pointer to the original struct. (do we need to keep this around?) */
-//    NPPluginFuncs *     pNative;
-
-//    /** padding for 16byte code aligment. */
-//    char                uaPadding1[8];
-
-    /** Stub code for each handler. */
-    struct Stub
-    {
-        char            chPush;
-        void *          pvImm32bit;
-        char            chCall;
-        int             offRel32bit;
-        char            chPopEcx;
-        char            chRet;
-        char            achMagic[4];    /* 0xcccccccc */
-    }   *pStubs;
-
-    /** The stuff we present to the Win32 side. */
-    NP32PluginFuncs *w32;
-
-} NPLUGINFUNCSWRAPPER,  *PNPLUGINFUNCSWRAPPER;
-
-
-/**
- * Netscape Entrypoints Wrapper.
- */
-typedef struct _NetscapeFuncsWrapper
-{
-    /** Pointer to the original struct. (do we need to keep this around?) */
-    NPNetscapeFuncs *   pNative;
-
-//    /** padding for 16byte code aligment. */
-//    char                auPadding[8];
-
-    /** Stub code for each handler. */
-    struct Stub
-    {
-        char            chPush;
-        void *          pvImm32bit;
-        char            chCall;
-        int             offRel32bit;
-        char            chPopEcx;
-        char            chRet;
-        char            achMagic[4];    /* 0xcccccccc */
-    }   *pStubs;
-
-//    /** The stuff we present to the Win32 side. */
-//    NP32NetscapeFuncs *w32;
-
-} NETSCAPEFUNCSWRAPPER,  *PNETSCAPEFUNCSWRAPPER;
-#endif
-
 /**
  * Plugin instance data.
  */
