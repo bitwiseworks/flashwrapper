@@ -131,7 +131,7 @@
     }
 
 /** Get ptr to input NP32Variant converted from NPVariant */
-#define NP4XUP_USE_IN_NPVARIANT(os2) w32##os2##Ptr
+#define NP4XUP_USE_IN_NPVARIANT(os2) (NPVariant *)w32##os2##Ptr
 
 /** Finalize input NPVariant to NP32Variant conversion */
 #define NP4XUP_END_IN_NPVARIANT(os2) do {} while (0)
@@ -145,7 +145,7 @@
     }
 
 /** Get ptr to in/out NP32Variant converted from NPVariant */
-#define NP4XUP_USE_OUT_NPVARIANT(os2) w32##os2##Ptr
+#define NP4XUP_USE_OUT_NPVARIANT(os2) (NPVariant *)w32##os2##Ptr
 
 /** Finalize in/out NPVariant to NP32Variant conversion */
 #define NP4XUP_END_OUT_NPVARIANT(os2)                                               \
@@ -162,7 +162,7 @@
     }
 
 /** Get ptr to input array of NP32Variant converted from NPVariant */
-#define NP4XUP_USE_IN_NPVARIANTS(os2) (const NP32Variant *)w32##os2##Ptr
+#define NP4XUP_USE_IN_NPVARIANTS(os2) (NPVariant *)w32##os2##Ptr
 
 /** Finalize input array NPVariant to NP32Variant conversion */
 #define NP4XUP_END_IN_NPVARIANTS(os2)                                               \
@@ -170,7 +170,7 @@
         free(w32##os2##Ptr);
 
 /*
- * Other stuff
+ * Plugin/browser context switch macros
  */
 
 /** Get and validate the instance pointer */
@@ -261,22 +261,21 @@
     pfnODIN_ThreadEnterOdinContextNested(NULL, FALSE, selFSOld); \
     VERIFY_EXCEPTION_CHAIN()
 
-/** Enter odin context from OS/2 netscape/mozilla class callback context. */
-#define NP4XCLASS_SANITY_CHECK(retval) \
-    if (npobj->_class != (NPClass *)&pInst->newClass) { \
-        dprintff("ERROR: npobj->_class must be %p", &pInst->newClass); \
-        return retval; \
-    } do {} while (0)
+/*
+ * NPClass wrapper macros
+ */
 
-/** Enter odin context from OS/2 netscape/mozilla class callback context. */
-#define NP4XCLASS_ENTER_ODIN(fDebug) \
-    npobj->_class = (NPClass *)pInst->pw32Class; \
-    NP4XUP_ENTER_ODIN(fDebug)
+/** Get the OS/2 wrapper class pointer */
+#define NP4XUP_CLASS(npobj) \
+    NPClassWrapper *pClassWrapper = (NPClassWrapper *)npobj->_class; \
+    dprintff("pClassWrapper %p pClassW32 %p", pClassWrapper, pClassWrapper->pClassW32)
 
-/** Leave odin context and go back into the OS/2 netscape/mozilla class callbackcontext. */
-#define NP4XCLASS_LEAVE_ODIN(fDebug) \
-    NP4XUP_LEAVE_ODIN(fDebug); \
-    npobj->_class = (NPClass *)&pInst->newClass
+/** Get the original Win32 class pointer */
+#define NP4XUP_W32_CLASS() pClassWrapper->pClassW32
+
+/*
+ * Other stuff
+ */
 
 /** dprintf a nsID structure (reference to such). */
 #define DPRINTF_NSID(refID)  \
@@ -301,6 +300,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <map>
+
 #define INCL_NS4X
 #include "common.h"
 
@@ -315,7 +316,7 @@
 /**
  * Win 32 Plugin Entrypoints.
  */
-typedef struct _NP32PluginFuncs
+struct NP32PluginFuncs
 {
     uint16_t size;
     uint16_t version;
@@ -345,13 +346,12 @@ typedef struct _NP32PluginFuncs
         };
         PFN functions[0];
     };
-} NP32PluginFuncs;
-
+};
 
 /**
  * Win32 Netscape Entrypoints.
  */
-typedef struct _NP32NetscapeFuncs
+struct NP32NetscapeFuncs
 {
     uint16_t size;
     uint16_t version;
@@ -365,12 +365,12 @@ typedef struct _NP32NetscapeFuncs
         };
         PFN functions[0];
     };
-} NP32NetscapeFuncs;
+};
 
 /**
  * NPVariant is 16 bytes on Win32 (12 bytes on all GCC platforms).
  */
-typedef struct _NP32Variant
+struct NP32Variant
 {
     NPVariantType type;
     uint32_t padding;
@@ -382,43 +382,7 @@ typedef struct _NP32Variant
         NPString stringValue;
         NPObject *objectValue;
     } value;
-
-} NP32Variant;
-
-/**
- * NPClass for Win32 with the correct NPVariant.
- */
-typedef struct _NP32Class
-{
-    uint32_t structVersion;
-
-#if NP_CLASS_STRUCT_VERSION != 3
-#error Check _NP32Class::functions length!
-#endif
-
-    union
-    {
-        struct
-        {
-            NPObject *(*pfnAllocateFunction)(NPP npp, _NP32Class *aClass);
-            void (*pfnDeallocateFunction)(NPObject *npobj);
-            void (*pfnInvalidateFunction)(NPObject *npobj);
-            bool (*pfnHasMethodFunction)(NPObject *npobj, NPIdentifier name);
-            bool (*pfnInvokeFunction)(NPObject *npobj, NPIdentifier name, const NP32Variant *args, uint32_t argCount, NP32Variant *result);
-            bool (*pfnInvokeDefaultFunction)(NPObject *npobj, const NP32Variant *args, uint32_t argCount, NP32Variant *result);
-            bool (*pfnHasPropertyFunction)(NPObject *npobj, NPIdentifier name);
-            bool (*pfnGetPropertyFunction)(NPObject *npobj, NPIdentifier name, NP32Variant *result);
-            bool (*pfnSetPropertyFunction)(NPObject *npobj, NPIdentifier name, const NP32Variant *value);
-            bool (*pfnRemovePropertyFunction)(NPObject *npobj, NPIdentifier name);
-            bool (*pfnEnumerationFunction)(NPObject *npobj, NPIdentifier **value, uint32_t *count);
-            bool (*pfnConstructFunction)(NPObject *npobj, const NP32Variant *args, uint32_t argCount, NP32Variant *result);
-        };
-        PFN functions[12]; /* as of NP_CLASS_STRUCT_VERSION */
-    };
-
-    enum { FunctionCount = sizeof(functions) / sizeof(functions[0]) };
-
-} NP32Class;
+};
 
 #pragma pack()
 
@@ -433,14 +397,15 @@ typedef struct _NP32Class
  *
  * Used to generate the following assembly:
  * <pre>
- *    push ADDR
+ *    push VAL
  *    call near FUNC
  *    pop ecx
  *    ret
  * </pre>
  *
- * This code effectively prepends ADDR to the original argument list and hands
- * control over to FUNC.
+ * This code effectively prepends VAL to the original argument list and hands
+ * control over to FUNC (which should declare two extra void * arguments,
+ * VAL and RET_ADDR, in front of the original argument list).
  */
 struct WrapperStub
 {
@@ -474,31 +439,24 @@ struct PluginInstance
 
     /** The stuff we present to the plugin. */
     NPP_t       w32;
-
-    /** Stub code for each NPClass method of the scriptable object (NPPVpluginScriptableNPObject) */
-    struct Stub
-    {
-        char            chPush;
-        void *          pvImm32bit;
-        char            chCall;
-        int             offRel32bit;
-        char            chPopEcx;
-        char            chRet;
-        char            achMagic[4];    /* 0xcccccccc */
-    }   aStubs[NP32Class::FunctionCount];
-
-    /** Original Win32 class of the scriptable object (NPPVpluginScriptableNPObject) */
-    NP32Class *pw32Class;
-
-    /** Substituted class */
-    NP32Class newClass;
-
-    /** Flag indicating that we're making the NPPVpluginScriptableNPObject request */
-    bool bInGetScriptableObject;
-
 };
 
 #pragma pack()
+
+struct NPClassWrapper : public NPClass
+{
+    #if NP_CLASS_STRUCT_VERSION != 3
+    #   error Check FuncCount!
+    #endif
+
+    enum { FuncCount = (sizeof(NPClass) - __offsetof(NPClass, allocate)) /
+                       sizeof(NPClass::allocate) };
+
+    /* Original Win32 NPClass */
+    NPClass *pClassW32;
+};
+
+typedef std::map<NPClass *, NPClassWrapper *> NPClassMap;
 
 /**
  * Auxiliary plugin wrapper data
@@ -519,6 +477,9 @@ struct NPOdinPluginWrapperData
 
     /* Original OS/2 browser callback function table (not owned by us) */
     NPNetscapeFuncs *pNetscapeFuncsOS2;
+
+    /* Map of Win32 classes to OS/2 wrapper classes presented to the browser */
+    NPClassMap classMap;
 };
 
 /*******************************************************************************
@@ -712,47 +673,40 @@ static void showMissingOrdinalMsg(int ordinal, const char *errString, const char
 
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-// UP wrappers (stuff that is presented to netscape/mozilla)
+// NPClass UP wrappers (stuff that is presented to netscape/mozilla)
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 
-NPObject *np4xClass_AllocateFunction(PluginInstance *pInst, void *pvCaller, NPP instance, NPClass *aClass)
+NPObject *np4xClass_AllocateFunction(NPP instance, NPClass *pClass)
 {
-    dprintff("enter - pInst=%p instance=%p aClass=%p", pInst, instance, aClass);
-    dprintff("pw32Class %p", pInst->pw32Class);
+    dprintff("enter - instance=%p pClass=%p", instance, pClass);
 
-    // sanity
-    if (aClass != (NPClass *)&pInst->newClass)
-    {
-        dprintff("ERROR: aClass must be %p", &pInst->newClass);
-        return NULL;
-    }
+    NPClassWrapper *pClassWrapper = (NPClassWrapper *)pClass;
+    dprintff("pClassWrapper %p pClassW32 %p", pClassWrapper, NP4XUP_W32_CLASS());
+
+    NP4XUP_INSTANCE(FALSE);
 
     NP4XUP_ENTER_ODIN(FALSE);
 
-    NPObject *object = pInst->pw32Class->pfnAllocateFunction(NP4XUP_W32_INSTANCE(), &pInst->newClass);
+    NPObject *object = NP4XUP_W32_CLASS()->allocate(NP4XUP_W32_INSTANCE(), pClassWrapper);
 
     NP4XUP_LEAVE_ODIN(FALSE);
-
-    if (object)
-        object->_class = (NPClass *)&pInst->newClass;
 
     dprintff("leave object=%p", object);
     return object;
 }
 
 
-void np4xClass_DeallocateFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj)
+void np4xClass_DeallocateFunction(NPObject *npobj)
 {
-    dprintff("enter - pInst=%p npobj=%p", pInst, npobj);
+    dprintff("enter - npobj=%p", npobj);
 
-    NP4XCLASS_SANITY_CHECK((void)0);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    pInst->pw32Class->pfnDeallocateFunction(npobj);
+    NP4XUP_W32_CLASS()->deallocate(npobj);
 
-    // Must not use NP4XCLASS_LEAVE_ODIN() since it would try to modify the just freed npobj
     NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave");
@@ -760,54 +714,54 @@ void np4xClass_DeallocateFunction(PluginInstance *pInst, void *pvCaller, NPObjec
 }
 
 
-void np4xClass_InvalidateFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj)
+void np4xClass_InvalidateFunction(NPObject *npobj)
 {
-    dprintff("enter - pInst=%p npobj=%p", pInst, npobj);
+    dprintff("enter - npobj=%p", npobj);
 
-    NP4XCLASS_SANITY_CHECK((void)0);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    pInst->pw32Class->pfnInvalidateFunction(npobj);
+    NP4XUP_W32_CLASS()->invalidate(npobj);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave");
     return;
 }
 
 
-bool np4xClass_HasMethodFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name)
+bool np4xClass_HasMethodFunction(NPObject *npobj, NPIdentifier name)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p", pInst, npobj, name);
+    dprintff("enter - npobj=%p name=%p", npobj, name);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnHasMethodFunction(npobj, name);
+    bool rc = NP4XUP_W32_CLASS()->hasMethod(npobj, name);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave rc=%s", rc ? "true" : "false");
     return rc;
 }
 
 
-bool np4xClass_InvokeFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount, NPVariant *result)
+bool np4xClass_InvokeFunction(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p args=%p argCount=%d result=%p", pInst, npobj, name, args, argCount, result);
+    dprintff("enter - npobj=%p name=%p args=%p argCount=%d result=%p", npobj, name, args, argCount, result);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
     NP4XUP_BEGIN_IN_NPVARIANTS(args, argCount);
     NP4XUP_BEGIN_OUT_NPVARIANT(result);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnInvokeFunction(npobj, name, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
+    bool rc = NP4XUP_W32_CLASS()->invoke(npobj, name, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     NP4XUP_END_OUT_NPVARIANT(result);
     NP4XUP_END_IN_NPVARIANTS(args);
@@ -817,20 +771,20 @@ bool np4xClass_InvokeFunction(PluginInstance *pInst, void *pvCaller, NPObject *n
 }
 
 
-bool np4xClass_InvokeDefaultFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
+bool np4xClass_InvokeDefaultFunction(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    dprintff("enter - pInst=%p npobj=%p args=%p argCount=%d result=%p", pInst, npobj, args, argCount, result);
+    dprintff("enter - npobj=%p args=%p argCount=%d result=%p", npobj, args, argCount, result);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
     NP4XUP_BEGIN_IN_NPVARIANTS(args, argCount);
     NP4XUP_BEGIN_OUT_NPVARIANT(result);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnInvokeDefaultFunction(npobj, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
+    bool rc = NP4XUP_W32_CLASS()->invokeDefault(npobj, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     NP4XUP_END_OUT_NPVARIANT(result);
     NP4XUP_END_IN_NPVARIANTS(args);
@@ -840,36 +794,36 @@ bool np4xClass_InvokeDefaultFunction(PluginInstance *pInst, void *pvCaller, NPOb
 }
 
 
-bool np4xClass_HasPropertyFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name)
+bool np4xClass_HasPropertyFunction(NPObject *npobj, NPIdentifier name)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p", pInst, npobj, name);
+    dprintff("enter - npobj=%p name=%p", npobj, name);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnHasPropertyFunction(npobj, name);
+    bool rc = NP4XUP_W32_CLASS()->hasProperty(npobj, name);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave rc=%s", rc ? "true" : "false");
     return rc;
 }
 
 
-bool np4xClass_GetPropertyFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name, NPVariant *result)
+bool np4xClass_GetPropertyFunction(NPObject *npobj, NPIdentifier name, NPVariant *result)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p result=%p", pInst, npobj, name, result);
+    dprintff("enter - npobj=%p name=%p result=%p", npobj, name, result);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
     NP4XUP_BEGIN_OUT_NPVARIANT(result);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnGetPropertyFunction(npobj, name, NP4XUP_USE_OUT_NPVARIANT(result));
+    bool rc = NP4XUP_W32_CLASS()->getProperty(npobj, name, NP4XUP_USE_OUT_NPVARIANT(result));
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     NP4XUP_END_OUT_NPVARIANT(result);
 
@@ -878,19 +832,19 @@ bool np4xClass_GetPropertyFunction(PluginInstance *pInst, void *pvCaller, NPObje
 }
 
 
-bool np4xClass_SetPropertyFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name, const NPVariant *value)
+bool np4xClass_SetPropertyFunction(NPObject *npobj, NPIdentifier name, const NPVariant *value)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p value=%p", pInst, npobj, name, value);
+    dprintff("enter - npobj=%p name=%p value=%p", npobj, name, value);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
     NP4XUP_BEGIN_IN_NPVARIANT(value);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnSetPropertyFunction(npobj, name, NP4XUP_USE_IN_NPVARIANT(value));
+    bool rc = NP4XUP_W32_CLASS()->setProperty(npobj, name, NP4XUP_USE_IN_NPVARIANT(value));
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     NP4XUP_END_IN_NPVARIANT(value);
 
@@ -899,54 +853,54 @@ bool np4xClass_SetPropertyFunction(PluginInstance *pInst, void *pvCaller, NPObje
 }
 
 
-bool np4xClass_RemovePropertyFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier name)
+bool np4xClass_RemovePropertyFunction(NPObject *npobj, NPIdentifier name)
 {
-    dprintff("enter - pInst=%p npobj=%p name=%p", pInst, npobj, name);
+    dprintff("enter - npobj=%p name=%p", npobj, name);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnHasPropertyFunction(npobj, name);
+    bool rc = NP4XUP_W32_CLASS()->removeProperty(npobj, name);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave rc=%s", rc ? "true" : "false");
     return rc;
 }
 
 
-bool np4xClass_EnumerationFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, NPIdentifier **value, uint32_t *count)
+bool np4xClass_EnumerationFunction(NPObject *npobj, NPIdentifier **value, uint32_t *count)
 {
-    dprintff("enter - pInst=%p npobj=%p value=%p count=%p", pInst, npobj, value, count);
+    dprintff("enter - npobj=%p value=%p count=%p", npobj, value, count);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnEnumerationFunction(npobj, value, count);
+    bool rc = NP4XUP_W32_CLASS()->enumerate(npobj, value, count);
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     dprintff("leave rc=%s", rc ? "true" : "false");
     return rc;
 }
 
 
-bool np4xClass_ConstructFunction(PluginInstance *pInst, void *pvCaller, NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
+bool np4xClass_ConstructFunction(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    dprintff("enter - pInst=%p npobj=%p args=%p argCount=%d result=%p", pInst, npobj, args, argCount, result);
+    dprintff("enter - npobj=%p args=%p argCount=%d result=%p", npobj, args, argCount, result);
 
-    NP4XCLASS_SANITY_CHECK(false);
+    NP4XUP_CLASS(npobj);
 
     NP4XUP_BEGIN_IN_NPVARIANTS(args, argCount);
     NP4XUP_BEGIN_OUT_NPVARIANT(result);
 
-    NP4XCLASS_ENTER_ODIN(FALSE);
+    NP4XUP_ENTER_ODIN(FALSE);
 
-    bool rc = pInst->pw32Class->pfnConstructFunction(npobj, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
+    bool rc = NP4XUP_W32_CLASS()->construct(npobj, NP4XUP_USE_IN_NPVARIANTS(args), argCount, NP4XUP_USE_IN_NPVARIANT(result));
 
-    NP4XCLASS_LEAVE_ODIN(FALSE);
+    NP4XUP_LEAVE_ODIN(FALSE);
 
     NP4XUP_END_OUT_NPVARIANT(result);
     NP4XUP_END_IN_NPVARIANTS(args);
@@ -996,9 +950,6 @@ NPError NP_LOADDS np4xUp_New(NPOdinPluginWrapper *pPlugin, void *pvCaller, NPMIM
     pInst->w32.ndata = pInst;
     pInst->pOrgInstance = instance;
     pInst->pWndData = NULL;
-    pInst->pw32Class = NULL;
-    memset(&pInst->newClass, 0, sizeof(pInst->newClass));
-    pInst->bInGetScriptableObject = false;
     instance->pdata = pInst;
 
     /*
@@ -1373,21 +1324,9 @@ NPError NP_LOADDS np4xUp_GetValue(NPOdinPluginWrapper *pPlugin, void *pvCaller, 
             {
                 NPObject *pObject = NULL;
 
-                // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
-                pInst->bInGetScriptableObject = true;
-
                 NP4XUP_ENTER_ODIN(FALSE);
                 rc = pPlugin->pData->pPluginFuncsW32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
                 NP4XUP_LEAVE_ODIN(FALSE);
-
-                pInst->bInGetScriptableObject = false;
-
-                // sanity
-                if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
-                {
-                    dprintff("ERROR: pObject->_class must be %p", &pInst->newClass);
-                    rc = NPERR_GENERIC_ERROR;
-                }
 
                 if (!rc)
                     *(void**)value = pObject;
@@ -1457,31 +1396,6 @@ NPError NP_LOADDS np4xUp_GetValue(NPOdinPluginWrapper *pPlugin, void *pvCaller, 
                         *(bool*)value = FALSE;
                         dprintff("OS/2 Mozilla doesn't yet support windowless plugins, so we return false!!");
                     }
-                }
-                break;
-
-            case NPPVpluginScriptableNPObject:
-                {
-                    NPObject *pObject = NULL;
-
-                    // set a flag that indicates to np4xDown_CreateObject() that we need class wrappers
-                    pInst->bInGetScriptableObject = true;
-
-                    NP4XUP_ENTER_ODIN(FALSE);
-                    rc = pPlugin->pData->pPluginFuncsW32->pfnGetValue(NP4XUP_W32_INSTANCE(), variable, &pObject);
-                    NP4XUP_LEAVE_ODIN(FALSE);
-
-                    pInst->bInGetScriptableObject = false;
-
-                    // sanity
-                    if (!rc && pObject->_class != (NPClass *)&pInst->newClass)
-                    {
-                        dprintff("ERROR: pObject->_class must be %p", &pInst->newClass);
-                        rc = NPERR_GENERIC_ERROR;
-                    }
-
-                    if (!rc)
-                        *(void**)value = pObject;
                 }
                 break;
 
@@ -2259,26 +2173,36 @@ int32_t      NP32_LOADDS np4xDown_IntFromIdentifier(NPOdinPluginWrapper *pPlugin
 }
 
 
-NPObject* NP32_LOADDS np4xDown_CreateObject(NPOdinPluginWrapper *pPlugin, void *pvCaller, NPP instance, NPClass *aClass)
+NPObject* NP32_LOADDS np4xDown_CreateObject(NPOdinPluginWrapper *pPlugin, void *pvCaller, NPP instance, NPClass *pClass)
 {
-    dprintff("enter - pPlugin=%p instance=%p aClass=%p",
-             pPlugin, instance, aClass);
+    dprintff("enter - pPlugin=%p instance=%p pClass=%p",
+             pPlugin, instance, pClass);
     NP4XDOWN_INSTANCE(FALSE);
     NP4XDOWN_LEAVE_ODIN(FALSE);
 
-    // check if we are being called as a result of np4xUp_GetValue(NPPVpluginScriptableNPObject)
-    if (pInst->bInGetScriptableObject)
+    dprintff("Win32 class version %d", pClass->structVersion);
+
+    NPClassWrapper *pClassWrapper;
+
+    /* Get the OS/2 wrapper for the given class */
+    NPClassMap::iterator it = pPlugin->pData->classMap.find(pClass);
+    if (it == pPlugin->pData->classMap.end())
     {
-        dprintff("w32 class %p version %d", aClass, aClass->structVersion);
+        /* No wrapper, create one */
+        pClassWrapper = new NPClassWrapper;
+        if (!pClassWrapper)
+        {
+            NP4XDOWN_ENTER_ODIN(FALSE);
+            dprintff("leave object=NULL (out of memory)!");
+            return NULL;
+        }
 
-        // save the original class
-        pInst->pw32Class = (NP32Class *)aClass;
+        pClassWrapper->pClassW32 = pClass;
 
-        memset(&pInst->newClass, 0, sizeof(pInst->newClass));
-        pInst->newClass.structVersion = aClass->structVersion;
+        pClassWrapper->structVersion = pClass->structVersion;
 
-        // fill up the function table with wrappers
-        PFN implementedWrappers[NP32Class::FunctionCount] =
+        /* Wrappers to functions we support */
+        PFN wrappers[NPClassWrapper::FuncCount] =
         {
             (PFN)&np4xClass_AllocateFunction,
             (PFN)&np4xClass_DeallocateFunction,
@@ -2294,27 +2218,32 @@ NPObject* NP32_LOADDS np4xDown_CreateObject(NPOdinPluginWrapper *pPlugin, void *
             (PFN)&np4xClass_ConstructFunction,
         };
 
-        // Set up wrappers for NPClass methods
-        for (size_t i = 0; i < NP32Class::FunctionCount; ++i)
+        PFN *os2Funcs = (PFN *) (&pClassWrapper->allocate);
+        PFN *w32Funcs = (PFN *) (&pClass->allocate);
+
+        /* Set up wrappers for NPClass functions */
+        for (size_t i = 0; i < NPClassWrapper::FuncCount; ++i)
         {
-            pInst->aStubs[i].chPush      = 0x68;
-            pInst->aStubs[i].pvImm32bit  = pInst;
-            pInst->aStubs[i].chCall      = 0xe8;
-            pInst->aStubs[i].offRel32bit = (char*)implementedWrappers[i] - (char*)&pInst->aStubs[i].offRel32bit - 4;
-            pInst->aStubs[i].chPopEcx    = 0x59;
-            pInst->aStubs[i].chRet       = 0xc3;
-
-            // point to a stub only if plugin provides a function, otherwise set it also to NULL
-            pInst->newClass.functions[i] = pInst->pw32Class->functions[i] != NULL ? (PFN)&pInst->aStubs[i] : NULL;
-
-            memset(pInst->aStubs[i].achMagic, 0xcc, sizeof(pInst->aStubs[i].achMagic));
+            /* Point to a stub only if plugin provides a function, otherwise set it also to NULL */
+            os2Funcs[i] = w32Funcs[i] != NULL ? wrappers[i] : NULL;
         }
 
-        // replace the class to be used
-        aClass = (NPClass *)&pInst->newClass;
+        dprintff("created NPClassWrapper %p with %d functions", pClassWrapper, NPClassWrapper::FuncCount);
+
+        pPlugin->pData->classMap[pClass] = pClassWrapper;
+    }
+    else
+    {
+        pClassWrapper = it->second;
     }
 
-    NPObject *object = pPlugin->pData->pNetscapeFuncsOS2->createobject(NP4XDOWN_NS_INSTANCE(), aClass);
+    NPObject *object = pPlugin->pData->pNetscapeFuncsOS2->createobject(NP4XDOWN_NS_INSTANCE(), pClassWrapper);
+
+    /* Note: The _class field for wrapped objects must always point to the class wrapper. All
+     * operations on objects are (or at least should be) peformed using browser callbacks (like
+     * NPN_HasProperty() and so on), so all class functions must be ready to be called by the
+     * browser. Plugins are not expected to touch _class at all. If they do, they will f*ck
+     * themselves up. */
 
     NP4XDOWN_ENTER_ODIN(FALSE);
     dprintff("leave object=%x (refcnt=%d)", object, object ? object->referenceCount : 0);
@@ -2331,7 +2260,7 @@ NPObject* NP32_LOADDS np4xDown_RetainObject(NPOdinPluginWrapper *pPlugin, void *
     NPObject *object = pPlugin->pData->pNetscapeFuncsOS2->retainobject(obj);
 
     NP4XDOWN_ENTER_ODIN(FALSE);
-    dprintff("leave object=%x (refcnt=%d)", object, object ? object->referenceCount : 0);
+    dprintff("leave object=%p (refcnt=%d)", object, object ? object->referenceCount : 0);
     return object;
 }
 
@@ -2369,6 +2298,7 @@ bool NP32_LOADDS np4xDown_Invoke(NPOdinPluginWrapper *pPlugin, void *pvCaller, N
     dprintff("leave rc=%s", rc ? "true" : "false");
     return rc;
 }
+
 
 bool NP32_LOADDS np4xDown_InvokeDefault(NPOdinPluginWrapper *pPlugin, void *pvCaller, NPP instance, NPObject* obj, const NP32Variant *args, uint32_t argCount, NP32Variant *result)
 {
@@ -2619,7 +2549,11 @@ static BOOL PluginDataInit(PNPODINWRAPPER pPlugin)
         return FALSE;
     }
 
-    memset(pPlugin->pData, 0, sizeof(NPOdinPluginWrapperData));
+    pPlugin->pData->pPluginStubsOS2 = NULL;
+    pPlugin->pData->pPluginFuncsW32 = NULL;
+    pPlugin->pData->pNetscapeStubsW32 = NULL;
+    pPlugin->pData->pNetscapeFuncsW32 = NULL;
+    pPlugin->pData->pNetscapeFuncsOS2 = NULL;
 
     return TRUE;
 }
@@ -2644,7 +2578,15 @@ static void PluginDataDestoy(PNPODINWRAPPER pPlugin)
     if (pPlugin->pData->pNetscapeFuncsW32)
         free(pPlugin->pData->pNetscapeFuncsW32);
 
-    free(pPlugin->pData);
+    /* Free class wrappers allocated in np4xDown_CreateObject */
+    for (NPClassMap::iterator it = pPlugin->pData->classMap.begin();
+         it != pPlugin->pData->classMap.end(); ++it)
+    {
+        dprintff("Deleting NPClassWrapper %p", it->second);
+        delete it->second;
+    }
+
+    delete pPlugin->pData;
     pPlugin->pData = NULL;
 
     return;
@@ -2771,8 +2713,6 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs *pCallbacks, PNPODINWRAP
 
         enum { wrappersCnt = sizeof(wrappers) / sizeof(wrappers[0]) };
 
-        dprintff("will create 'not-implemented' stubs for %d functions", funcCnt - wrappersCnt);
-
         WrapperStub *stubs = pPlugin->pData->pPluginStubsOS2;
 
         for (size_t i = 0; i < wrappersCnt; ++i)
@@ -2798,6 +2738,8 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs *pCallbacks, PNPODINWRAP
         {
             if (os2Funcs[i] == (PFN)&np4xUp_NotImplementedStub)
             {
+                dprintff("creating 'not-implemented' stub for function #%d", i);
+
                 stubs[i].chPush      = 0x68;
                 stubs[i].pvImm32bit  = (void *)i;
                 stubs[i].chCall      = 0xe8;
@@ -2969,8 +2911,6 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs *pFuncs, PNPODINWRAPPER pP
 
     enum { wrappersCnt = sizeof(wrappers) / sizeof(wrappers[0]) };
 
-    dprintff("will create 'not-implemented stubs' for %d functions", funcCnt - wrappersCnt);
-
     WrapperStub *stubs = pPlugin->pData->pNetscapeStubsW32;
 
     for (size_t i = 0; i < wrappersCnt; ++i)
@@ -2996,6 +2936,8 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs *pFuncs, PNPODINWRAPPER pP
     {
         if (w32Funcs->functions[i] == (PFN)&np4xDown_NotImplementedStub)
         {
+            dprintff("creating 'not-implemented' stub for function %d", i);
+
             stubs[i].chPush      = 0x68;
             stubs[i].pvImm32bit  = (void *)i;
             stubs[i].chCall      = 0xe8;

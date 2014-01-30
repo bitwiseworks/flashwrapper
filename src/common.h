@@ -235,10 +235,10 @@ typedef NPError     (* OSCALL PFN_NP_GetValue)(NPP future, NPPVariable variable,
 typedef char *      (* OSCALL PFN_NP_GetMIMEDescription)(PNPODINWRAPPER pPlugin);
 
 /* win32 versions */
-typedef struct _NP32PluginFuncs    *PNP32PluginFuncs;
-typedef struct _NP32NetscapeFuncs  *PNP32NetscapeFuncs;
-typedef NPError (*W32OSCALL    PFNW32_NP_GetEntryPoints)(PNP32PluginFuncs pCallbacks);
-typedef NPError (*W32OSCALL    PFNW32_NP_Initialize)(PNP32NetscapeFuncs pFuncs);
+struct NP32PluginFuncs;
+struct NP32NetscapeFuncs;
+typedef NPError (*W32OSCALL    PFNW32_NP_GetEntryPoints)(NP32PluginFuncs *pCallbacks);
+typedef NPError (*W32OSCALL    PFNW32_NP_Initialize)(NP32NetscapeFuncs *pFuncs);
 typedef NPError (*W32OSCALL    PFNW32_NP_Shutdown)(void);
 typedef NPError (*W32OSCALL    PFNW32_NP_GetValue)(NPP future, NPPVariable variable, void *value);
 typedef char * (*W32OSCALL     PFNW32_NP_GetMIMEDescription)(void);
