@@ -2674,18 +2674,12 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs *pCallbacks, PNPODINWRAP
     if (!rc)
     {
         dprintff("Win32 NP_GetEntryPoints successful!");
+        dprintffBuf((char *)w32Funcs, w32StructSize);
 
         /* The beginning of the function table to fill for the browser */
-        PFN *os2Funcs = (PFN *) (&pCallbacks->version + 1);
+        PFN *os2Funcs = (PFN *)(&pCallbacks->version + 1);
 
-        /* Fill up the OS/2 function table with dummy stubs as flags (wrappers to supported
-         * functions will overwrite them below and all dummy stubs will be replaced by a special
-         * callback sequence) */
-        for (size_t i = 0; i < funcCnt; ++i)
-            os2Funcs[i] = (PFN)&np4xUp_NotImplementedStub;
-
-        /* This is not a callback but instead some data pointer, pass it as is */
-        pCallbacks->javaClass = w32Funcs->javaClass;
+        enum { CopyAsIs = 0x01 };
 
         /* Wrappers for functions we support */
         PFN wrappers[] =
@@ -2701,7 +2695,7 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs *pCallbacks, PNPODINWRAP
             (PFN)&np4xUp_Print,
             (PFN)&np4xUp_HandleEvent,
             (PFN)&np4xUp_URLNotify,
-            NULL, // javaClass,
+            (PFN)CopyAsIs, // javaClass is not a callback
             (PFN)&np4xUp_GetValue,
             (PFN)&np4xUp_SetValue,
             (PFN)&np4xUp_GotFocus,
@@ -2715,41 +2709,42 @@ NPError OSCALL npGenericNP_GetEntryPoints(NPPluginFuncs *pCallbacks, PNPODINWRAP
 
         WrapperStub *stubs = pPlugin->pData->pPluginStubsOS2;
 
-        for (size_t i = 0; i < wrappersCnt; ++i)
-        {
-            if (wrappers[i] == NULL)
-                continue;
-
-            stubs[i].chPush      = 0x68;
-            stubs[i].pvImm32bit  = pPlugin;
-            stubs[i].chCall      = 0xe8;
-            stubs[i].offRel32bit = (char*)wrappers[i] - (char*)&stubs[i].offRel32bit - 4;
-            stubs[i].chPopEcx    = 0x59;
-            stubs[i].chRet       = 0xc3;
-
-            /* Point to the stub only if plugin provides a function, otherwise set it also to NULL */
-            os2Funcs[i] = w32Funcs->functions[i] != NULL ? (PFN)&stubs[i] : NULL;
-
-            memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
-        }
-
-        /* Set up stubs for unused functions */
         for (size_t i = 0; i < funcCnt; ++i)
         {
-            if (os2Funcs[i] == (PFN)&np4xUp_NotImplementedStub)
+            if (i < wrappersCnt && wrappers[i] == (PFN)CopyAsIs)
             {
-                dprintff("creating 'not-implemented' stub for function #%d", i);
+                os2Funcs[i] = w32Funcs->functions[i];
+                dprintff("copied value %p for function #%d as is", os2Funcs[i], i);
+                continue;
+            }
+
+            /* Create a stub only if plugin provides a function, otherwise set it also to NULL */
+            if (w32Funcs->functions[i] != NULL)
+            {
+                PFN pfn;
+                if (i < wrappersCnt && wrappers[i] != NULL)
+                    pfn = wrappers[i];
+                else
+                    pfn = (PFN)&np4xUp_NotImplementedStub;
 
                 stubs[i].chPush      = 0x68;
-                stubs[i].pvImm32bit  = (void *)i;
+                stubs[i].pvImm32bit  = pPlugin;
                 stubs[i].chCall      = 0xe8;
-                stubs[i].offRel32bit = (char *)&np4xUp_NotImplementedStub - (char *)&stubs[i].offRel32bit - 4;
+                stubs[i].offRel32bit = (intptr_t)pfn - (intptr_t)&stubs[i].offRel32bit - 4;
                 stubs[i].chPopEcx    = 0x59;
                 stubs[i].chRet       = 0xc3;
 
+                memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
+
                 os2Funcs[i] = (PFN)&stubs[i];
 
-                memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
+                dprintff("created OS/2 %sstub %p for function #%d (Win32 %p)",
+                         pfn == (PFN)&np4xUp_NotImplementedStub ? "'not-implemented' " : "",
+                         os2Funcs[i], i, w32Funcs->functions[i]);
+            }
+            else
+            {
+                os2Funcs[i] = NULL;
             }
         }
     }
@@ -2843,12 +2838,6 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs *pFuncs, PNPODINWRAPPER pP
     /* The beginning of the function table to wrap for the plugin */
     PFN *os2Funcs = (PFN *) (&pFuncs->version + 1);
 
-    /* fill up the Win32 function table with dummy stubs as flags (wrappers to supported functions
-     * will overwrite them below and all dummy stubs will be replaced by a special callback
-     * sequence) */
-    for (size_t i = 0; i < funcCnt; ++i)
-        w32Funcs->functions[i] = (PFN)&np4xDown_NotImplementedStub;
-
     /* Wrappers to functions we support */
     PFN wrappers[] =
     {
@@ -2913,41 +2902,35 @@ NPError OSCALL npGenericNP_Initialize(NPNetscapeFuncs *pFuncs, PNPODINWRAPPER pP
 
     WrapperStub *stubs = pPlugin->pData->pNetscapeStubsW32;
 
-    for (size_t i = 0; i < wrappersCnt; ++i)
-    {
-        if (wrappers[i] == NULL)
-            continue;
-
-        stubs[i].chPush      = 0x68;
-        stubs[i].pvImm32bit  = pPlugin;
-        stubs[i].chCall      = 0xe8;
-        stubs[i].offRel32bit = (char *)wrappers[i] - (char *)&stubs[i].offRel32bit - 4;
-        stubs[i].chPopEcx    = 0x59;
-        stubs[i].chRet       = 0xc3;
-
-        /* Point to a stub only if browser provides a function, otherwise set it also to NULL */
-        w32Funcs->functions[i] = os2Funcs[i] != NULL ? (PFN)&stubs[i] : NULL;
-
-        memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
-    }
-
-    /* Set up stubs for unused functions */
     for (size_t i = 0; i < funcCnt; ++i)
     {
-        if (w32Funcs->functions[i] == (PFN)&np4xDown_NotImplementedStub)
+        /* Create a stub only if broswer provides a function, otherwise set it also to NULL */
+        if (os2Funcs[i] != NULL)
         {
-            dprintff("creating 'not-implemented' stub for function %d", i);
+            PFN pfn;
+            if (i < wrappersCnt && wrappers[i] != NULL)
+                pfn = wrappers[i];
+            else
+                pfn = (PFN)&np4xDown_NotImplementedStub;
 
             stubs[i].chPush      = 0x68;
-            stubs[i].pvImm32bit  = (void *)i;
+            stubs[i].pvImm32bit  = pPlugin;
             stubs[i].chCall      = 0xe8;
-            stubs[i].offRel32bit = (char *)&np4xDown_NotImplementedStub - (char *)&stubs[i].offRel32bit - 4;
+            stubs[i].offRel32bit = (intptr_t)pfn - (intptr_t)&stubs[i].offRel32bit - 4;
             stubs[i].chPopEcx    = 0x59;
             stubs[i].chRet       = 0xc3;
 
+            memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
+
             w32Funcs->functions[i] = (PFN)&stubs[i];
 
-            memset(stubs[i].achMagic, 0xcc, sizeof(stubs[i].achMagic));
+            dprintff("created Win32 %sstub %p for function #%d (OS/2 %p)",
+                     pfn == (PFN)&np4xDown_NotImplementedStub ? "'not-implemented' " : "",
+                     w32Funcs->functions[i], i, os2Funcs[i]);
+        }
+        else
+        {
+            w32Funcs->functions[i] = NULL;
         }
     }
 
