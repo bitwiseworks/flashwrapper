@@ -26,6 +26,8 @@
 #include <os2.h>
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define INCL_NS4X
 #include "common.h"
@@ -54,7 +56,7 @@ extern int Registered;
 BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 {
     if (!Registered) {
-        npGenericErrorBox("You may not use the Flash plugin with an unregistered copy of eComStation", FALSE);
+        npGenericErrorBox("You may not use the Flash plugin with an unregistered copy of eComStation.", FALSE);
         return FALSE;
     }
 
@@ -164,6 +166,10 @@ BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
 /**
  * Sets up an error box to inform the user of some kind of failure.
  *
+ * Note that when fYesNo is TRUE, the message box is application modal (i.e. this function does not
+ * return until the user dismisses the message box). This is known to cause problems (crashes, etc)
+ * when used at inappropriate times (i.e. during DLL init).
+ *
  * @returns 0 on success and !fYesNo.
  * @returns 0 if fYesNo and user pressed YES.
  * @returns 1 if fYesNo and user pressed NO.
@@ -174,17 +180,47 @@ BOOL    npGenericLazyInit(PNPODINWRAPPER pPlugin)
  */
 int     npGenericErrorBox(const char *pszMessage, BOOL fYesNo)
 {
-    ULONG rc;
-    ULONG fFlags = MB_ERROR | MB_APPLMODAL | MB_MOVEABLE;
-    if (fYesNo)
-        fFlags |= MB_YESNO;
-    else
-        fFlags |= MB_OK;
+    dprintff("pszMessage '%s', fYesNo %d", pszMessage, fYesNo);
 
-    rc = WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, pszMessage,
-                       "Flash Plugin!", 0, fFlags);
-    if (rc == MB_ERROR)
-        return -1;
-    return !fYesNo || rc == MBID_YES ? 0 : 1;
+    ULONG rc;
+    ULONG fFlags = MB_ERROR | MB_MOVEABLE;
+
+    MB2D buttons[] = {
+        { "OK", MBID_OK, BS_PUSHBUTTON | BS_DEFAULT },
+        { "Yes", MBID_YES, BS_PUSHBUTTON },
+        { "No", MBID_NO, BS_PUSHBUTTON },
+    };
+
+    MB2D *pbuttons;
+    ULONG cbuttons;
+    if (fYesNo) {
+        pbuttons = &buttons[1];
+        cbuttons = 2;
+    } else {
+        pbuttons = &buttons[0];
+        cbuttons = 1;
+        fFlags |= MB_NONMODAL;
+    }
+
+    MB2INFO *info;
+    ULONG cinfo = sizeof(MB2INFO) + sizeof(MB2D) * cbuttons;
+    info = (MB2INFO *)malloc(cinfo);
+    info->cb = cinfo;
+    info->hIcon = NULLHANDLE;
+    info->cButtons = cbuttons;
+    info->flStyle = fFlags;
+    info->hwndNotify = NULLHANDLE;
+
+    memcpy(info->mb2d, pbuttons, sizeof(MB2D) * cbuttons);
+
+    rc = WinMessageBox2(HWND_DESKTOP, WinQueryActiveWindow(HWND_DESKTOP), pszMessage,
+                        "Flash Plugin: Error", 0, info);
+
+    free(info);
+
+    dprintff("rc %d", rc);
+
+    return rc == MBID_ERROR ? -1 :
+           !fYesNo || rc == MBID_YES ? 0 : 1;
 }
 
