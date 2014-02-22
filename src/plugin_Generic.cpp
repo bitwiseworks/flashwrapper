@@ -70,11 +70,16 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 
     // Verify the existence of the Plugin DLL.
     FILESTATUS3     fst3;
-    if (DosQueryPathInfo(pPlugin->szPluginDllName, FIL_STANDARD,
-                         &fst3, sizeof(fst3)) ||
+    APIRET arc;
+    if ((arc = DosQueryPathInfo(pPlugin->szPluginDllName, FIL_STANDARD,
+                         &fst3, sizeof(fst3))) ||
         (fst3.attrFile & FILE_DIRECTORY) || fst3.cbFile < 1024) {
         dprintff("Bad plugin file [%s]", pPlugin->szPluginDllName);
         //DebugInt3();
+        char msg[CCHMAXPATH + 128];
+        sprintf(msg, "Plugin file '%s' %s!\n\nDOS Error: %d", pPlugin->szPluginDllName,
+                arc ? "could not be loaded" : "is invalid", arc);
+        npGenericErrorBox(msg, FALSE);
         return FALSE;
     }
 
