@@ -78,9 +78,32 @@ BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
         //DebugInt3();
         char msg[CCHMAXPATH + 128];
         sprintf(msg, "Plugin file '%s' %s!\n\nDOS Error: %d", pPlugin->szPluginDllName,
-                arc ? "could not be loaded" : "is invalid", arc);
+                arc ? "could not be found" : "is invalid", arc);
         npGenericErrorBox(msg, FALSE);
         return FALSE;
+    }
+
+    // Get plugin description
+    DWORD dummy, versize;
+    void *verbuf;
+    versize = odinGetFileVersionInfoSize(pPlugin->szPluginDllName, &dummy);
+    dprintff("Win32 versize %d", versize);
+    if (versize > 0)
+      verbuf = malloc(versize);
+    if (verbuf) {
+        if (odinGetFileVersionInfo(pPlugin->szPluginDllName, NULL, versize, verbuf)) {
+            // For now, we use language 1033 (English) and CP 1252 (Western) as this is
+            // what seems to be used in Firefox too
+            char *buf;
+            UINT len;
+            if (odinVerQueryValue(verbuf, "\\StringFileInfo\\040904E4\\FileDescription",
+                                  (void **)&buf, &len)) {
+                dprintf("Win32 FileDescription %*.*s", len, len, buf);
+                // @todo export FileDescription through NP_GetValue(NPPVpluginDescriptionString),
+                // see nsPluginsDirUnix.cpp in mozilla (needs altering nsPluginsDirOS2.cpp as well)
+            }
+        }
+        free(verbuf);
     }
 
     // Initialize the native entry points.
