@@ -153,6 +153,9 @@ static void (*WIN32API          pfnSetWindowAppearance)(int fLooks);
 /** Enable Flash Audio */
 static BOOL (*WIN32API          pfnEnableFlashAudio)(BOOL fEnable);
 
+static DWORD (*WIN32API         pfnGetFileVersionInfoSize)(LPCSTR filename, LPDWORD handle);
+static BOOL (*WIN32API          pfnGetFileVersionInfo)(LPCSTR filename, DWORD handle, DWORD datasize, LPVOID data);
+static DWORD (*WIN32API         pfnVerQueryValue)(LPVOID pBlock, LPCSTR lpSubBlock, LPVOID *lpBuffer, UINT *puLen);
 
 #undef static //debugging
 
@@ -188,6 +191,9 @@ struct OdinEntryPoint aAPIs[] =
     {1, (void**)&pfnSetWindowAppearance,               "_SetWindowAppearance@4", "USER32", NULLHANDLE},
     {1, (void**)&pfnEnableFlashAudio,                  "ODIN_EnableFlashAudio", "WINMM", NULLHANDLE},
     //vladest        {0, (void**)&pfnJ2PluginHacks,                     "_J2PluginHacks@8"},
+    {1, (void**)&pfnGetFileVersionInfoSize,            "GetFileVersionInfoSizeA", "VERSION", NULLHANDLE},
+    {1, (void**)&pfnGetFileVersionInfo,                "GetFileVersionInfoA", "VERSION", NULLHANDLE},
+    {1, (void**)&pfnVerQueryValue,                     "VerQueryValueA", "VERSION", NULLHANDLE},
 };
 
 /**
@@ -612,3 +618,35 @@ BOOL WIN32API   odinEnableFlashAudio(BOOL fEnable)
     return fRc;
 }
 
+DWORD WIN32API odinGetFileVersionInfoSize(LPCSTR filename, LPDWORD handle)
+{
+    if (!pfnGetFileVersionInfoSize)
+        return 0;
+    DWORD size;
+    ENTER_ODIN32_CONTEXT_IF_REQUIRED();
+    size = pfnGetFileVersionInfoSize(filename, handle);
+    LEAVE_ODIN32_CONTEXT();
+    return size;
+}
+
+BOOL WIN32API odinGetFileVersionInfo(LPCSTR filename, DWORD handle, DWORD datasize, LPVOID data)
+{
+    if (!pfnGetFileVersionInfo)
+        return FALSE;
+    BOOL fRc;
+    ENTER_ODIN32_CONTEXT_IF_REQUIRED();
+    fRc = pfnGetFileVersionInfo(filename, handle, datasize, data);
+    LEAVE_ODIN32_CONTEXT();
+    return fRc;
+}
+
+DWORD WIN32API odinVerQueryValue(LPVOID pBlock, LPCSTR lpSubBlock, LPVOID *lpBuffer, UINT *puLen)
+{
+    if (!pfnVerQueryValue)
+        return FALSE;
+    DWORD fRc;
+    ENTER_ODIN32_CONTEXT_IF_REQUIRED();
+    fRc = pfnVerQueryValue(pBlock, lpSubBlock, lpBuffer, puLen);
+    LEAVE_ODIN32_CONTEXT();
+    return fRc;
+}

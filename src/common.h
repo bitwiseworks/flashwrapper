@@ -394,6 +394,10 @@ ATOM WIN32API       odinFindAtom(LPCSTR atomStr);
 void WIN32API       odinSetWindowAppearance(int fLooks);
 BOOL WIN32API       odinEnableFlashAudio(BOOL fEnable);
 
+DWORD WIN32API      odinGetFileVersionInfoSize(LPCSTR filename, LPDWORD handle);
+BOOL WIN32API       odinGetFileVersionInfo(LPCSTR filename, DWORD handle, DWORD datasize, LPVOID data);
+DWORD WIN32API      odinVerQueryValue(LPVOID pBlock, LPCSTR lpSubBlock, LPVOID *lpBuffer, UINT *puLen);
+
 /* window and ps/dc hacking. */
 void *              npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSetWindow, HWND hwndOS2, HWND hwndOdin);
 void                npWinSetWindowEnd(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PNPSAVEDPS pSetWindow);
