@@ -110,6 +110,10 @@ endif
 
 PATH_PACKAGE    = $(PATH_OUT)/package
 
+# Unfortunately, cp provided with kmk is bogus and fails with 'Permission
+# denied' when using the -p option. So, use a real CP.EXE instead.
+CP := cp
+
 #
 # Include a site-specific config for local overrides
 #
