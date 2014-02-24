@@ -1,0 +1,46 @@
+## @file
+# Sources
+#
+
+SUB_DEPTH = ..
+include $(KBUILD_PATH)/subheader.kmk
+
+DLLS               += npflos2
+npflos2_TEMPLATE    = Base
+npflos2_SOURCES     = \
+    apis_odin.cpp \
+    npflos2.cpp \
+    odin_windowing.cpp \
+    odin_windowing_os2.cpp \
+    plugin_Generic.cpp \
+    plugin_primary.cpp \
+    util_asm.asm \
+    util_debug.c \
+    wrap_ns4x.cpp \
+    firefoxfakeres.orc \
+    npflos2.rc \
+    npflos2.def
+
+firefoxfakeres.orc_WRCFLAGS = -p _firefoxfake
+
+# Mozilla APIs are not currently needed
+ifdef 0
+npflos2_DEFS       +=INCL_MOZAPIS
+npflos2_SOURCES    += \
+    apis_mozilla.cpp
+endif
+
+# build an include resource file with the verision information
+npflos2.rc_DEPS = $(npflos2_0_OUTDIR)/npflos2-bld.rc
+npflos2_INCS += $(npflos2_0_OUTDIR)
+$$(npflos2_0_OUTDIR)/npflos2-bld.rc: $(PATH_ROOT)/Config.kmk $(PATH_SUB_CURRENT)/GenVerInfo.cmd
+	$(QUIET)cd $(npflos2_DEFPATH) && GenVerInfo.cmd \
+         [$@] [$(PLUGIN_VERSION)] [$(PLUGIN_BUILD_NAME)] [$(WIN32_PLUGIN_VERSION)]
+
+npflos2_SOURCES.debug   = \
+    dbg_VerifyExcptChain.asm
+
+npflos2_LIBS        = \
+    $(npflos2_DEFPATH)/security/securit2.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
