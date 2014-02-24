@@ -7,14 +7,14 @@
 #------------------------------------------------------------------------------
 
 # Version: N.N.N[.N] where 1 <= N <= 127 (Mozilla requirement)
-PLUGIN_VERSION  = 0.4.1
+PLUGIN_VERSION  = 0.4.2
 
 # Build: Symbolic name like "Beta 1" (empty for GA builds). Ends with "test" in
 # intermediate builds
 PLUGIN_BUILD_NAME    = GA
 
 # Win32 plugin version provided with the wrapper plugin
-WIN32_PLUGIN_VERSION = 11.5.502.135
+WIN32_PLUGIN_VERSION = 11.5.502.149
 
 #
 # Handler for Wine RC (.orc) source files

@@ -278,6 +278,13 @@ Changelog
  - More Flash Plugin Warpper specific fixes are present in Odin 0.8.8, please
    see the changelog file of Odin.
 
+24.02.2014
+ - Bump wrapper version to 0.4.2 GA.
+ - Fix crashes after destroying plugin instances. This improves stability
+   on many web-sites.
+ - Fix crash when using pluign on an unregistered version of eCS.
+ - Show a proper error dialog when NPSWF32.DLL is not found.
+
 More information
 ================
 
