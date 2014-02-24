@@ -11,7 +11,10 @@ PLUGIN_VERSION  = 0.4.1
 
 # Build: Symbolic name like "Beta 1" (empty for GA builds). Ends with "test" in
 # intermediate builds
-PLUGIN_BUILD    = GA
+PLUGIN_BUILD_NAME    = GA
+
+# Win32 plugin version provided with the wrapper plugin
+WIN32_PLUGIN_VERSION = 11.5.502.135
 
 #
 # Handler for Wine RC (.orc) source files
@@ -105,6 +108,8 @@ endif
 #TEMPLATE_Base_LD_DEBUG       = split
 #TEMPLATE_Base_DEBUG_STAGE    = nul
 
+PATH_PACKAGE    = $(PATH_OUT)/package
+
 #
 # Include a site-specific config for local overrides
 #
@@ -138,4 +143,31 @@ TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
 # INCLUDE is needed for ALP.
 #
 export INCLUDE := $(if $(INCLUDE),$(INCLUDE);)$(PATH_SDK_OS2TK4)/inc
+endif
+
+# Extract PLUGIN_VERSION components
+PLUGIN_VERSION_MAJ := $(word 1, $(subst ., ,$(PLUGIN_VERSION)))
+PLUGIN_VERSION_MIN := $(word 2, $(subst ., ,$(PLUGIN_VERSION)))
+PLUGIN_VERSION_BLD := $(word 3, $(subst ., ,$(PLUGIN_VERSION)))
+ifeq ($(PLUGIN_VERSION_MAJ),)
+$(error $(PLUGIN_VERSION) has invalid major number)
+else ifeq ($(PLUGIN_VERSION_MIN),)
+$(error $(PLUGIN_VERSION) has invalid minor number)
+else ifeq ($(PLUGIN_VERSION_BLD),)
+$(error $(PLUGIN_VERSION) has invalid build number)
+endif
+
+# Extract WIN32_PLUGIN_VERSION components
+WIN32_PLUGIN_VERSION_MAJ := $(word 1, $(subst ., ,$(WIN32_PLUGIN_VERSION)))
+WIN32_PLUGIN_VERSION_MIN := $(word 2, $(subst ., ,$(WIN32_PLUGIN_VERSION)))
+WIN32_PLUGIN_VERSION_BLD := $(word 3, $(subst ., ,$(WIN32_PLUGIN_VERSION)))
+WIN32_PLUGIN_VERSION_PATCH := $(word 4, $(subst ., ,$(WIN32_PLUGIN_VERSION)))
+ifeq ($(WIN32_PLUGIN_VERSION_MAJ),)
+$(error $(WIN32_PLUGIN_VERSION) has invalid major number)
+else ifeq ($(WIN32_PLUGIN_VERSION_MIN),)
+$(error $(WIN32_PLUGIN_VERSION) has invalid minor number)
+else ifeq ($(WIN32_PLUGIN_VERSION_BLD),)
+$(error $(WIN32_PLUGIN_VERSION) has invalid build number)
+else ifeq ($(WIN32_PLUGIN_VERSION_PATCH),)
+$(error $(WIN32_PLUGIN_VERSION) has invalid patch number)
 endif

@@ -1,0 +1,49 @@
+## @file
+# Sources
+#
+
+SUB_DEPTH = ..
+include $(KBUILD_PATH)/subheader.kmk
+
+WPI_FILE    := $(PATH_PACKAGE)/flash_ecs_$(subst .,_,$(PLUGIN_VERSION))_$(PLUGIN_BUILD_NAME).exe
+WIC_FILE    := $(PATH_PACKAGE)/flash_ecs.wis
+OTHER_CLEAN += $(WIC_FILE)
+
+README_FILE := $(PATH_PACKAGE)/flash.txt
+OTHER_CLEAN += $(README_FILE)
+
+$(PATH_PACKAGE)/%: %.in $(MAKEFILE_LIST) | $$(call DIRDEP,$$(PATH_PACKAGE))
+	%$(call MSG_GENERATE,,$@)
+	$(QUIET)$(SED) -r \
+		-e "s:@VER@:$(PLUGIN_VERSION):g" \
+		-e "s:@VER_MAJ@:$(PLUGIN_VERSION_MAJ):g" \
+		-e "s:@VER_MIN@:$(PLUGIN_VERSION_MIN):g" \
+		-e "s:@VER_BLD@:$(PLUGIN_VERSION_BLD):g" \
+		-e "s:@WIN32_VER@:$(WIN32_PLUGIN_VERSION):g" \
+		-e "s:@WIN32_VER_MAJ@:$(WIN32_PLUGIN_VERSION_MAJ):g" \
+		-e "s:@WIN32_VER_MIN@:$(WIN32_PLUGIN_VERSION_MIN):g" \
+		-e "s:@WIN32_VER_BLD@:$(WIN32_PLUGIN_VERSION_BLD):g" \
+		-e "s:@WIN32_VER_PATCH@:$(WIN32_PLUGIN_VERSION_PATCH):g" \
+		-e "s:@BLD_NAME@:$(PLUGIN_BUILD_NAME):g" \
+		$< > $@
+
+BLDDIRS += $(call DIRDEP,$(PATH_PACKAGE))
+
+package: $(WPI_FILE)
+
+$(WPI_FILE): $(WIC_FILE) $(README_FILE) $(PATH_STAGE)/bin/npflos2.dll
+	%$(call MSG_GENERATE,,$@)
+	$(QUIET)$(RM) -Rf $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/
+	$(QUIET)$(MKDIR) $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/
+	$(QUIET)$(CP) \
+		eula.pdf flash.lic \
+		$(README_FILE) $(PATH_STAGE)/bin/npflos2.dll \
+		$(PATH_PACKAGE)/12
+	$(QUIET)$(CP) NPSWF32.dll $(PATH_PACKAGE)/13/
+	cd $(PATH_PACKAGE)/ && \
+		$(PATH_CURRENT)/wic.cmd -a -U $(notdir $@) 12 -c12 -r '*' 13 -c13 -r '*' -s $(WIC_FILE)
+	$(QUIET)$(RM) -Rf $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/
+
+OTHER_CLEAN += $(WPI_FILE)
+
+include $(FILE_KBUILD_SUB_FOOTER)

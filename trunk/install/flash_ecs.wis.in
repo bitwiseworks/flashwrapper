@@ -269,25 +269,25 @@
 	</VARPROMPT>
 
 		<PCK INDEX=12
-			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\0\4\1"
+			PACKAGEID="Mensys BV\Flash for eComStation\Plugin Wrapper\@VER_MAJ@\@VER_MIN@\@VER_BLD@"
 			TITLE="Flash Plugin Wrapper"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\PluginWrapperPath"
                         CREATEOBJECT="REPLACE WPFolder|Flash Plugin Wrapper for eComStation|<WP_DESKTOP>|ALWAYSSORT=YES;OBJECTID=<FLASH_FOR_ECS>;"
                         CREATEOBJECT="REPLACE WPProgram|Flash Plugin Wrapper for eComStation^readme|<FLASH_FOR_ECS>|EXENAME=E.EXE;STARTUPDIR=$(12);PARAMETERS=flash.txt;OBJECTID=<FLASH_FOR_ECS_README>;"
-		>Flash Plugin Wrapper 0.4.1 for eComStation
+		>Flash Plugin Wrapper @VER@ for eComStation
 		</PCK>
 
 		<PCK INDEX=13
-			PACKAGEID="Mensys BV\Flash for eComStation\Win32 plugin\0\11\5"
-			TITLE="Adobe Flash Player Win32 plugin"
+			PACKAGEID="Mensys BV\Flash for eComStation\Win32 plugin\@WIN32_VER_MAJ@\@WIN32_VER_MIN@\@WIN32_VER_BLD@\@WIN32_VER_PATCH@"
+			TITLE="Adobe Flash Player Win32 Plugin"
 			TARGET="=("GetPathAndRenameOldFlash")"
 			NODESELECT
 			CLEARPROFILE="USER\Flash10_Plugin\AdobePluginPath"
                         CREATEOBJECT="REPLACE WPProgram|Flash Plugin Wrapper for eComStation^license|<FLASH_FOR_ECS>|EXENAME=E.EXE;STARTUPDIR=$(12);PARAMETERS=flash.lic;OBJECTID=<FLASH_FOR_ECS_LICENSE>;"
 			CREATEOBJECT="WPShadow|.|<FLASH_FOR_ECS>|SHADOWID=$(12)\eula.pdf;"
-		>Flash Player 11.5.502.135
+		>Adobe Flash Player Win32 Plugin @WIN32_VER@
 		</PCK>
 
 	</HEAD>
