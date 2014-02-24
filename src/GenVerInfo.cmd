@@ -2,7 +2,7 @@
 
 '@echo off'
 
-parse arg '['aOutFile'] ['aVersion'] ['aBuild']'
+parse arg '['aOutFile'] ['aVersion'] ['aBuild'] ['aWin32Version']'
 
 parse var aVersion maj'.'min'.'patch
 if (maj = '' | min = '' | verify(aVersion, '1234567890.') \= 0) then do
@@ -11,6 +11,12 @@ if (maj = '' | min = '' | verify(aVersion, '1234567890.') \= 0) then do
 end
 if (maj < 0 | maj > 127 | min < 0 | min > 127) then do
     say 'GetVerInfo.cmd: ERROR: "'aVersion'": version numbers must be 0 to 127.'
+    exit 1
+end
+
+parse var aWin32Version win_maj'.'win_min'.'win_bld'.'win_patch
+if (win_maj = '' | win_min = '' | win_bld = '' | win_patch = '' | verify(aWin32Version, '1234567890.') \= 0) then do
+    say 'GetVerInfo.cmd: ERROR: "'aWin32Version'" is not a valid Win32 plugin version number.'
     exit 1
 end
 
@@ -50,6 +56,6 @@ call lineout aOutFile, 'RCDATA NP_INFO_FileVersion { 'mozVersion' }'
  *
  *   call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash Wrapper for OS/2'mozBuild'\0" }'
  */
-call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash 11.5 r502\0" }'
+call lineout aOutFile, 'RCDATA NP_INFO_FileDescription { "Shockwave Flash 'win_maj'.'win_min' r'win_bld'\0" }'
 
 call lineout aOutFile
