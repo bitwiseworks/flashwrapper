@@ -35,11 +35,11 @@ $(WPI_FILE): $(WIC_FILE) $(README_FILE) $(PATH_STAGE)/bin/npflos2.dll
 	%$(call MSG_GENERATE,,$@)
 	$(QUIET)$(RM) -Rf $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/
 	$(QUIET)$(MKDIR) $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/
-	$(QUIET)$(CP) \
+	$(QUIET)$(CP) -p \
 		eula.pdf flash.lic \
 		$(README_FILE) $(PATH_STAGE)/bin/npflos2.dll \
 		$(PATH_PACKAGE)/12
-	$(QUIET)$(CP) NPSWF32.dll $(PATH_PACKAGE)/13/
+	$(QUIET)$(CP) -p NPSWF32.dll $(PATH_PACKAGE)/13/
 	cd $(PATH_PACKAGE)/ && \
 		$(PATH_CURRENT)/wic.cmd -a -U $(notdir $@) 12 -c12 -r '*' 13 -c13 -r '*' -s $(WIC_FILE)
 	$(QUIET)$(RM) -Rf $(PATH_PACKAGE)/12/ $(PATH_PACKAGE)/13/

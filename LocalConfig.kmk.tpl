@@ -41,3 +41,10 @@
 # PATH_SDK_OS2TK4 is set, or to 'alp.exe' otherwise.
 #
 # PATH_TOOL_ALP := alp.exe
+
+#
+# Path to the Unix cp utility. Used to copy files for install packages
+# instead of the kmk version due bugs in processing of the '-p' option.
+# Defaults to 'cp'.
+#
+# CP := cp
