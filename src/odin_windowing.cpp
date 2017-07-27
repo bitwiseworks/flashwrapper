@@ -25,6 +25,9 @@
 
 #define WC_NPWIN_FLASH_FS "ShockwaveFlashFullScreen"
 
+/* Window property to associate PNPWINDATA with OS/2 HWND */
+#define WP_NPWINDATA "ShockwaveFlashNPWINDATA"
+
 /** Index of the os2 hwnd for Minus windows. */
 #define LMINUS1_GWL_OS2HWND     0
 /** Index of the os2 hwnd for the plugin window. */
@@ -64,6 +67,8 @@ typedef struct _MATRIXLF
     LONG    lM33;
 } MATRIXLF;
 typedef MATRIXLF *PMATRIXLF;
+
+typedef const char *PCSZ;
 
 #define INCL_NS4X
 #include "common.h"
@@ -123,7 +128,6 @@ extern BOOL _System     WinSetWindowPos(HWND, HWND, LONG, LONG, LONG, LONG, ULON
 #define QW_OWNER    4
 extern HWND _System     WinQueryWindow(HWND, int);
 extern BOOL _System     WinQueryWindowPos(HWND, struct OS2SWP *pSwp);
-#define QWL_USER    0
 extern ULONG _System    WinQueryWindowULong(HWND hwndOS2, LONG lIndex);
 extern BOOL  _System    WinSetWindowULong(HWND hwndOS2, LONG lIndex, ULONG ul);
 extern BOOL  _System    WinSetOwner(HWND hwndOS2, HWND hwndOS2NewOwner);
@@ -138,6 +142,9 @@ extern BOOL _System     GpiSetPS(HPS hps, PSIZEL psizl, LONG lOptions);
 extern LONG _System     GpiSavePS(HPS hps);
 extern BOOL _System     GpiRestorePS(HPS hps, LONG lSaveId);
 extern ULONG _System    WinGetLastError(HAB hab);
+extern PVOID _System    WinQueryProperty(HWND hwnd, PCSZ pszNameOrAtom);
+extern PVOID _System    WinRemoveProperty(HWND hwnd, PCSZ pszNameOrAtom);
+extern BOOL _System     WinSetProperty(HWND hwnd, PCSZ pszNameOrAtom, PVOID pvData, ULONG ulFlags);
 #ifndef GPI_ERROR
 #define GPI_ERROR   0
 #endif
@@ -252,7 +259,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
         if (ppWndData)
             pWndData = *ppWndData;
         if (!pWndData && type == NPWindowTypeWindow)
-            pWndData = (PNPWINDATA)WinQueryWindowULong(hwnd, QWL_USER);
+            pWndData = (PNPWINDATA)WinQueryProperty(hwnd, WP_NPWINDATA);
 
         /*
          * Take action on whether or not we succeeded...
@@ -282,7 +289,7 @@ void * npWinSetWindowBegin(void * aWindow, BOOL fNS4x, PNPWINDATA *ppWndData, PN
                                 memcpy(pvOdinWnd, aWindow, cb);
                                 ((NPWindow*)pvOdinWnd)->window = (void*)pWndData->hwndOdin;
 
-                                if (WinSetWindowULong(hwnd, QWL_USER, (ULONG)pWndData))
+                                if (WinSetProperty(hwnd, WP_NPWINDATA, pWndData, 0))
                                 {
                                     dprintff("Created wrapper pvOdinWnd->window=%x for  aWindow->window=%x.",
                                              pWndData->hwndOdin, pWndData->hwndOS2);
@@ -727,24 +734,9 @@ HWND                npWinDownNetscapeWindow(HWND hwndOS2)
         npWinInit();
     if (gfInited)
     {
-        hwndFake = WinQueryWindowULong(hwndOS2, QWL_USER);
-        if (!hwndFake)
-        {
-            hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevelMinus);
-            if (hwndFake)
-            {
-                odinSetWindowLong(hwndFake, LMINUS1_GWL_OS2HWND, (LONG)hwndOS2);
-                if (!WinQueryWindowULong(hwndOS2, QWL_USER))
-                    WinSetWindowULong(hwndOS2, QWL_USER, (ULONG)hwndFake);
-            }
-        }
-        else if (((ULONG)hwndFake & 0xFF000000) != 0x68000000) /* ODIN window handle */
-        {
-            /* QWL_USER doesn't contain a window handle!
-             * Change the hwndFake storeage to WinSetProperty! */
-            DebugInt3();
-            hwndFake = NULLHANDLE;
-        }
+        hwndFake = odinCreateFakeWindowEx(hwndOS2, gWCLevelMinus);
+        if (hwndFake)
+            odinSetWindowLong(hwndFake, LMINUS1_GWL_OS2HWND, (LONG)hwndOS2);
     }
 
     #ifdef DEBUG
@@ -818,8 +810,6 @@ HWND                npWinCreateWindowWrapper(HWND hwndOS2, int x, int y, int cx,
             {
                 dprintf("npWinCreateWindowWrapper: created fake window %X", hwndFake);
                 odinSetWindowLong(hwndFake, LMINUS1_GWL_OS2HWND, (LONG)ahwndParents[cParents]);
-                if (!WinQueryWindowULong(ahwndParents[cParents], QWL_USER))
-                    WinSetWindowULong(ahwndParents[cParents], QWL_USER, (ULONG)hwndFake);
             }
         }
 #endif
@@ -971,7 +961,7 @@ MRESULT _System npWinPluginSubClassWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPA
     VERIFY_EXCEPTION_CHAIN();
     __interrupt(3);
     MRESULT     mres;
-    PNPWINDATA      pWndData = (PNPWINDATA)WinQueryWindowULong(hwnd, QWL_USER);
+    PNPWINDATA      pWndData = (PNPWINDATA)WinQueryProperty(hwnd, WP_NPWINDATA);
 
     switch (msg)
     {
@@ -1029,9 +1019,9 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
             dprintff("WM_NCDESTROY - cleaning up memory associated with this window.");
             /** @sketch Cleanup:
              * Get the OS/2 plugin window handle (Level 0).
-             * Get the OS/2 QWL_USER for the handle. This should point to a
+             * Get the OS/2 WP_NPWINDATA for the handle. This should point to a
              *      NPWINDATA structure, and is placed there in npxpcom SetWindow().
-             * Zero the OS/2 QWL_USER.
+             * Remove the OS/2 WP_NPWINDATA.
              * Validate the returned pointer.
              * If valid Then free it and its members.
              *
@@ -1042,8 +1032,8 @@ LRESULT npWinLevel0WndProc(HWND hwnd, UINT msg, WPARAM mp1, LPARAM mp2)
             if (((ULONG)hwndOS2 & 0x80000000) /* paranoid validation */)
             {
                 USHORT selFSOld = pfnODIN_ThreadLeaveOdinContextNested(NULL, FALSE);
-                PNPWINDATA pWndData = (PNPWINDATA)WinQueryWindowULong(hwndOS2, 0 /*QWL_USER*/);
-                WinSetWindowULong(hwndOS2, 0 /*QWL_USER*/, 0);
+                PNPWINDATA pWndData = (PNPWINDATA)WinQueryProperty(hwndOS2, WP_NPWINDATA);
+                WinRemoveProperty(hwndOS2, WP_NPWINDATA);
                 if (pWndData)
                 {
                     if (    (unsigned)pWndData >= 0x00010000
