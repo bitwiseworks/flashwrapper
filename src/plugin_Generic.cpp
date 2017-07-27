@@ -45,8 +45,6 @@ extern "C" unsigned npGenericNPWeakStub(void);
 #pragma weak(npGenericNP_GetMIMEDescription,    npGenericNPWeakStub)
 #endif
 
-extern int Registered;
-
 /**
  * Query the XPM interface of the
  * @returns Success indicator.
@@ -55,11 +53,6 @@ extern int Registered;
  */
 BOOL    npGenericInit(PNPODINWRAPPER pPlugin)
 {
-    if (!Registered) {
-        npGenericErrorBox("You may not use the Flash plugin with an unregistered copy of eComStation.", FALSE);
-        return FALSE;
-    }
-
     // Validate input.
     if (!VALID_PTR(pPlugin) || pPlugin->cb != sizeof(*pPlugin) ||
         !pPlugin->szPluginDllName[0]) {

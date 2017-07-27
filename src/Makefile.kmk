@@ -40,7 +40,4 @@ $$(npflos2_0_OUTDIR)/npflos2-bld.rc: $(PATH_ROOT)/Config.kmk $(PATH_SUB_CURRENT)
 npflos2_SOURCES.debug   = \
     dbg_VerifyExcptChain.asm
 
-npflos2_LIBS        = \
-    $(npflos2_DEFPATH)/security/securit2.lib
-
 include $(FILE_KBUILD_SUB_FOOTER)
